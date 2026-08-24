@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
-import { Botao, BotaoLink } from "@/components/ui/botao";
-import { Campo, Entrada, AreaTexto, Selecao } from "@/components/ui/campo";
 import { capturarParametros, rastrear, idEvento } from "@/lib/rastreamento";
 import { linkWhatsApp } from "@/lib/marca";
-import { cn } from "@/lib/utils";
 
 type Dados = {
   nome: string;
@@ -50,6 +47,8 @@ const SERVICOS = [
   "Operação completa",
 ];
 
+const PASSOS = ["Contato", "Negócio", "Necessidade"];
+
 /** Máscara de telefone brasileira aplicada durante a digitação. */
 function mascararTelefone(valor: string) {
   const d = valor.replace(/\D/g, "").slice(0, 11);
@@ -57,6 +56,30 @@ function mascararTelefone(valor: string) {
   if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
   if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
   return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
+function Campo({
+  rotulo,
+  erro,
+  dica,
+  children,
+}: {
+  rotulo: string;
+  erro?: string;
+  dica?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className={erro ? "campo campo--erro" : "campo"}>
+      <span className="campo__rotulo">{rotulo}</span>
+      {children}
+      {erro ? (
+        <span className="campo__erro">{erro}</span>
+      ) : (
+        dica && <span className="campo__dica">{dica}</span>
+      )}
+    </label>
+  );
 }
 
 export function FormularioDiagnostico() {
@@ -136,184 +159,181 @@ export function FormularioDiagnostico() {
 
   if (enviado) {
     return (
-      <div className="cartao-vidro rounded-xl p-10 text-center">
-        <CheckCircle2 className="mx-auto size-14 text-sucesso" />
-        <h3 className="mt-6 font-display text-2xl font-extrabold text-white">Pedido recebido</h3>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-300">
-          Vamos analisar sua conta, sua página e seu funil. Em até 24 horas você recebe o parecer
-          com os três gargalos mais caros da sua operação.
-        </p>
-        <BotaoLink
-          href={linkWhatsApp(`Oi! Sou ${dados.nome}, acabei de pedir o diagnóstico no site.`)}
-          externo
-          tamanho="lg"
-          className="mt-8"
-        >
-          Adiantar pelo WhatsApp
-        </BotaoLink>
+      <div className="ficha-form vidro">
+        <div className="ficha-form__cabeca">
+          <span>Pedido registrado</span>
+        </div>
+        <div className="recebido">
+          <span className="recebido__selo">Protocolo aberto</span>
+          <h3>Recebemos o seu pedido</h3>
+          <p>
+            Vamos analisar sua conta, sua página e seu funil. Em até 24 horas úteis você recebe o
+            parecer com os três gargalos mais caros da sua operação.
+          </p>
+          <a
+            href={linkWhatsApp(`Oi! Sou ${dados.nome}, acabei de pedir o diagnóstico no site.`)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="acao acao--azul"
+          >
+            Adiantar pelo WhatsApp
+            <ArrowRight size={17} />
+          </a>
+        </div>
       </div>
     );
   }
 
   return (
-    <form onSubmit={enviar} className="cartao-vidro rounded-xl p-6 sm:p-8" noValidate>
-      <div className="mb-7 flex items-center gap-2">
-        {[0, 1, 2].map((i) => (
-          <span
-            key={i}
-            className={cn(
-              "h-1 flex-1 rounded-full transition-colors",
-              i <= passo ? "bg-mrg-500" : "bg-white/10",
-            )}
-          />
-        ))}
+    <form onSubmit={enviar} className="ficha-form vidro" noValidate>
+      <div className="ficha-form__cabeca">
+        <span>Pedido de diagnóstico</span>
+        <span className="ficha-form__passo">
+          {passo + 1}/3 · {PASSOS[passo]}
+        </span>
       </div>
 
-      <input
-        type="text"
-        name="empresa_site"
-        tabIndex={-1}
-        autoComplete="off"
-        value={armadilha}
-        onChange={(e) => setArmadilha(e.target.value)}
-        className="absolute -left-[9999px] size-0 opacity-0"
-        aria-hidden
-      />
-
-      {passo === 0 && (
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-display text-xl font-bold text-white">Vamos começar pelo básico</h3>
-            <p className="mt-1 text-sm text-ink-400">Leva menos de 1 minuto.</p>
-          </div>
-          <Campo rotulo="Nome completo" erro={erros.nome}>
-            <Entrada
-              value={dados.nome}
-              onChange={definir("nome")}
-              placeholder="Como podemos te chamar?"
-              autoComplete="name"
-            />
-          </Campo>
-          <Campo rotulo="E-mail" erro={erros.email}>
-            <Entrada
-              type="email"
-              value={dados.email}
-              onChange={definir("email")}
-              placeholder="voce@empresa.com.br"
-              autoComplete="email"
-            />
-          </Campo>
-          <Campo rotulo="WhatsApp" erro={erros.telefone}>
-            <Entrada
-              inputMode="tel"
-              value={dados.telefone}
-              onChange={definir("telefone")}
-              placeholder="(00) 00000-0000"
-              autoComplete="tel"
-            />
-          </Campo>
+      <div className="ficha-form__corpo">
+        <div className="progresso" aria-hidden>
+          {[0, 1, 2].map((i) => (
+            <span key={i} data-feito={i <= passo ? "sim" : "nao"} />
+          ))}
         </div>
-      )}
 
-      {passo === 1 && (
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-display text-xl font-bold text-white">Sobre o seu negócio</h3>
-            <p className="mt-1 text-sm text-ink-400">
-              Isso define o tipo de análise que vamos fazer.
-            </p>
-          </div>
-          <Campo rotulo="Empresa ou projeto" erro={erros.empresa}>
-            <Entrada
-              value={dados.empresa}
-              onChange={definir("empresa")}
-              placeholder="Nome da empresa"
-              autoComplete="organization"
-            />
-          </Campo>
-          <Campo rotulo="Instagram (opcional)">
-            <Entrada
-              value={dados.instagram}
-              onChange={definir("instagram")}
-              placeholder="@suaempresa"
-            />
-          </Campo>
-          <Campo rotulo="Faturamento mensal atual" erro={erros.faturamento_mensal}>
-            <Selecao value={dados.faturamento_mensal} onChange={definir("faturamento_mensal")}>
-              <option value="">Selecione…</option>
-              {FATURAMENTO.map((f) => (
-                <option key={f} value={f}>
-                  {f}
-                </option>
-              ))}
-            </Selecao>
-          </Campo>
-          <Campo rotulo="Quanto investe em anúncios hoje">
-            <Selecao value={dados.investimento_trafego} onChange={definir("investimento_trafego")}>
-              <option value="">Selecione…</option>
-              {INVESTIMENTO.map((f) => (
-                <option key={f} value={f}>
-                  {f}
-                </option>
-              ))}
-            </Selecao>
-          </Campo>
-        </div>
-      )}
+        <input
+          type="text"
+          name="empresa_site"
+          tabIndex={-1}
+          autoComplete="off"
+          value={armadilha}
+          onChange={(e) => setArmadilha(e.target.value)}
+          className="armadilha"
+          aria-hidden
+        />
 
-      {passo === 2 && (
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-display text-xl font-bold text-white">O que você precisa</h3>
-            <p className="mt-1 text-sm text-ink-400">Última etapa.</p>
-          </div>
-          <Campo rotulo="Serviço de maior interesse">
-            <Selecao value={dados.servico_desejado} onChange={definir("servico_desejado")}>
-              <option value="">Selecione…</option>
-              {SERVICOS.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </Selecao>
-          </Campo>
-          <Campo rotulo="Conte rapidamente o seu cenário" dica="Qual é o maior gargalo hoje?">
-            <AreaTexto
-              value={dados.mensagem}
-              onChange={definir("mensagem")}
-              placeholder="Ex.: invisto R$ 8 mil/mês no Meta, chegam leads mas quase ninguém fecha…"
-            />
-          </Campo>
-        </div>
-      )}
+        {passo === 0 && (
+          <>
+            <p className="form__titulo">Vamos começar pelo básico</p>
+            <p className="form__sub">Leva menos de um minuto.</p>
 
-      <div className="mt-7 flex items-center gap-3">
-        {passo > 0 && (
-          <Botao type="button" variante="contorno" onClick={() => setPasso((p) => p - 1)}>
-            <ArrowLeft className="size-4" />
-            Voltar
-          </Botao>
+            <Campo rotulo="Nome completo" erro={erros.nome}>
+              <input
+                value={dados.nome}
+                onChange={definir("nome")}
+                placeholder="Como podemos te chamar?"
+                autoComplete="name"
+              />
+            </Campo>
+            <Campo rotulo="E-mail" erro={erros.email}>
+              <input
+                type="email"
+                value={dados.email}
+                onChange={definir("email")}
+                placeholder="voce@empresa.com.br"
+                autoComplete="email"
+              />
+            </Campo>
+            <Campo rotulo="WhatsApp" erro={erros.telefone}>
+              <input
+                inputMode="tel"
+                value={dados.telefone}
+                onChange={definir("telefone")}
+                placeholder="(00) 00000-0000"
+                autoComplete="tel"
+              />
+            </Campo>
+          </>
         )}
-        {passo < 2 ? (
-          <Botao type="button" onClick={avancar} largura="cheia" tamanho="lg">
-            Continuar
-            <ArrowRight className="size-4" />
-          </Botao>
-        ) : (
-          <Botao type="submit" largura="cheia" tamanho="lg" disabled={enviando}>
-            {enviando ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                Enviando…
-              </>
-            ) : (
-              <>
-                Quero meu diagnóstico
-                <ArrowRight className="size-4" />
-              </>
-            )}
-          </Botao>
+
+        {passo === 1 && (
+          <>
+            <p className="form__titulo">Sobre o seu negócio</p>
+            <p className="form__sub">Isso define o tipo de análise que vamos fazer.</p>
+
+            <Campo rotulo="Empresa ou projeto" erro={erros.empresa}>
+              <input
+                value={dados.empresa}
+                onChange={definir("empresa")}
+                placeholder="Nome da empresa"
+                autoComplete="organization"
+              />
+            </Campo>
+            <Campo rotulo="Instagram (opcional)">
+              <input
+                value={dados.instagram}
+                onChange={definir("instagram")}
+                placeholder="@suaempresa"
+              />
+            </Campo>
+            <Campo rotulo="Faturamento mensal atual" erro={erros.faturamento_mensal}>
+              <select value={dados.faturamento_mensal} onChange={definir("faturamento_mensal")}>
+                <option value="">Selecione…</option>
+                {FATURAMENTO.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
+              </select>
+            </Campo>
+            <Campo rotulo="Quanto investe em anúncios hoje">
+              <select value={dados.investimento_trafego} onChange={definir("investimento_trafego")}>
+                <option value="">Selecione…</option>
+                {INVESTIMENTO.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
+              </select>
+            </Campo>
+          </>
         )}
+
+        {passo === 2 && (
+          <>
+            <p className="form__titulo">O que você precisa</p>
+            <p className="form__sub">Última etapa.</p>
+
+            <Campo rotulo="Serviço de maior interesse">
+              <select value={dados.servico_desejado} onChange={definir("servico_desejado")}>
+                <option value="">Selecione…</option>
+                {SERVICOS.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </Campo>
+            <Campo rotulo="Conte rapidamente o seu cenário" dica="Qual é o maior gargalo hoje?">
+              <textarea
+                value={dados.mensagem}
+                onChange={definir("mensagem")}
+                placeholder="Ex.: invisto R$ 8 mil/mês no Meta, chegam leads mas quase ninguém fecha…"
+              />
+            </Campo>
+          </>
+        )}
+
+        <div className="form__acoes">
+          {passo > 0 && (
+            <button
+              type="button"
+              className="acao acao--linha acao--voltar"
+              onClick={() => setPasso((p) => p - 1)}
+            >
+              Voltar
+            </button>
+          )}
+          {passo < 2 ? (
+            <button type="button" className="acao acao--azul" onClick={avancar}>
+              Continuar
+              <ArrowRight size={16} />
+            </button>
+          ) : (
+            <button type="submit" className="acao acao--azul" disabled={enviando}>
+              {enviando ? "Enviando…" : "Pedir diagnóstico"}
+            </button>
+          )}
+        </div>
       </div>
     </form>
   );

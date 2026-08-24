@@ -1,0 +1,1407 @@
+/* ══════════════════════════════════════════════════════════════
+   MR GROW — Seções e superfícies de vidro
+   Continuação de sitio.css.
+
+   O vidro entra como acabamento das superfícies — cartões, painéis,
+   formulário — sobre a composição de cartaz. A abertura, os campos
+   de cor azuis e o tipo chapado seguem sólidos: é o contraste entre
+   o sólido e o translúcido que dá a leitura moderna, não o vidro
+   aplicado em tudo.
+   ══════════════════════════════════════════════════════════════ */
+
+.sitio {
+  --vidro: rgb(255 255 255 / 0.055);
+  --vidro-forte: rgb(255 255 255 / 0.085);
+  --vidro-borda: rgb(255 255 255 / 0.14);
+  --brilho: inset 0 1px 0 0 rgb(255 255 255 / 0.14);
+  --sombra: 0 24px 60px -32px rgb(0 0 0 / 0.9);
+}
+
+/* A superfície de vidro do sistema. */
+.vidro {
+  background: linear-gradient(160deg, var(--vidro-forte), var(--vidro));
+  border: 1px solid var(--vidro-borda);
+  backdrop-filter: blur(22px) saturate(150%);
+  box-shadow: var(--brilho), var(--sombra);
+}
+
+/* ── Cabeçalho de vidro ─────────────────────────────────────── */
+
+.topo {
+  position: sticky;
+  top: 0;
+  background: color-mix(in oklab, var(--carvao) 62%, transparent);
+  backdrop-filter: blur(20px) saturate(150%);
+  z-index: 50;
+}
+
+.topo__acoes {
+  display: none;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+@media (min-width: 66rem) {
+  .topo__acoes {
+    display: flex;
+  }
+}
+
+.topo__menu {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--vidro-borda);
+  background: var(--vidro);
+  backdrop-filter: blur(14px);
+  color: var(--osso);
+  cursor: pointer;
+}
+
+@media (min-width: 66rem) {
+  .topo__menu {
+    display: none;
+  }
+}
+
+.topo__gaveta {
+  border-top: 1px solid var(--vidro-borda);
+  background: color-mix(in oklab, var(--carvao) 92%, transparent);
+  backdrop-filter: blur(22px);
+  padding-block: 0.5rem 1.5rem;
+}
+
+@media (min-width: 66rem) {
+  .topo__gaveta {
+    display: none;
+  }
+}
+
+.topo__gaveta a:not(.acao) {
+  display: block;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+  font-size: 1rem;
+  color: var(--osso);
+  text-decoration: none;
+}
+
+.topo__gaveta .acao {
+  margin-top: 1.25rem;
+  width: 100%;
+}
+
+.topo__gaveta .acao + .acao {
+  margin-top: 0.6rem;
+}
+
+.acao--largo {
+  width: 100%;
+}
+
+.acao:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Utilidades ─────────────────────────────────────────────── */
+
+.espaco {
+  margin-top: clamp(2.5rem, 5vw, 3.75rem);
+}
+
+/* ── Prova social ───────────────────────────────────────────── */
+
+.alcance {
+  margin-top: 2.5rem;
+  padding-top: 2.25rem;
+  border-top: 1px solid var(--linha);
+  display: grid;
+  gap: 1.75rem;
+  align-items: center;
+}
+
+@media (min-width: 46rem) {
+  .alcance {
+    grid-template-columns: auto 1fr;
+    gap: 2.75rem;
+  }
+}
+
+/* O mapa é cinza sobre branco: inverter apagaria o país no fundo
+   escuro. Ele fica numa chapa clara, lido como encarte. */
+.alcance figure {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--vidro-borda);
+  background: color-mix(in oklab, var(--osso) 90%, var(--carvao));
+  width: fit-content;
+  margin-inline: auto;
+}
+
+.alcance img {
+  display: block;
+  height: 7rem;
+  width: auto;
+}
+
+.alcance p {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--cinza);
+  max-width: 46ch;
+}
+
+.segmentos {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--cinza) 82%, transparent);
+}
+
+/* ── Auditoria (diagnóstico) ────────────────────────────────── */
+
+.auditoria {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 48rem) {
+  .auditoria {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 76rem) {
+  .auditoria {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.item {
+  padding: 1.6rem 1.5rem 1.75rem;
+  transition: border-color 0.25s, transform 0.25s;
+}
+
+.item:hover {
+  transform: translateY(-3px);
+  border-color: rgb(22 104 245 / 0.55);
+}
+
+.item__marca {
+  display: block;
+  width: 1.4rem;
+  height: 2px;
+  background: var(--azul);
+}
+
+.item__titulo {
+  margin-top: 1.1rem;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.item__texto {
+  margin-top: 0.6rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--cinza);
+}
+
+/* ── Método G.R.O.W ─────────────────────────────────────────── */
+
+.roda {
+  display: block;
+  width: clamp(5rem, 11vw, 6.5rem);
+  height: auto;
+  margin-bottom: 1.35rem;
+}
+
+.pilares {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 56rem) {
+  .pilares {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.pilar {
+  padding: 1.85rem 1.75rem 2rem;
+}
+
+.pilar__topo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pilar__letra {
+  display: grid;
+  place-items: center;
+  width: 2.85rem;
+  height: 2.85rem;
+  flex-shrink: 0;
+  background: var(--azul);
+  color: #fff;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.pilar h3 {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.pilar__resumo {
+  margin-top: 0.15rem;
+  font-size: 0.875rem;
+  color: var(--cinza);
+}
+
+.pilar ul {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.pilar li {
+  display: grid;
+  grid-template-columns: 1.3rem 1fr;
+  gap: 0.6rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--cinza);
+}
+
+.pilar li::before {
+  content: "";
+  width: 0.8rem;
+  height: 2px;
+  margin-top: 0.68rem;
+  background: var(--azul);
+}
+
+/* ── Serviços ───────────────────────────────────────────────── */
+
+.servicos {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 48rem) {
+  .servicos {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 76rem) {
+  .servicos {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.servico {
+  padding: 1.75rem 1.6rem 1.85rem;
+  transition: border-color 0.25s, transform 0.25s;
+}
+
+.servico:hover {
+  transform: translateY(-3px);
+  border-color: rgb(22 104 245 / 0.55);
+}
+
+.servico h3 {
+  margin-top: 1.1rem;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.servico p {
+  margin-top: 0.6rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--cinza);
+}
+
+.servico__icone {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  background: rgb(22 104 245 / 0.16);
+  border: 1px solid rgb(22 104 245 / 0.4);
+  color: #7fb2ff;
+}
+
+.pilulas {
+  margin-top: 1.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.pilula {
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--vidro-borda);
+  background: var(--vidro);
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--cinza);
+  white-space: nowrap;
+}
+
+/* ── Resultados ─────────────────────────────────────────────── */
+
+.casos {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 56rem) {
+  .casos {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.caso {
+  padding: 1.85rem 1.7rem 2rem;
+}
+
+.caso__salto {
+  margin-top: 1.1rem;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: clamp(2.1rem, 4.4vw, 2.9rem);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  color: #7fb2ff;
+}
+
+.caso__metrica {
+  margin-top: 0.55rem;
+  font-size: 0.9375rem;
+  color: var(--osso);
+}
+
+.caso__contexto {
+  margin-top: 1.05rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--cinza);
+}
+
+.caso__delta {
+  margin-top: 1.4rem;
+  padding-top: 1.15rem;
+  border-top: 1px solid var(--vidro-borda);
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.8125rem;
+  color: var(--cinza);
+}
+
+.caso__antes {
+  text-decoration: line-through;
+}
+
+.caso__depois {
+  font-weight: 600;
+  color: var(--osso);
+}
+
+.depoimentos {
+  margin-top: 1rem;
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 56rem) {
+  .depoimentos {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.depoimento {
+  padding: 1.85rem 1.75rem 2rem;
+}
+
+.depoimento blockquote {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: clamp(1.15rem, 2vw, 1.4rem);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.025em;
+  text-wrap: pretty;
+}
+
+.depoimento figcaption {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--vidro-borda);
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cinza);
+}
+
+/* ── Processo · numerado porque a ordem é informação ────────── */
+
+.passos {
+  counter-reset: passo;
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 56rem) {
+  .passos {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.passo {
+  counter-increment: passo;
+  padding: 1.75rem 1.6rem 1.9rem;
+}
+
+.passo::before {
+  content: counter(passo, decimal-leading-zero);
+  display: inline-block;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #7fb2ff;
+}
+
+.passo h3 {
+  margin-top: 1rem;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.passo p {
+  margin-top: 0.6rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--cinza);
+}
+
+.passo__prazo {
+  margin-top: 1.25rem;
+  display: inline-block;
+  padding: 0.3rem 0.7rem;
+  background: var(--azul);
+  color: #fff;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ── Planos ─────────────────────────────────────────────────── */
+
+.planos {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 60rem) {
+  .planos {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.plano {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.8rem 2.15rem;
+}
+
+/* O destaque é campo de cor sólido, coerente com a abertura. */
+.plano--destaque {
+  background: var(--azul);
+  border-color: var(--azul);
+  backdrop-filter: none;
+  box-shadow: 0 30px 70px -30px rgb(22 104 245 / 0.7);
+}
+
+.plano--destaque .plano__para,
+.plano--destaque .plano__ciclo,
+.plano--destaque li {
+  color: rgb(255 255 255 / 0.85);
+}
+
+.plano--destaque li::before,
+.plano--destaque .plano__selo {
+  background: #fff;
+}
+
+.plano--destaque .plano__selo {
+  color: var(--azul);
+}
+
+.plano--destaque .acao--azul {
+  background: #fff;
+  color: var(--azul);
+}
+
+.plano--destaque .acao--azul:hover {
+  background: var(--carvao);
+  color: #fff;
+}
+
+.plano__selo {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: 0.3rem 0.7rem;
+  background: var(--azul);
+  color: #fff;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.plano h3 {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+}
+
+.plano__para {
+  margin-top: 0.45rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--cinza);
+}
+
+.plano__valor {
+  margin-top: 1.6rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--vidro-borda);
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.plano--destaque .plano__valor {
+  border-top-color: rgb(255 255 255 / 0.28);
+}
+
+.plano__preco {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 2.1rem;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+.plano__preco--texto {
+  font-size: 1.4rem;
+  letter-spacing: -0.03em;
+}
+
+.plano__ciclo {
+  font-size: 0.875rem;
+  color: var(--cinza);
+}
+
+.plano ul {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 0.65rem;
+  flex: 1;
+}
+
+.plano li {
+  display: grid;
+  grid-template-columns: 1.3rem 1fr;
+  gap: 0.6rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--cinza);
+}
+
+.plano li::before {
+  content: "";
+  width: 0.8rem;
+  height: 2px;
+  margin-top: 0.68rem;
+  background: var(--azul);
+}
+
+.plano .acao {
+  margin-top: 1.75rem;
+  width: 100%;
+}
+
+.planos__nota {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--cinza);
+}
+
+/* ── Sobre ──────────────────────────────────────────────────── */
+
+.sobre {
+  display: grid;
+  gap: 2.5rem;
+}
+
+@media (min-width: 62rem) {
+  .sobre {
+    grid-template-columns: 23rem 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+}
+
+.sobre__retrato {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--azul);
+}
+
+.sobre__retrato img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.sobre__ficha {
+  margin-top: 1rem;
+  padding: 0.35rem 1.1rem;
+}
+
+.sobre__ficha div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.8rem;
+  border-bottom: 1px solid var(--vidro-borda);
+}
+
+.sobre__ficha div:last-child {
+  border-bottom: 0;
+}
+
+.sobre__ficha dt {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cinza);
+}
+
+.sobre__ficha dd {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.sobre__texto {
+  margin-top: 1.6rem;
+  display: grid;
+  gap: 1.1rem;
+  max-width: 56ch;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--cinza);
+}
+
+.sobre__links {
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+/* ── FAQ ────────────────────────────────────────────────────── */
+
+.faq {
+  display: grid;
+  gap: 0.7rem;
+  max-width: 52rem;
+}
+
+.faq__item {
+  overflow: hidden;
+}
+
+.faq__pergunta {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.35rem 1.5rem;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--osso);
+}
+
+.faq__sinal {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  background: var(--azul);
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.faq__corpo {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+}
+
+.faq__corpo--aberto {
+  grid-template-rows: 1fr;
+}
+
+.faq__corpo > div {
+  overflow: hidden;
+}
+
+.faq__corpo p {
+  padding: 0 1.5rem 1.5rem;
+  max-width: 70ch;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--cinza);
+}
+
+/* ── Fecho e formulário ─────────────────────────────────────── */
+
+.fecho__grade {
+  display: grid;
+  gap: 3rem;
+}
+
+@media (min-width: 66rem) {
+  .fecho__grade {
+    grid-template-columns: 1fr 27rem;
+    gap: 4rem;
+    align-items: start;
+  }
+}
+
+.fecho__texto {
+  margin-top: 1.5rem;
+  max-width: 48ch;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--cinza);
+}
+
+.entregas {
+  margin-top: 2rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.entregas li {
+  display: grid;
+  grid-template-columns: 1.3rem 1fr;
+  gap: 0.65rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--cinza);
+}
+
+.entregas li::before {
+  content: "";
+  width: 0.8rem;
+  height: 2px;
+  margin-top: 0.68rem;
+  background: var(--azul);
+}
+
+.prazo {
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.15rem 1.4rem;
+}
+
+.prazo strong {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  color: #7fb2ff;
+  line-height: 1;
+}
+
+.prazo p {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--cinza);
+}
+
+.ficha-form__cabeca {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.05rem 1.5rem;
+  border-bottom: 1px solid var(--vidro-borda);
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.ficha-form__passo {
+  color: var(--cinza);
+}
+
+.ficha-form__corpo {
+  padding: 1.6rem 1.5rem 1.5rem;
+}
+
+.progresso {
+  display: flex;
+  gap: 0.3rem;
+  margin-bottom: 1.6rem;
+}
+
+.progresso span {
+  height: 2px;
+  flex: 1;
+  background: rgb(255 255 255 / 0.16);
+}
+
+.progresso span[data-feito="sim"] {
+  background: var(--azul);
+}
+
+.form__titulo {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.form__sub {
+  margin-top: 0.25rem;
+  margin-bottom: 1.4rem;
+  font-size: 0.9375rem;
+  color: var(--cinza);
+}
+
+.campo {
+  display: block;
+  margin-top: 1.1rem;
+}
+
+.campo:first-of-type {
+  margin-top: 0;
+}
+
+.campo__rotulo {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cinza);
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  color: var(--osso);
+  background: rgb(0 0 0 / 0.28);
+  border: 1px solid var(--vidro-borda);
+  padding: 0.75rem 0.85rem;
+  transition: border-color 0.18s, background-color 0.18s;
+}
+
+.campo textarea {
+  min-height: 6.5rem;
+  resize: vertical;
+}
+
+.campo input::placeholder,
+.campo textarea::placeholder {
+  color: color-mix(in oklab, var(--cinza) 62%, transparent);
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+  border-color: var(--azul);
+  background: rgb(0 0 0 / 0.4);
+}
+
+.campo select option {
+  background: var(--carvao-2);
+  color: var(--osso);
+}
+
+.campo--erro input,
+.campo--erro select {
+  border-color: #ff6b4a;
+}
+
+.campo__erro {
+  margin-top: 0.35rem;
+  font-size: 0.8125rem;
+  color: #ff6b4a;
+}
+
+.campo__dica {
+  margin-top: 0.35rem;
+  font-size: 0.8125rem;
+  color: var(--cinza);
+}
+
+.form__acoes {
+  margin-top: 1.6rem;
+  display: flex;
+  gap: 0.55rem;
+}
+
+.form__acoes .acao {
+  flex: 1;
+}
+
+.form__acoes .acao--voltar {
+  flex: 0 0 auto;
+}
+
+.armadilha {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.recebido {
+  padding: 2.5rem 1.75rem;
+  text-align: center;
+}
+
+.recebido__selo {
+  display: inline-block;
+  padding: 0.35rem 0.8rem;
+  background: var(--azul);
+  color: #fff;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.recebido h3 {
+  margin-top: 1.25rem;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+}
+
+.recebido p {
+  margin-top: 0.9rem;
+  margin-inline: auto;
+  max-width: 38ch;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--cinza);
+}
+
+.recebido .acao {
+  margin-top: 1.75rem;
+}
+
+/* ── Rodapé ─────────────────────────────────────────────────── */
+
+.rodape {
+  border-top: 1px solid var(--linha);
+  padding-block: clamp(3rem, 6vw, 4.5rem) 2rem;
+}
+
+.rodape__grade {
+  display: grid;
+  gap: 2.75rem;
+}
+
+@media (min-width: 62rem) {
+  .rodape__grade {
+    grid-template-columns: 1.2fr 2fr;
+    gap: 4rem;
+  }
+}
+
+.rodape__descricao {
+  margin-top: 1.3rem;
+  max-width: 36ch;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--cinza);
+}
+
+.rodape__contatos {
+  margin-top: 1.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.rodape__contatos a {
+  padding: 0.55rem 0.95rem;
+  border: 1px solid var(--vidro-borda);
+  background: var(--vidro);
+  backdrop-filter: blur(14px);
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cinza);
+  text-decoration: none;
+  transition: color 0.18s, border-color 0.18s;
+}
+
+.rodape__contatos a:hover {
+  color: var(--osso);
+  border-color: rgb(255 255 255 / 0.32);
+}
+
+.rodape__colunas {
+  display: grid;
+  gap: 2rem;
+}
+
+@media (min-width: 42rem) {
+  .rodape__colunas {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.rodape__colunas h3 {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--cinza) 72%, transparent);
+}
+
+.rodape__colunas ul {
+  margin-top: 1.1rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.rodape__colunas a {
+  font-size: 0.9375rem;
+  color: var(--cinza);
+  text-decoration: none;
+  transition: color 0.18s;
+}
+
+.rodape__colunas a:hover {
+  color: var(--osso);
+}
+
+.rodape__base {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--linha);
+  display: grid;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: color-mix(in oklab, var(--cinza) 70%, transparent);
+}
+
+@media (min-width: 56rem) {
+  .rodape__base {
+    grid-template-columns: auto 1fr;
+    gap: 3rem;
+    align-items: baseline;
+  }
+}
+
+/* ── Ações flutuantes ───────────────────────────────────────── */
+
+.barra-fixa {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 40;
+  padding: 0.75rem;
+  background: color-mix(in oklab, var(--carvao) 82%, transparent);
+  backdrop-filter: blur(20px) saturate(150%);
+  border-top: 1px solid var(--vidro-borda);
+  transform: translateY(100%);
+  transition: transform 0.3s;
+}
+
+.barra-fixa[data-visivel="sim"] {
+  transform: none;
+}
+
+@media (min-width: 42rem) {
+  .barra-fixa {
+    display: none;
+  }
+}
+
+.flutuantes {
+  position: fixed;
+  right: 1rem;
+  bottom: 5rem;
+  z-index: 40;
+  display: grid;
+  gap: 0.5rem;
+  justify-items: center;
+}
+
+@media (min-width: 42rem) {
+  .flutuantes {
+    right: 1.5rem;
+    bottom: 1.5rem;
+  }
+}
+
+.flutuante {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--vidro-borda);
+  background: var(--vidro-forte);
+  backdrop-filter: blur(18px) saturate(150%);
+  color: var(--osso);
+  cursor: pointer;
+  transition: opacity 0.25s, background-color 0.18s;
+}
+
+.flutuante[data-visivel="nao"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.flutuante--zap {
+  width: 3.25rem;
+  height: 3.25rem;
+  background: var(--azul);
+  border-color: var(--azul);
+  backdrop-filter: none;
+  color: #fff;
+}
+
+.flutuante--zap:hover {
+  background: var(--osso);
+  color: var(--carvao);
+}
+
+/* ── A diferença ────────────────────────────────────────────── */
+
+.contraste {
+  overflow: hidden;
+}
+
+.contraste__cabeca,
+.contraste__linha {
+  display: grid;
+  gap: 0.4rem 2rem;
+  padding: 1.15rem 1.5rem;
+}
+
+@media (min-width: 60rem) {
+  .contraste__cabeca,
+  .contraste__linha {
+    grid-template-columns: 12rem 1fr 1fr;
+  }
+}
+
+.contraste__cabeca {
+  display: none;
+}
+
+@media (min-width: 60rem) {
+  .contraste__cabeca {
+    display: grid;
+    padding-block: 0.9rem;
+    border-bottom: 1px solid var(--vidro-borda);
+    background: rgb(255 255 255 / 0.03);
+  }
+}
+
+.contraste__rot {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cinza);
+}
+
+.contraste__rot--nossa {
+  color: #7fb2ff;
+}
+
+.contraste__linha {
+  border-bottom: 1px solid rgb(255 255 255 / 0.07);
+}
+
+.contraste__linha:last-child {
+  border-bottom: 0;
+}
+
+.contraste__criterio {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.contraste__comum,
+.contraste__nossa {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  padding-left: 1.4rem;
+  position: relative;
+}
+
+.contraste__comum {
+  color: color-mix(in oklab, var(--cinza) 88%, transparent);
+}
+
+.contraste__nossa {
+  color: var(--osso);
+}
+
+.contraste__comum::before,
+.contraste__nossa::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.7rem;
+  width: 0.8rem;
+  height: 2px;
+}
+
+.contraste__comum::before {
+  background: rgb(255 255 255 / 0.3);
+}
+
+.contraste__nossa::before {
+  background: var(--azul);
+}
+
+@media (max-width: 59.99rem) {
+  .contraste__comum::after,
+  .contraste__nossa::after {
+    display: block;
+    margin-top: 0.2rem;
+    font-family: var(--fonte-display), sans-serif;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .contraste__comum::after {
+    content: "Agência comum";
+    color: var(--cinza);
+  }
+
+  .contraste__nossa::after {
+    content: "MR Grow";
+    color: #7fb2ff;
+  }
+}
+
+/* ── Luz ambiente ───────────────────────────────────────────────
+   Vidro sobre fundo chapado lê como caixa cinza: não há o que
+   refratar. Estes focos de luz atrás das seções é que fazem o
+   painel virar vidro. Alternam de lado para a página não ficar
+   simétrica. */
+
+.secao,
+.fecho {
+  position: relative;
+  isolation: isolate;
+}
+
+.secao::before,
+.fecho::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  inset: 8% -12% 22% 42%;
+  background: radial-gradient(38rem 26rem at 60% 40%, rgb(22 104 245 / 0.2), transparent 70%);
+}
+
+.secao:nth-of-type(even)::before {
+  inset: 10% 45% 20% -12%;
+  background: radial-gradient(36rem 24rem at 40% 45%, rgb(22 104 245 / 0.17), transparent 70%);
+}
+
+.fecho::before {
+  inset: 0 -10% 15% 35%;
+  background: radial-gradient(42rem 28rem at 65% 35%, rgb(22 104 245 / 0.24), transparent 70%);
+}
+
+/* A faixa azul e o mural ficam sólidos — o contraste é o ponto. */
+.faixa,
+.mural {
+  position: relative;
+  z-index: 1;
+}

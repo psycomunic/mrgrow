@@ -1,41 +1,46 @@
 import Image from "next/image";
-import { Instagram } from "lucide-react";
 import { Secao } from "./secao";
-import { BotaoLink } from "@/components/ui/botao";
 import { MARCA } from "@/lib/marca";
+
+const FICHA = [
+  { r: "Operando mídia paga há", v: "+6 anos" },
+  { r: "Base", v: "Brasil · remoto" },
+  { r: "Contas novas por mês", v: "Limitadas" },
+];
 
 export function Sobre() {
   return (
     <Secao id="sobre">
-      <div className="cartao-vidro grid gap-10 rounded-xl p-8 sm:p-12 lg:grid-cols-[.85fr_1.15fr] lg:items-center">
-        <div className="relative">
-          <div className="relative aspect-4/5 w-full overflow-hidden rounded-lg bg-gradient-to-br from-mrg-600/30 via-ink-800 to-ink-950 ring-1 ring-white/10">
+      <div className="sobre">
+        <div>
+          <figure className="sobre__retrato">
             <Image
               src="/marca/mateus.webp"
               alt={`${MARCA.fundador}, fundador da ${MARCA.nome}`}
-              fill
-              sizes="(max-width: 1024px) 100vw, 420px"
-              className="object-cover object-top"
+              width={1147}
+              height={1246}
+              sizes="(max-width: 992px) 100vw, 368px"
             />
-            <div
-              aria-hidden
-              className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink-950/80 to-transparent"
-            />
-          </div>
-          <span className="cartao-vidro absolute -right-3 -bottom-4 rounded-md px-4 py-3 text-center">
-            <span className="block font-display text-xl font-extrabold text-white">+6 anos</span>
-            <span className="text-[11px] text-ink-400">operando mídia paga</span>
-          </span>
+          </figure>
+
+          <dl className="sobre__ficha vidro">
+            {FICHA.map((f) => (
+              <div key={f.r}>
+                <dt>{f.r}</dt>
+                <dd>{f.v}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
 
         <div>
-          <span className="text-[11px] font-bold tracking-[0.14em] text-mrg-300 uppercase">
+          <span className="chapeu">
+            <i />
             Quem está por trás
           </span>
-          <h2 className="mt-4 font-display text-3xl leading-tight font-extrabold tracking-tight sm:text-4xl">
-            {MARCA.fundador}, fundador da MR Grow
-          </h2>
-          <div className="mt-5 space-y-4 text-base leading-relaxed text-ink-300">
+          <h2>{MARCA.fundador}, fundador da MR Grow</h2>
+
+          <div className="sobre__texto">
             <p>
               A MR Grow nasceu de uma inconformidade simples: empresário nenhum deveria precisar
               confiar na palavra da agência para saber se o investimento está voltando.
@@ -45,21 +50,29 @@ export function Sobre() {
               números da conta e ao plano de ação — sempre. Se o resultado não vem, a conversa é
               sobre o que mudar, não sobre o que justificar.
             </p>
-            <p className="text-ink-200">
+            <p>
               Trabalhamos com um número limitado de contas por mês. É o que garante que cada uma
               seja lida todos os dias por quem entende dela.
             </p>
           </div>
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <BotaoLink href={MARCA.instagramFundador} externo variante="contorno">
-              <Instagram className="size-4" />
+          <div className="sobre__links">
+            <a
+              href={MARCA.instagramFundador}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="acao acao--linha acao--mini"
+            >
               @mvteusrodrigues
-            </BotaoLink>
-            <BotaoLink href={MARCA.instagramAgencia} externo variante="contorno">
-              <Instagram className="size-4" />
+            </a>
+            <a
+              href={MARCA.instagramAgencia}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="acao acao--linha acao--mini"
+            >
               @mrgrow.ag
-            </BotaoLink>
+            </a>
           </div>
         </div>
       </div>

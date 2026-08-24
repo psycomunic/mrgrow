@@ -1,51 +1,38 @@
-import { cn } from "@/lib/utils";
-
-export function Secao({
-  id,
-  children,
-  className,
-}: {
-  id?: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
+/**
+ * Toda seção abre igual: chapéu e título à esquerda, apoio à direita.
+ * É a régua que dá unidade sem precisar de moldura.
+ */
+export function Secao({ id, children }: { id?: string; children: React.ReactNode }) {
   return (
-    <section id={id} className={cn("scroll-mt-24 py-20 sm:py-28", className)}>
-      <div className="container-mrg">{children}</div>
+    <section id={id} className="secao">
+      <div className="area">{children}</div>
     </section>
   );
 }
 
-export function TituloSecao({
-  sobre,
+export function CabecaSecao({
+  chapeu,
   titulo,
-  descricao,
-  centralizado = true,
+  apoio,
+  antes,
 }: {
-  sobre?: string;
+  chapeu: string;
   titulo: React.ReactNode;
-  descricao?: string;
-  centralizado?: boolean;
+  apoio?: string;
+  /** Conteúdo acima do chapéu — a roda do G.R.O.W, por exemplo. */
+  antes?: React.ReactNode;
 }) {
   return (
-    <div className={cn("max-w-3xl", centralizado && "mx-auto text-center")}>
-      {sobre && (
-        <span
-          className={cn(
-            "inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.14em] text-mrg-300 uppercase",
-            centralizado && "justify-center",
-          )}
-        >
-          <span className="block h-px w-4 bg-mrg-500" />
-          {sobre}
+    <div className="secao__cabeca">
+      <div>
+        {antes}
+        <span className="chapeu">
+          <i />
+          {chapeu}
         </span>
-      )}
-      <h2 className="mt-4 font-display text-3xl leading-tight font-extrabold tracking-tight text-balance sm:text-4xl lg:text-[2.75rem]">
-        {titulo}
-      </h2>
-      {descricao && (
-        <p className="mt-5 text-lg leading-relaxed text-ink-300 text-pretty">{descricao}</p>
-      )}
+        <h2>{titulo}</h2>
+      </div>
+      {apoio && <p className="secao__apoio">{apoio}</p>}
     </div>
   );
 }
