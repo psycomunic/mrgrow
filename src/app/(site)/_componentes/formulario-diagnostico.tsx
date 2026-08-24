@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { PearlButton } from "@/components/ui/pearl-button";
 import { capturarParametros, rastrear, idEvento } from "@/lib/rastreamento";
 import { linkWhatsApp } from "@/lib/marca";
 
@@ -324,14 +325,13 @@ export function FormularioDiagnostico() {
             </button>
           )}
           {passo < 2 ? (
-            <button type="button" className="acao acao--azul" onClick={avancar}>
-              Continuar
-              <ArrowRight size={16} />
-            </button>
+            <PearlButton type="button" onClick={avancar} label="Continuar" />
           ) : (
-            <button type="submit" className="acao acao--azul" disabled={enviando}>
-              {enviando ? "Enviando…" : "Pedir diagnóstico"}
-            </button>
+            <PearlButton
+              type="submit"
+              disabled={enviando}
+              label={enviando ? "Enviando…" : "Pedir diagnóstico"}
+            />
           )}
         </div>
       </div>

@@ -1575,3 +1575,51 @@
     transform: none !important;
   }
 }
+
+/* ── Pearl Button no envio do formulário ────────────────────────
+   O componente vem com corpo de botão-herói (25px, padding 32/45).
+   Aqui ele precisa caber numa coluna de 27rem, então redimensiono
+   por fora — o CSS dele é injetado sem escopo, e `.sitio` ganha por
+   especificidade sem precisar tocar no arquivo do componente. */
+
+.sitio .form__acoes .pearl-button {
+  flex: 1;
+  --radius: 4px;
+}
+
+.sitio .form__acoes .pearl-button .wrap {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: rgb(255 255 255 / 0.92);
+  padding: 1.05rem 1.5rem;
+}
+
+.sitio .form__acoes .pearl-button .wrap p {
+  justify-content: center;
+  gap: 0.6rem;
+  /* A máscara original apaga 60% da altura do texto; em corpo pequeno
+     isso come a legibilidade. Aqui ela só tira o último fio. */
+  -webkit-mask-image: linear-gradient(to bottom, #fff 82%, rgb(255 255 255 / 0.55));
+  mask-image: linear-gradient(to bottom, #fff 82%, rgb(255 255 255 / 0.55));
+}
+
+.sitio .form__acoes .pearl-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.sitio .form__acoes .pearl-button:focus-visible {
+  outline: 2px solid #7fb2ff;
+  outline-offset: 3px;
+}
+
+/* ── Painel com feixe ao redor do formulário ────────────────────
+   O componente traz padding e fundo próprios; aqui ele é só a
+   moldura, e o vidro do formulário aparece por dentro. */
+
+.sitio .ficha-form {
+  position: relative;
+  z-index: 1;
+}

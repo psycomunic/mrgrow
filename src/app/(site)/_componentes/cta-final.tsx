@@ -1,3 +1,4 @@
+import { BorderBeamPanel } from "@/components/ui/border-beam-panel";
 import { FormularioDiagnostico } from "./formulario-diagnostico";
 
 const ENTREGAS = [
@@ -38,7 +39,16 @@ export function CtaFinal() {
           </div>
         </div>
 
-        <FormularioDiagnostico />
+        {/* O feixe fica só aqui: marcar o ponto de conversão é o único
+            lugar da página onde esse tipo de destaque se paga. */}
+        <BorderBeamPanel
+          radius={0}
+          thickness={2}
+          colors={["#1668f5", "#7fb2ff"]}
+          className="!border-transparent !bg-transparent !p-0"
+        >
+          <FormularioDiagnostico />
+        </BorderBeamPanel>
       </div>
     </section>
   );
