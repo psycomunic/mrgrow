@@ -1,0 +1,595 @@
+/* ══════════════════════════════════════════════════════════════
+   MR GROW — Landing page · direção "Operação"
+   Agência escura, editorial, com o trabalho real como material.
+
+   Fugindo de dois lugares comuns:
+   · o preto neutro + um neon ácido (o escuro padrão de IA)
+   · o azul elétrico com vidro fosco (o SaaS genérico do site antigo)
+   O chão aqui é petróleo — cromático, tirado do próprio logotipo —
+   e quem grita é a tipografia, não um acento fluorescente.
+   ══════════════════════════════════════════════════════════════ */
+
+.sitio {
+  --breu: #05121a;
+  --carvao: #0a1f2a;
+  --fio: #16323f;
+  --osso: #f2ede6;
+  --nevoa: #93a9b5;
+  --azul: #3e9bd6;
+  --brasa: #e4633a;
+
+  background: var(--breu);
+  color: var(--osso);
+  font-family: var(--fonte-texto), ui-sans-serif, system-ui, sans-serif;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+body:has(.sitio) {
+  background: #05121a;
+}
+
+.sitio *,
+.sitio *::before,
+.sitio *::after {
+  box-sizing: border-box;
+}
+
+/* :where() zera a especificidade: sem isso o reset venceria toda classe. */
+.sitio :where(p, h1, h2, h3, h4, ul, ol, li, figure, figcaption, blockquote, dl, dt, dd) {
+  margin: 0;
+  padding: 0;
+}
+
+.sitio :where(ul, ol) {
+  list-style: none;
+}
+
+.sitio ::selection {
+  background: var(--azul);
+  color: var(--breu);
+}
+
+.sitio a:focus-visible,
+.sitio button:focus-visible {
+  outline: 2px solid var(--azul);
+  outline-offset: 4px;
+}
+
+/* ── Medidas ────────────────────────────────────────────────── */
+
+.limite {
+  width: 100%;
+  max-width: 88rem;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 4vw, 3.5rem);
+}
+
+/* ── Etiqueta: caixa alta destravada, no próprio texto ──────── */
+
+.etiqueta {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--nevoa);
+}
+
+.etiqueta--azul {
+  color: var(--azul);
+}
+
+/* ── Botões ─────────────────────────────────────────────────── */
+
+.bt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-family: var(--fonte-texto), sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  padding: 1rem 1.75rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.bt--claro {
+  background: var(--osso);
+  color: var(--breu);
+}
+
+.bt--claro:hover {
+  background: var(--azul);
+  color: var(--breu);
+}
+
+.bt--linha {
+  border-color: color-mix(in oklab, var(--osso) 30%, transparent);
+  color: var(--osso);
+}
+
+.bt--linha:hover {
+  border-color: var(--osso);
+  background: color-mix(in oklab, var(--osso) 8%, transparent);
+}
+
+.bt--mini {
+  padding: 0.6rem 1.1rem;
+  font-size: 0.8125rem;
+}
+
+/* ── Cabeçalho ──────────────────────────────────────────────── */
+
+.topo {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: color-mix(in oklab, var(--breu) 82%, transparent);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid color-mix(in oklab, var(--fio) 60%, transparent);
+}
+
+.topo__linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  height: 4.5rem;
+}
+
+.topo__marca {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.topo__nav {
+  display: none;
+  gap: 2.25rem;
+}
+
+@media (min-width: 62rem) {
+  .topo__nav {
+    display: flex;
+  }
+}
+
+.topo__nav a {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--nevoa);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.topo__nav a:hover {
+  color: var(--osso);
+}
+
+/* ── Abertura ───────────────────────────────────────────────── */
+
+.abertura {
+  padding-top: clamp(4rem, 11vw, 9rem);
+  padding-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+
+.abertura__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid var(--fio);
+}
+
+.ponto {
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-right: 0.55rem;
+  border-radius: 999px;
+  background: var(--azul);
+  vertical-align: 0.05em;
+}
+
+/* O título é a imagem da página. */
+.titulao {
+  margin-top: 2.75rem;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: clamp(2.75rem, 9.2vw, 8.25rem);
+  font-weight: 600;
+  font-stretch: 92%;
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.titulao em {
+  font-style: normal;
+  color: var(--azul);
+}
+
+.abertura__base {
+  margin-top: clamp(2.5rem, 5vw, 3.75rem);
+  display: grid;
+  gap: 2.5rem;
+}
+
+@media (min-width: 60rem) {
+  .abertura__base {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 4rem;
+  }
+}
+
+.abertura__texto {
+  max-width: 46ch;
+  font-size: clamp(1rem, 1.5vw, 1.1875rem);
+  line-height: 1.55;
+  color: var(--nevoa);
+}
+
+.abertura__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* ── Assinatura: a faixa com o trabalho real ────────────────── */
+
+.faixa {
+  margin-top: clamp(3rem, 6vw, 5rem);
+  border-top: 1px solid var(--fio);
+  border-bottom: 1px solid var(--fio);
+  padding-block: 1.75rem;
+  overflow: hidden;
+  /* Esmaece nas pontas para a faixa não terminar em corte seco. */
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+
+.faixa__trilho {
+  display: flex;
+  gap: 1.25rem;
+  width: max-content;
+  animation: correr 90s linear infinite;
+}
+
+.faixa:hover .faixa__trilho {
+  animation-play-state: paused;
+}
+
+@keyframes correr {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.pagina {
+  position: relative;
+  width: 15rem;
+  height: 11rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid var(--fio);
+  background: var(--carvao);
+}
+
+.pagina img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.pagina figcaption {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 0.85rem 0.85rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--osso);
+  background: linear-gradient(transparent, color-mix(in oklab, var(--breu) 92%, transparent) 55%);
+}
+
+/* ── Números: editorial, com fio — não é cartão nem extrato ─── */
+
+.numeros {
+  padding-block: clamp(3.5rem, 7vw, 6rem);
+}
+
+.numeros__grade {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--fio);
+}
+
+@media (min-width: 48rem) {
+  .numeros__grade {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.numero {
+  padding: 2rem 0 2.25rem;
+  border-bottom: 1px solid var(--fio);
+}
+
+@media (min-width: 48rem) {
+  .numero {
+    padding: 2.25rem 2rem 2.5rem 0;
+    border-right: 1px solid var(--fio);
+  }
+
+  .numero:last-child {
+    border-right: 0;
+  }
+
+  .numero + .numero {
+    padding-left: 2rem;
+  }
+}
+
+.numero__valor {
+  display: block;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: clamp(2.5rem, 5.5vw, 4rem);
+  font-weight: 500;
+  font-stretch: 88%;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.numero__rotulo {
+  margin-top: 0.9rem;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--nevoa);
+  max-width: 30ch;
+}
+
+/* ── Seções ─────────────────────────────────────────────────── */
+
+.secao {
+  padding-block: clamp(4rem, 8vw, 7rem);
+  border-top: 1px solid var(--fio);
+  scroll-margin-top: 4.5rem;
+}
+
+.secao__cabeca {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 64rem) {
+  .secao__cabeca {
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: end;
+  }
+}
+
+.secao h2 {
+  margin-top: 1.25rem;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: clamp(2rem, 4.6vw, 3.5rem);
+  font-weight: 600;
+  font-stretch: 94%;
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.secao__apoio {
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  color: var(--nevoa);
+  max-width: 46ch;
+}
+
+/* ── Diferença: duas colunas, sem tabela ────────────────────── */
+
+.contraste {
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  display: grid;
+  border-top: 1px solid var(--fio);
+}
+
+.linha {
+  display: grid;
+  gap: 0.5rem 2.5rem;
+  padding-block: 1.6rem;
+  border-bottom: 1px solid var(--fio);
+  align-items: baseline;
+}
+
+@media (min-width: 56rem) {
+  .linha {
+    grid-template-columns: 14rem 1fr 1fr;
+  }
+}
+
+.linha__criterio {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 1.125rem;
+  font-weight: 500;
+  font-stretch: 94%;
+  letter-spacing: -0.02em;
+}
+
+.linha__comum,
+.linha__nossa {
+  font-size: 1rem;
+  line-height: 1.5;
+  display: grid;
+  grid-template-columns: 1.4rem 1fr;
+  gap: 0.65rem;
+}
+
+.linha__comum {
+  color: color-mix(in oklab, var(--nevoa) 82%, transparent);
+}
+
+.linha__comum::before {
+  content: "";
+  width: 0.9rem;
+  height: 1px;
+  margin-top: 0.75rem;
+  background: var(--brasa);
+}
+
+.linha__nossa::before {
+  content: "";
+  width: 0.9rem;
+  height: 1px;
+  margin-top: 0.75rem;
+  background: var(--azul);
+}
+
+.contraste__rotulos {
+  display: none;
+  padding-bottom: 1rem;
+}
+
+@media (min-width: 56rem) {
+  .contraste__rotulos {
+    display: grid;
+    grid-template-columns: 14rem 1fr 1fr;
+    gap: 2.5rem;
+  }
+}
+
+@media (max-width: 55.99rem) {
+  .linha__comum::after,
+  .linha__nossa::after {
+    display: none;
+  }
+}
+
+/* ── Trabalho: grade grande, o site como protagonista ───────── */
+
+.obras {
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 48rem) {
+  .obras {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 72rem) {
+  .obras {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.obra {
+  position: relative;
+  overflow: hidden;
+  background: var(--carvao);
+  border: 1px solid var(--fio);
+  transition: border-color 0.25s;
+}
+
+.obra:hover {
+  border-color: color-mix(in oklab, var(--azul) 60%, transparent);
+}
+
+.obra__quadro {
+  height: 19rem;
+  overflow: hidden;
+}
+
+.obra__quadro img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 8s linear;
+}
+
+.obra:hover .obra__quadro img {
+  transform: translateY(calc(304px - 100%));
+}
+
+.obra__pe {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem 1.25rem;
+  border-top: 1px solid var(--fio);
+}
+
+.obra__nome {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 1.0625rem;
+  font-weight: 500;
+  font-stretch: 94%;
+  letter-spacing: -0.02em;
+}
+
+.obra__tipo {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--nevoa);
+  white-space: nowrap;
+}
+
+/* ── Fecho ──────────────────────────────────────────────────── */
+
+.fecho {
+  padding-block: clamp(4rem, 9vw, 8rem);
+  border-top: 1px solid var(--fio);
+}
+
+.fecho__grade {
+  display: grid;
+  gap: 2.5rem;
+}
+
+@media (min-width: 60rem) {
+  .fecho__grade {
+    grid-template-columns: 1.2fr auto;
+    align-items: end;
+    gap: 4rem;
+  }
+}
+
+.fecho h2 {
+  margin-top: 1.5rem;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: clamp(2.25rem, 6vw, 5rem);
+  font-weight: 600;
+  font-stretch: 92%;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  max-width: 16ch;
+}
+
+.fecho__nota {
+  margin-top: 1.75rem;
+  max-width: 44ch;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--nevoa);
+}
+
+/* ── Movimento reduzido ─────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .sitio *,
+  .sitio *::before,
+  .sitio *::after {
+    animation: none !important;
+    transition-duration: 0.001ms !important;
+  }
+}
