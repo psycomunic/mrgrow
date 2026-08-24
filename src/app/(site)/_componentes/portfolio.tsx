@@ -31,6 +31,7 @@ export function Portfolio() {
     <Secao id="trabalho">
       <CabecaSecao
         chapeu="Trabalho"
+        peso="grande"
         titulo="Páginas feitas para vender, não para enfeitar"
         apoio="Todo site que entregamos nasce com rastreamento, velocidade e um caminho claro até a compra ou o contato. Passe o mouse para percorrer a página inteira."
       />

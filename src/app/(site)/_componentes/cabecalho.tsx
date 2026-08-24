@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { MARCA, linkWhatsApp } from "@/lib/marca";
+import { ProgressoRolagem } from "./progresso-rolagem";
 
 const LINKS = [
   { href: "#diagnostico-dores", rotulo: "Diagnóstico" },
@@ -17,9 +18,18 @@ const LINKS = [
 
 export function Cabecalho() {
   const [aberto, setAberto] = useState(false);
+  const [rolou, setRolou] = useState(false);
+
+  useEffect(() => {
+    const aoRolar = () => setRolou(window.scrollY > 24);
+    aoRolar();
+    window.addEventListener("scroll", aoRolar, { passive: true });
+    return () => window.removeEventListener("scroll", aoRolar);
+  }, []);
 
   return (
-    <header className="topo">
+    <header className="topo" data-rolou={rolou ? "sim" : "nao"}>
+      <ProgressoRolagem />
       <div className="area topo__linha">
         <Link href="/" aria-label={MARCA.nome} style={{ display: "flex", flexShrink: 0 }}>
           <Logo />

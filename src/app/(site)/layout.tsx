@@ -25,6 +25,11 @@ const texto = Manrope({
 export default function LayoutSite({ children }: { children: React.ReactNode }) {
   return (
     <div className={`sitio ${display.variable} ${texto.variable}`}>
+      {/* Marca antes da pintura que há JS: só então o reveal esconde
+          os blocos. Sem isso, falha de script deixaria a página vazia. */}
+      <script
+        dangerouslySetInnerHTML={{ __html: 'document.documentElement.dataset.js="sim"' }}
+      />
       <Rastreadores />
       <Cabecalho />
       <main>{children}</main>

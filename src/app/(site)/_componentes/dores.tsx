@@ -36,6 +36,7 @@ export function Dores() {
     <Secao id="diagnostico-dores">
       <CabecaSecao
         chapeu="Diagnóstico"
+        peso="grande"
         titulo="Se dois destes itens são a sua rotina, o problema não é a verba"
         apoio="É a estrutura. E estrutura é o que a gente monta antes de subir qualquer campanha."
       />
