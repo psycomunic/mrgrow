@@ -20,7 +20,7 @@ export default async function LayoutPortal({ children }: { children: React.React
       <header className="border-b border-white/8 bg-ink-900/50 backdrop-blur-xl">
         <div className="container-mrg flex h-16 items-center justify-between">
           <Link href="/portal" className="flex items-center gap-3 foco-anel"><span className="rounded-sm bg-white px-2 py-1.5">
-            <Logo altura={2} /></span>
+            <Logo className="h-8" /></span>
             <span className="border-l border-white/10 pl-3 text-xs font-medium text-ink-400">
               Portal do cliente
             </span>

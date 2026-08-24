@@ -8,7 +8,7 @@ export default function LayoutAuth({ children }: { children: React.ReactNode }) 
 
       <div className="flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16">
         <Link href="/" className="mb-10 inline-flex w-fit items-center rounded-sm bg-white px-3 py-2 foco-anel">
-          <Logo altura={2.5} />
+          <Logo className="h-10" />
         </Link>
         <div className="w-full max-w-sm">{children}</div>
       </div>

@@ -26,7 +26,7 @@ export function BarraLateral({
   const conteudo = (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center gap-2.5 border-b border-white/8 px-5">
-        <Lampada altura={2} />
+        <Lampada className="size-8 shrink-0" />
         <div className="min-w-0">
           <p className="truncate font-display text-sm font-extrabold text-white">{organizacao}</p>
           <p className="text-[11px] text-ink-500">Plataforma da agência</p>

@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { Instagram, Mail, MessageCircle } from "lucide-react";
 import { MARCA, linkWhatsApp } from "@/lib/marca";
-import { Lampada } from "./cabecalho";
+import { Logo } from "./cabecalho";
 
 const COLUNAS = [
   {
@@ -17,7 +18,7 @@ const COLUNAS = [
     links: [
       { r: "Método G.R.O.W", h: "#metodo" },
       { r: "Resultados", h: "#resultados" },
-      { r: "Trabalho", h: "#portfolio" },
+      { r: "Portfólio", h: "#portfolio" },
       { r: "Sobre o fundador", h: "#sobre" },
       { r: "Planos", h: "#planos" },
     ],
@@ -34,35 +35,54 @@ const COLUNAS = [
 
 export function Rodape() {
   return (
-    <footer className="rodape">
-      <div className="limite">
-        <div className="rodape__grade">
+    <footer className="border-t border-white/8 bg-ink-950">
+      <div className="container-mrg py-16">
+        <div className="grid gap-12 lg:grid-cols-[1.4fr_2fr]">
           <div>
-            <Link href="/" className="rodape__marca">
-              <Lampada altura={2} />
-              <span className="topo__nome">MR Grow</span>
-            </Link>
-            <p className="rodape__descricao">{MARCA.descricao}</p>
+            <Logo className="h-10" />
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-ink-400">{MARCA.descricao}</p>
 
-            <div className="rodape__contatos">
-              <a href={linkWhatsApp()} target="_blank" rel="noopener noreferrer">
-                WhatsApp
+            <div className="mt-6 flex flex-wrap gap-2">
+              <a
+                href={linkWhatsApp()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3.5 py-2 text-sm text-ink-200 transition-colors hover:bg-white/10 foco-anel"
+              >
+                <MessageCircle className="size-4" /> WhatsApp
               </a>
-              <a href={MARCA.instagramAgencia} target="_blank" rel="noopener noreferrer">
-                @mrgrow.ag
+              <a
+                href={MARCA.instagramAgencia}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3.5 py-2 text-sm text-ink-200 transition-colors hover:bg-white/10 foco-anel"
+              >
+                <Instagram className="size-4" /> @mrgrow.ag
               </a>
-              <a href={`mailto:${MARCA.email}`}>{MARCA.email}</a>
+              <a
+                href={`mailto:${MARCA.email}`}
+                className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3.5 py-2 text-sm text-ink-200 transition-colors hover:bg-white/10 foco-anel"
+              >
+                <Mail className="size-4" /> {MARCA.email}
+              </a>
             </div>
           </div>
 
-          <div className="rodape__colunas">
+          <div className="grid gap-8 sm:grid-cols-3">
             {COLUNAS.map((c) => (
               <div key={c.titulo}>
-                <h3>{c.titulo}</h3>
-                <ul>
+                <h3 className="text-xs font-bold tracking-[0.14em] text-ink-500 uppercase">
+                  {c.titulo}
+                </h3>
+                <ul className="mt-4 space-y-2.5">
                   {c.links.map((l) => (
                     <li key={l.r}>
-                      <Link href={l.h}>{l.r}</Link>
+                      <Link
+                        href={l.h}
+                        className="text-sm text-ink-300 transition-colors hover:text-white foco-anel"
+                      >
+                        {l.r}
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -71,7 +91,7 @@ export function Rodape() {
           </div>
         </div>
 
-        <div className="rodape__base">
+        <div className="mt-14 flex flex-col gap-3 border-t border-white/8 pt-6 text-xs text-ink-500 sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {new Date().getFullYear()} {MARCA.nome}. Todos os direitos reservados.
           </p>

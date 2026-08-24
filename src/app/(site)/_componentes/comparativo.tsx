@@ -1,61 +1,84 @@
-import { Secao, CabecaSecao } from "./secao";
+import { Check, X } from "lucide-react";
+import { Secao, TituloSecao } from "./secao";
 
-const CONTRASTE = [
+const LINHAS = [
   {
-    c: "Rastreamento",
+    criterio: "Rastreamento e dados",
     comum: "Pixel instalado e “tá certo”",
-    nossa: "GA4, GTM, Pixel e API de Conversões auditados todo mês",
+    mrgrow: "GA4 + GTM + Pixel + API de Conversões auditados todo mês",
   },
   {
-    c: "Criativos",
-    comum: "Duas a quatro artes por mês",
-    nossa: "Matriz de ângulos com testes semanais e vencedor documentado",
+    criterio: "Criativos",
+    comum: "2 a 4 artes por mês",
+    mrgrow: "Matriz de ângulos com testes semanais e vencedor documentado",
   },
   {
-    c: "Relatório",
+    criterio: "Relatório",
     comum: "PDF no dia 5 do mês seguinte",
-    nossa: "Painel aberto, 24 horas por dia, com investimento e retorno por conta",
+    mrgrow: "Painel ao vivo, 24/7, com investimento e retorno por conta",
   },
   {
-    c: "Página",
+    criterio: "Página",
     comum: "“Manda o link que a gente anuncia”",
-    nossa: "Landing page própria, otimizada e testada",
+    mrgrow: "Landing page própria, otimizada e testada",
   },
   {
-    c: "Comercial",
+    criterio: "Comercial",
     comum: "Entrega o lead e some",
-    nossa: "CRM, prazo de resposta acordado e acompanhamento até o fechamento",
+    mrgrow: "CRM, SLA de resposta e acompanhamento até o fechamento",
   },
   {
-    c: "Meta",
+    criterio: "Meta",
     comum: "Alcance e engajamento",
-    nossa: "CPA e ROAS alvo calculados sobre a sua margem",
+    mrgrow: "CPA e ROAS alvo calculados sobre a sua margem",
   },
 ];
 
 export function Comparativo() {
   return (
     <Secao id="comparativo">
-      <CabecaSecao
-        etiqueta="A diferença"
-        titulo="O mesmo serviço, cobrado de dois jeitos muito diferentes."
-        apoio="À esquerda, o que costuma vir na proposta. À direita, o que está no nosso escopo."
+      <TituloSecao
+        sobre="A diferença"
+        titulo={
+          <>
+            Agência comum <span className="text-ink-500">×</span>{" "}
+            <span className="texto-gradiente">MR Grow</span>
+          </>
+        }
       />
 
-      <div className="contraste espaco">
-        <div className="contraste__rotulos">
-          <span />
-          <span className="etiqueta etiqueta--brasa">Agência comum</span>
-          <span className="etiqueta etiqueta--azul">MR Grow</span>
-        </div>
-
-        {CONTRASTE.map((l) => (
-          <div className="linha" key={l.c}>
-            <span className="linha__criterio">{l.c}</span>
-            <span className="linha__comum">{l.comum}</span>
-            <span className="linha__nossa">{l.nossa}</span>
-          </div>
-        ))}
+      <div className="mt-14 overflow-x-auto">
+        <table className="w-full min-w-[46rem] border-separate border-spacing-y-2 text-left">
+          <thead>
+            <tr className="text-xs tracking-wider text-ink-400 uppercase">
+              <th className="px-5 py-3 font-semibold">Critério</th>
+              <th className="px-5 py-3 font-semibold">Agência comum</th>
+              <th className="px-5 py-3 font-semibold text-mrg-300">MR Grow</th>
+            </tr>
+          </thead>
+          <tbody>
+            {LINHAS.map((l) => (
+              <tr
+                key={l.criterio}
+                className="cartao-vidro [&>td:first-child]:rounded-l-md [&>td:last-child]:rounded-r-md"
+              >
+                <td className="px-5 py-4 text-sm font-semibold text-white">{l.criterio}</td>
+                <td className="px-5 py-4 text-sm text-ink-400">
+                  <span className="flex items-start gap-2">
+                    <X className="mt-0.5 size-4 shrink-0 text-perigo" />
+                    {l.comum}
+                  </span>
+                </td>
+                <td className="px-5 py-4 text-sm text-ink-100">
+                  <span className="flex items-start gap-2">
+                    <Check className="mt-0.5 size-4 shrink-0 text-sucesso" />
+                    {l.mrgrow}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </Secao>
   );

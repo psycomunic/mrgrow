@@ -6,7 +6,6 @@ import { Metodo } from "./_componentes/metodo";
 import { Servicos } from "./_componentes/servicos";
 import { Resultados } from "./_componentes/resultados";
 import { Portfolio } from "./_componentes/portfolio";
-import { Numeros } from "./_componentes/numeros";
 import { Comparativo } from "./_componentes/comparativo";
 import { Processo } from "./_componentes/processo";
 import { Planos } from "./_componentes/planos";
@@ -68,7 +67,6 @@ export default function PaginaInicial() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
       />
       <Hero />
-      <Numeros />
       <ProvaSocial />
       <Dores />
       <Metodo />
