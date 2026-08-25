@@ -23,7 +23,10 @@
   background: var(--carvao);
   color: var(--osso);
   font-family: var(--fonte-texto), ui-sans-serif, system-ui, sans-serif;
-  overflow-x: hidden;
+  /* `clip` e não `hidden`: overflow-x:hidden faz o overflow-y virar auto,
+     o que cria um contêiner de rolagem e mata o position:sticky do
+     cabeçalho. `clip` corta igual sem criar contêiner. */
+  overflow-x: clip;
 }
 
 body:has(.sitio) {

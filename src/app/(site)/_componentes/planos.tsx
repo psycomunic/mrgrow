@@ -1,3 +1,4 @@
+import { BorderBeamPanel } from "@/components/ui/border-beam-panel";
 import { Secao, CabecaSecao } from "./secao";
 
 const PLANOS = [
@@ -57,31 +58,54 @@ export function Planos() {
       />
 
       <div className="planos espaco">
-        {PLANOS.map((p) => (
-          <div className={p.destaque ? "plano plano--destaque" : "plano vidro"} key={p.nome}>
-            {p.destaque && <span className="plano__selo">Escolhido por quem escala</span>}
+        {PLANOS.map((p) => {
+          const cartao = (
+            <div className={p.destaque ? "plano plano--destaque" : "plano vidro"}>
+              {p.destaque && <span className="plano__selo">Escolhido por quem escala</span>}
 
-            <h3>{p.nome}</h3>
-            <p className="plano__para">{p.para}</p>
+              <h3>{p.nome}</h3>
+              <p className="plano__para">{p.para}</p>
 
-            <p className="plano__valor">
-              <span className={p.ciclo ? "plano__preco" : "plano__preco plano__preco--texto"}>
-                {p.preco}
-              </span>
-              {p.ciclo && <span className="plano__ciclo">{p.ciclo}</span>}
-            </p>
+              <p className="plano__valor">
+                <span className={p.ciclo ? "plano__preco" : "plano__preco plano__preco--texto"}>
+                  {p.preco}
+                </span>
+                {p.ciclo && <span className="plano__ciclo">{p.ciclo}</span>}
+              </p>
 
-            <ul>
-              {p.itens.map((i) => (
-                <li key={i}>{i}</li>
-              ))}
-            </ul>
+              <ul>
+                {p.itens.map((i) => (
+                  <li key={i}>{i}</li>
+                ))}
+              </ul>
 
-            <a href="#diagnostico" className={p.destaque ? "acao acao--azul" : "acao acao--linha"}>
-              Solicitar diagnóstico
-            </a>
-          </div>
-        ))}
+              <a
+                href="#diagnostico"
+                className={p.destaque ? "acao acao--azul" : "acao acao--linha"}
+              >
+                Solicitar diagnóstico
+              </a>
+            </div>
+          );
+
+          // Só o plano recomendado ganha o feixe — é ele que a página quer que
+          // você escolha. Nos outros, a moldura seria ruído.
+          return p.destaque ? (
+            <BorderBeamPanel
+              key={p.nome}
+              radius={0}
+              thickness={2}
+              colors={["#1668f5", "#7fb2ff"]}
+              className="plano-feixe !border-transparent !bg-transparent !p-0"
+            >
+              {cartao}
+            </BorderBeamPanel>
+          ) : (
+            <div key={p.nome} style={{ display: "flex" }}>
+              {cartao}
+            </div>
+          );
+        })}
       </div>
 
       <p className="planos__nota">

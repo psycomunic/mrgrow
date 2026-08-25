@@ -30,13 +30,22 @@ export function CtaFinal() {
             ))}
           </ul>
 
-          <div className="prazo vidro">
-            <strong>24h</strong>
-            <p>
-              Resposta garantida em 24 horas úteis. Atendemos um número limitado de contas novas
-              por mês.
-            </p>
-          </div>
+          <BorderBeamPanel
+            radius={0}
+            thickness={2}
+            beams={1}
+            idleSpeed={26}
+            colors={["#1668f5"]}
+            className="prazo-feixe !border-transparent !bg-transparent !p-0"
+          >
+            <div className="prazo">
+              <strong>24h</strong>
+              <p>
+                Resposta garantida em 24 horas úteis. Atendemos um número limitado de contas
+                novas por mês.
+              </p>
+            </div>
+          </BorderBeamPanel>
         </div>
 
         {/* O feixe fica só aqui: marcar o ponto de conversão é o único
