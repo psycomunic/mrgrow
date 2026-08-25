@@ -15,10 +15,10 @@ export function Sobre() {
         <div>
           <figure className="sobre__retrato">
             <Image
-              src="/marca/mateus.webp"
+              src="/marca/mateus-retrato.webp"
               alt={`${MARCA.fundador}, fundador da ${MARCA.nome}`}
-              width={1147}
-              height={1246}
+              width={1100}
+              height={1347}
               sizes="(max-width: 992px) 100vw, 368px"
             />
           </figure>
