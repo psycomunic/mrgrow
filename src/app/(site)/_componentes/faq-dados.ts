@@ -1,7 +1,7 @@
 export const PERGUNTAS = [
   {
     p: "Quanto preciso investir em mídia para começar?",
-    r: "Depende do seu ticket e do seu ciclo de venda. Como regra prática, trabalhamos a partir de R$ 3.000/mês em mídia — abaixo disso o volume de dados costuma ser pequeno demais para otimizar com segurança. No diagnóstico a gente calcula o mínimo viável para o seu caso.",
+    r: "Depende do seu ticket e do seu ciclo de venda. Como regra prática, trabalhamos a partir de R$ 3.000/mês em mídia. Abaixo disso o volume de dados costuma ser pequeno demais para otimizar com segurança. No diagnóstico a gente calcula o mínimo viável para o seu caso.",
   },
   {
     p: "Em quanto tempo aparecem os resultados?",
@@ -9,7 +9,7 @@ export const PERGUNTAS = [
   },
   {
     p: "Tem fidelidade no contrato?",
-    r: "Trabalhamos com 3 meses iniciais. Não é para prender ninguém — é o tempo mínimo honesto para estruturar, testar e otimizar. Depois disso o contrato passa a ser mensal.",
+    r: "Trabalhamos com 3 meses iniciais. Não é para prender ninguém: é o tempo mínimo honesto para estruturar, testar e otimizar. Depois disso o contrato passa a ser mensal.",
   },
   {
     p: "Vocês atendem meu segmento?",

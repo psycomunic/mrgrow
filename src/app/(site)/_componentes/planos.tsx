@@ -54,7 +54,7 @@ export function Planos() {
       <CabecaSecao
         chapeu="Planos"
         titulo="Escolha pelo estágio da sua operação"
-        apoio="Valores de referência. O escopo final sai do diagnóstico — e a gente só propõe o que faz sentido para a sua margem."
+        apoio="Valores de referência. O escopo final sai do diagnóstico, e a gente só propõe o que faz sentido para a sua margem."
       />
 
       <div className="planos espaco">
@@ -88,7 +88,7 @@ export function Planos() {
             </div>
           );
 
-          // Só o plano recomendado ganha o feixe — é ele que a página quer que
+          // Só o plano recomendado ganha o feixe, é ele que a página quer que
           // você escolha. Nos outros, a moldura seria ruído.
           return p.destaque ? (
             <BorderBeamPanel

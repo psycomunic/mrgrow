@@ -47,7 +47,7 @@ export function Sobre() {
             </p>
             <p>
               Por isso a operação inteira é montada com dado aberto. Você tem acesso ao painel, aos
-              números da conta e ao plano de ação — sempre. Se o resultado não vem, a conversa é
+              números da conta e ao plano de ação, sempre. Se o resultado não vem, a conversa é
               sobre o que mudar, não sobre o que justificar.
             </p>
             <p>

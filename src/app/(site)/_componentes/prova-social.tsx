@@ -36,19 +36,20 @@ export function ProvaSocial() {
         </ul>
 
         <div className="alcance">
-          <figure>
+          <figure className="alcance__mapa">
             <Image
-              src="/marca/mapa-brasil.webp"
+              src="/marca/mapa-brasil-dark.webp"
               alt="Mapa do Brasil com as praças onde a MR Grow opera contas"
               width={900}
               height={902}
-              sizes="180px"
+              sizes="(max-width: 832px) 80vw, 340px"
             />
           </figure>
           <div>
-            <p>
-              Contas atendidas de norte a sul do país. Operação remota, resultado medido no mesmo
-              painel — não importa onde a sua empresa fica.
+            <p className="alcance__texto">Contas atendidas de norte a sul do país.</p>
+            <p className="alcance__apoio">
+              Operação remota, resultado medido no mesmo painel, não importa onde a sua empresa
+              fica.
             </p>
             <ul className="segmentos">
               {SEGMENTOS.map((s) => (

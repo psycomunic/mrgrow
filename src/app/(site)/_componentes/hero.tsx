@@ -13,6 +13,20 @@ export function Hero() {
   return (
     <>
       <section className="cartaz">
+        {/* Foto do escritório sangrando no fundo inteiro. `priority` porque
+            é o maior elemento acima da dobra, sem isso o LCP sofre. */}
+        <div className="cartaz__fundo">
+          <Image
+            src="/marca/hero-fundo.webp"
+            alt={`${MARCA.fundador} no escritório da ${MARCA.nome}`}
+            width={2048}
+            height={1152}
+            sizes="100vw"
+            priority
+            fetchPriority="high"
+          />
+        </div>
+
         <div className="area cartaz__grade">
           <div className="cartaz__texto">
             <span className="chapeu">
@@ -27,7 +41,7 @@ export function Hero() {
             </h1>
 
             <p className="cartaz__linha">
-              Tráfego, criativo, página e rastreamento numa operação só — com painel aberto para
+              Tráfego, criativo, página e rastreamento numa operação só, com painel aberto para
               você conferir cada real investido e o que ele trouxe de volta.
             </p>
 
@@ -50,23 +64,6 @@ export function Hero() {
               Análise gratuita da sua conta em até 24h · sem compromisso
             </p>
           </div>
-
-          <figure className="retrato">
-            <div className="retrato__painel">
-              <Image
-                src="/marca/mateus.webp"
-                alt={`${MARCA.fundador}, fundador da ${MARCA.nome}`}
-                width={1147}
-                height={1246}
-                sizes="(max-width: 992px) 90vw, 560px"
-                loading="eager"
-              />
-              <figcaption className="retrato__cita">
-                Você não precisa confiar na palavra da agência. Precisa ver os números.
-                <b>{MARCA.fundador}</b>
-              </figcaption>
-            </div>
-          </figure>
         </div>
       </section>
 

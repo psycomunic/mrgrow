@@ -151,49 +151,59 @@
 /* ── Prova social ───────────────────────────────────────────── */
 
 .alcance {
-  margin-top: 2.5rem;
-  padding-top: 2.25rem;
+  margin-top: 2.75rem;
+  padding-top: 2.5rem;
   border-top: 1px solid var(--linha);
   display: grid;
-  gap: 1.75rem;
+  gap: 2rem;
   align-items: center;
 }
 
-@media (min-width: 46rem) {
+@media (min-width: 52rem) {
   .alcance {
-    grid-template-columns: auto 1fr;
-    gap: 2.75rem;
+    grid-template-columns: 21.25rem 1fr;
+    gap: 3.5rem;
   }
 }
 
-/* O mapa é cinza sobre branco: inverter apagaria o país no fundo
-   escuro. Ele fica numa chapa clara, lido como encarte. */
-.alcance figure {
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--vidro-borda);
-  background: color-mix(in oklab, var(--osso) 90%, var(--carvao));
-  width: fit-content;
+/* O arquivo já vem recolorido e com fundo transparente
+   (mapa-brasil-dark.webp), então não precisa de chapa nem de filtro.
+   O tamanho vive no contêiner, não na imagem: largura em porcentagem
+   direto numa faixa de grid entra em circularidade no cálculo e a
+   imagem sai menor do que o pedido. */
+.alcance__mapa {
+  width: 21.25rem;
+  max-width: 100%;
   margin-inline: auto;
 }
 
-.alcance img {
+.alcance__mapa img {
   display: block;
-  height: 7rem;
-  width: auto;
-  /* O relevo do mapa é cinza-claro sobre branco: na chapa ele some.
-     O contraste devolve a silhueta sem falsear as cores dos marcadores. */
-  filter: contrast(1.35) saturate(1.15);
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 14px 30px rgb(0 0 0 / 0.5));
 }
 
-.alcance p {
-  font-size: 1rem;
+.alcance__texto {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: clamp(1.15rem, 2.2vw, 1.6rem);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  color: var(--osso);
+  max-width: 24ch;
+}
+
+.alcance__apoio {
+  margin-top: 0.9rem;
+  font-size: 0.9375rem;
   line-height: 1.55;
   color: var(--cinza);
-  max-width: 46ch;
+  max-width: 42ch;
 }
 
 .segmentos {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem 1.5rem;
@@ -203,6 +213,11 @@
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: color-mix(in oklab, var(--cinza) 82%, transparent);
+}
+
+/* Sem isto, "E-COMMERCE" e "CLÍNICAS E ESTÉTICA" quebram no meio. */
+.segmentos li {
+  white-space: nowrap;
 }
 
 /* ── Auditoria (diagnóstico) ────────────────────────────────── */
@@ -718,11 +733,27 @@
   }
 }
 
+/* Era um bloco azul chapado atrás do recorte — o mesmo tratamento cru
+   que saiu do hero. Aqui vira luz e vidro, na linguagem do resto. */
 .sobre__retrato {
   position: relative;
   aspect-ratio: 4 / 5;
   overflow: hidden;
-  background: var(--azul);
+  background:
+    radial-gradient(58% 52% at 50% 34%, rgb(22 104 245 / 0.62), transparent 72%),
+    linear-gradient(168deg, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.02));
+  border: 1px solid rgb(255 255 255 / 0.13);
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.16);
+}
+
+/* Sombra sob os pés para ele não flutuar sobre o painel. */
+.sobre__retrato::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 38%;
+  background: linear-gradient(180deg, transparent, rgb(15 16 18 / 0.72));
+  pointer-events: none;
 }
 
 .sobre__retrato img {
@@ -1561,9 +1592,11 @@
   border-color: rgb(22 104 245 / 0.5);
 }
 
-/* ── Mural: logos um pouco maiores e mais legíveis ──────────── */
+/* ── Mural: logos um pouco maiores e mais legíveis ──────────────
+   Mira a lista, não `.mural img`: o mapa também vive nesta seção e
+   herdava altura fixa, invert e mix-blend-mode. */
 
-.mural img {
+.mural li img {
   height: 2.75rem;
   opacity: 0.68;
 }

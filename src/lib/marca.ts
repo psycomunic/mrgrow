@@ -1,4 +1,4 @@
-/** Identidade e dados públicos da MR Grow — fonte única de verdade do site. */
+/** Identidade e dados públicos da MR Grow, fonte única de verdade do site. */
 
 export const MARCA = {
   nome: "MR Grow",

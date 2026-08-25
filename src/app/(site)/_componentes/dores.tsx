@@ -1,6 +1,6 @@
 import { Secao, CabecaSecao } from "./secao";
 
-/** Itens de uma auditoria, não etapas — por isso não são numerados. */
+/** Itens de uma auditoria, não etapas, por isso não são numerados. */
 const AUDITORIA = [
   {
     titulo: "Você investe e não sabe o que voltou",

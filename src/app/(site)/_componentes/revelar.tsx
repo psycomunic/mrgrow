@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 
 /**
- * Revela o bloco quando ele entra na tela. Uma vez só — reaparecer a
+ * Revela o bloco quando ele entra na tela. Uma vez só, reaparecer a
  * cada rolagem cansa e denuncia o efeito.
  *
  * Movimento reduzido é tratado no CSS, que força o estado final; aqui

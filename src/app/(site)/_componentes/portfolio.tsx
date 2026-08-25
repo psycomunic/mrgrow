@@ -6,7 +6,7 @@ type Projeto = {
   nome: string;
   segmento: string;
   tipo: string;
-  /** Altura real da captura (largura é sempre 768) — evita salto de layout. */
+  /** Altura real da captura (largura é sempre 768), evita salto de layout. */
   altura: number;
 };
 

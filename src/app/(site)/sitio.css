@@ -159,9 +159,10 @@ body:has(.sitio) {
 }
 
 /* ── Cartaz ─────────────────────────────────────────────────────
-   A abertura passou a usar a mesma linguagem do resto: luz ambiente,
-   vidro e profundidade. O retângulo azul chapado atrás da foto e as
-   caixas de marcação no título eram os dois pontos mais crus. */
+   A abertura é a foto do escritório sangrando no fundo inteiro. Ela já
+   traz o Mateus à direita e a parede azul livre à esquerda, que é onde
+   o texto se apoia — por isso o recorte em painel de vidro saiu: seriam
+   duas vezes a mesma pessoa. */
 
 .cartaz {
   position: relative;
@@ -169,36 +170,79 @@ body:has(.sitio) {
   overflow: hidden;
 }
 
-/* Duas fontes de luz cruzadas, não um bloco de cor. */
-.cartaz::before {
-  content: "";
+.cartaz__fundo {
   position: absolute;
-  inset: -18% -14% auto -14%;
-  height: 52rem;
+  inset: 0;
   z-index: -2;
-  background:
-    radial-gradient(40rem 30rem at 68% 34%, rgb(22 104 245 / 0.34), transparent 68%),
-    radial-gradient(34rem 24rem at 14% 8%, rgb(111 168 255 / 0.12), transparent 70%);
 }
 
-.cartaz__grade {
-  display: grid;
-  align-items: end;
-  gap: clamp(2.5rem, 5vw, 3.5rem);
-  padding-top: clamp(2.5rem, 5vw, 4.5rem);
+.cartaz__fundo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 62% center;
 }
 
 @media (min-width: 62rem) {
-  .cartaz__grade {
-    grid-template-columns: 1.12fr 0.88fr;
-    min-height: min(44rem, calc(100dvh - 4.5rem));
+  .cartaz__fundo img {
+    object-position: center;
   }
 }
 
-.cartaz__texto {
+/* Véu de leitura. Escurece a esquerda para o texto, o topo para o menu
+   fixo e a base para emendar na faixa de números. */
+.cartaz__fundo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgb(15 16 18 / 0.92) 0%,
+      rgb(15 16 18 / 0.7) 34%,
+      rgb(15 16 18 / 0.72) 62%,
+      rgb(15 16 18 / 0.96) 100%
+    );
+}
+
+@media (min-width: 62rem) {
+  .cartaz__fundo::after {
+    background:
+      linear-gradient(
+        98deg,
+        rgb(15 16 18 / 0.94) 0%,
+        rgb(15 16 18 / 0.86) 30%,
+        rgb(15 16 18 / 0.42) 54%,
+        rgb(15 16 18 / 0.12) 72%,
+        transparent 88%
+      ),
+      linear-gradient(
+        180deg,
+        rgb(15 16 18 / 0.72) 0%,
+        transparent 26%,
+        transparent 60%,
+        rgb(15 16 18 / 0.9) 100%
+      );
+  }
+}
+
+.cartaz__grade {
   position: relative;
-  z-index: 3;
-  padding-bottom: clamp(2.5rem, 5vw, 4.5rem);
+  z-index: 2;
+  display: grid;
+  align-items: center;
+  padding-block: clamp(3.5rem, 8vw, 6.5rem);
+  min-height: min(42rem, calc(100dvh - 4.5rem));
+}
+
+.cartaz__texto {
+  max-width: 38rem;
+}
+
+@media (min-width: 62rem) {
+  .cartaz__texto {
+    max-width: 34rem;
+  }
 }
 
 .chapeu {
@@ -219,15 +263,15 @@ body:has(.sitio) {
   background: var(--azul);
 }
 
-/* Título chapado, sem caixa de marcação. A ênfase é cor, não bloco. */
 .cartaz h1 {
   margin-top: 1.6rem;
   font-family: var(--fonte-display), sans-serif;
-  font-size: clamp(2.3rem, 4.7vw, 4rem);
+  font-size: clamp(2.3rem, 4.5vw, 3.85rem);
   font-weight: 700;
   line-height: 0.94;
   letter-spacing: -0.045em;
   text-transform: uppercase;
+  text-shadow: 0 2px 24px rgb(0 0 0 / 0.5);
 }
 
 .cartaz h1 em {
@@ -236,15 +280,15 @@ body:has(.sitio) {
 }
 
 .cartaz__linha {
-  margin-top: 1.85rem;
-  max-width: 34rem;
+  margin-top: 1.75rem;
+  max-width: 32rem;
   font-size: 1.0625rem;
   line-height: 1.6;
-  color: var(--cinza);
+  color: color-mix(in oklab, var(--osso) 76%, transparent);
 }
 
 .cartaz__acoes {
-  margin-top: 2.25rem;
+  margin-top: 2.15rem;
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
@@ -253,90 +297,7 @@ body:has(.sitio) {
 .cartaz__nota {
   margin-top: 1.35rem;
   font-size: 0.8125rem;
-  color: color-mix(in oklab, var(--cinza) 85%, transparent);
-}
-
-/* ── Retrato: o sujeito rompe a moldura ─────────────────────── */
-
-.retrato {
-  position: relative;
-  align-self: end;
-  display: flex;
-  justify-content: center;
-  min-height: 20rem;
-}
-
-/* Halo por trás — luz, não um bloco recortado. */
-.retrato::before {
-  content: "";
-  position: absolute;
-  inset: 14% -6% 0 -6%;
-  z-index: -1;
-  background: radial-gradient(50% 55% at 50% 62%, rgb(22 104 245 / 0.5), transparent 72%);
-  filter: blur(6px);
-}
-
-/* Painel de vidro no qual ele se apoia; a foto sobe acima da aresta. */
-.retrato__painel {
-  position: relative;
-  width: 100%;
-  max-width: 30rem;
-  margin-top: auto;
-  height: min(30rem, 62vh);
-  background: linear-gradient(165deg, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.03));
-  border: 1px solid rgb(255 255 255 / 0.13);
-  border-bottom: 0;
-  backdrop-filter: blur(20px) saturate(150%);
-  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.16);
-}
-
-.retrato img {
-  position: absolute;
-  z-index: 2;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-  width: 118%;
-  max-width: none;
-  height: auto;
-  /* Sobe acima da aresta do painel: o sujeito rompe a moldura. */
-  margin-bottom: 0;
-}
-
-.retrato__cita {
-  position: absolute;
-  z-index: 3;
-  left: -1.25rem;
-  bottom: 1.75rem;
-  max-width: 14.5rem;
-  padding: 0.9rem 1rem;
-  background: rgb(15 16 18 / 0.72);
-  backdrop-filter: blur(18px) saturate(150%);
-  border-left: 2px solid var(--azul);
-  font-size: 0.8125rem;
-  line-height: 1.45;
-  color: var(--osso);
-}
-
-.retrato__cita b {
-  display: block;
-  margin-top: 0.5rem;
-  font-family: var(--fonte-display), sans-serif;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--cinza);
-}
-
-@media (max-width: 61.99rem) {
-  .retrato__cita {
-    display: none;
-  }
-
-  .retrato__painel {
-    height: 24rem;
-  }
+  color: color-mix(in oklab, var(--osso) 58%, transparent);
 }
 
 /* ── Faixa de números: vidro, não campo saturado ────────────── */
@@ -434,7 +395,7 @@ body:has(.sitio) {
   }
 }
 
-.mural img {
+.mural li img {
   display: block;
   margin-inline: auto;
   height: 2.4rem;
@@ -445,7 +406,7 @@ body:has(.sitio) {
   transition: opacity 0.25s;
 }
 
-.mural img:hover {
+.mural li img:hover {
   opacity: 1;
 }
 

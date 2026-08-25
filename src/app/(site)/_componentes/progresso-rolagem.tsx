@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-/** Fio de progresso no topo — mostra quanto da página já foi lida. */
+/** Fio de progresso no topo, mostra quanto da página já foi lida. */
 export function ProgressoRolagem() {
   const [pct, setPct] = useState(0);
 

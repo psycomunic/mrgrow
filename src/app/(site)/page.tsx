@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     absolute: "MR Grow · Tráfego pago e performance para negócios que querem escalar",
   },
   description:
-    "Assessoria de marketing e performance. Tráfego, criativo, página e dados em uma operação só — com painel ao vivo para você acompanhar cada real investido.",
+    "Assessoria de marketing e performance. Tráfego, criativo, página e dados em uma operação só, com painel ao vivo para você acompanhar cada real investido.",
   alternates: { canonical: "/" },
 };
 

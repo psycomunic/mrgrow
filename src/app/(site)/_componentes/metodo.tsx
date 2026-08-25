@@ -54,7 +54,7 @@ export function Metodo() {
       <CabecaSecao
         chapeu="Método G.R.O.W"
         titulo="Quatro etapas para sair do imprevisível"
-        apoio="Nada de fórmula mágica. É processo — o mesmo que roda em todas as contas da MR Grow, com responsável, prazo e indicador em cada etapa."
+        apoio="Nada de fórmula mágica. É processo: o mesmo que roda em todas as contas da MR Grow, com responsável, prazo e indicador em cada etapa."
         antes={
           <Image
             src="/marca/grow-roda.webp"

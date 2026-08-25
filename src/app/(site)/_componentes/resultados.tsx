@@ -47,7 +47,7 @@ export function Resultados() {
       <CabecaSecao
         chapeu="Resultados"
         titulo="O que muda quando a estrutura está certa"
-        apoio="Recortes reais de operação. Os números variam por segmento, oferta e verba — e a gente diz isso na primeira conversa."
+        apoio="Recortes reais de operação. Os números variam por segmento, oferta e verba, e a gente diz isso na primeira conversa."
       />
 
       <div className="casos espaco">

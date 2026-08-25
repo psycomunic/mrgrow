@@ -110,7 +110,7 @@ export function Logo({ altura = 2.15 }: { altura?: number }) {
   );
 }
 
-/** Só a lâmpada da marca — para blocos pequenos (usada no painel). */
+/** Só a lâmpada da marca, para blocos pequenos (usada no painel). */
 export function Lampada({ className }: { className?: string }) {
   return (
     <Image
