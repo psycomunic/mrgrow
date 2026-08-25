@@ -23,7 +23,7 @@ export function Hero() {
             <h1>
               Seu anúncio não precisa de mais alcance.
               <br />
-              Precisa de <mark>mais vendas</mark>
+              Precisa de <em>mais vendas</em>
             </h1>
 
             <p className="cartaz__linha">
@@ -52,18 +52,20 @@ export function Hero() {
           </div>
 
           <figure className="retrato">
-            <Image
-              src="/marca/mateus.webp"
-              alt={`${MARCA.fundador}, fundador da ${MARCA.nome}`}
-              width={1147}
-              height={1246}
-              sizes="(max-width: 992px) 90vw, 544px"
-              loading="eager"
-            />
-            <figcaption className="retrato__cita">
-              Você não precisa confiar na palavra da agência. Precisa ver os números.
-              <b>{MARCA.fundador}</b>
-            </figcaption>
+            <div className="retrato__painel">
+              <Image
+                src="/marca/mateus.webp"
+                alt={`${MARCA.fundador}, fundador da ${MARCA.nome}`}
+                width={1147}
+                height={1246}
+                sizes="(max-width: 992px) 90vw, 560px"
+                loading="eager"
+              />
+              <figcaption className="retrato__cita">
+                Você não precisa confiar na palavra da agência. Precisa ver os números.
+                <b>{MARCA.fundador}</b>
+              </figcaption>
+            </div>
           </figure>
         </div>
       </section>

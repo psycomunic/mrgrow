@@ -158,30 +158,47 @@ body:has(.sitio) {
   font-size: 0.8125rem;
 }
 
-/* ── Cartaz ─────────────────────────────────────────────────── */
+/* ── Cartaz ─────────────────────────────────────────────────────
+   A abertura passou a usar a mesma linguagem do resto: luz ambiente,
+   vidro e profundidade. O retângulo azul chapado atrás da foto e as
+   caixas de marcação no título eram os dois pontos mais crus. */
 
 .cartaz {
   position: relative;
+  isolation: isolate;
   overflow: hidden;
+}
+
+/* Duas fontes de luz cruzadas, não um bloco de cor. */
+.cartaz::before {
+  content: "";
+  position: absolute;
+  inset: -18% -14% auto -14%;
+  height: 52rem;
+  z-index: -2;
+  background:
+    radial-gradient(40rem 30rem at 68% 34%, rgb(22 104 245 / 0.34), transparent 68%),
+    radial-gradient(34rem 24rem at 14% 8%, rgb(111 168 255 / 0.12), transparent 70%);
 }
 
 .cartaz__grade {
   display: grid;
   align-items: end;
-  gap: 0;
+  gap: clamp(2.5rem, 5vw, 3.5rem);
+  padding-top: clamp(2.5rem, 5vw, 4.5rem);
 }
 
 @media (min-width: 62rem) {
   .cartaz__grade {
-    grid-template-columns: 1.1fr 0.9fr;
-    min-height: min(46rem, calc(100dvh - 4.5rem));
+    grid-template-columns: 1.12fr 0.88fr;
+    min-height: min(44rem, calc(100dvh - 4.5rem));
   }
 }
 
 .cartaz__texto {
-  padding-block: clamp(3rem, 6vw, 5rem) clamp(3rem, 6vw, 5.5rem);
   position: relative;
   z-index: 3;
+  padding-bottom: clamp(2.5rem, 5vw, 4.5rem);
 }
 
 .chapeu {
@@ -202,27 +219,24 @@ body:has(.sitio) {
   background: var(--azul);
 }
 
-/* O título é chapado. Sem gradiente, sem brilho. */
+/* Título chapado, sem caixa de marcação. A ênfase é cor, não bloco. */
 .cartaz h1 {
-  margin-top: 1.75rem;
+  margin-top: 1.6rem;
   font-family: var(--fonte-display), sans-serif;
-  font-size: clamp(2.3rem, 4.6vw, 3.9rem);
+  font-size: clamp(2.3rem, 4.7vw, 4rem);
   font-weight: 700;
-  line-height: 0.9;
+  line-height: 0.94;
   letter-spacing: -0.045em;
   text-transform: uppercase;
 }
 
-/* A palavra que carrega a promessa ganha campo de cor, não gradiente. */
-.cartaz h1 mark {
-  background: var(--azul);
-  color: #fff;
-  padding: 0 0.2em 0.06em;
-  margin-left: -0.05em;
+.cartaz h1 em {
+  font-style: normal;
+  color: #8fbcff;
 }
 
 .cartaz__linha {
-  margin-top: 2rem;
+  margin-top: 1.85rem;
   max-width: 34rem;
   font-size: 1.0625rem;
   line-height: 1.6;
@@ -230,7 +244,7 @@ body:has(.sitio) {
 }
 
 .cartaz__acoes {
-  margin-top: 2.35rem;
+  margin-top: 2.25rem;
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
@@ -242,51 +256,63 @@ body:has(.sitio) {
   color: color-mix(in oklab, var(--cinza) 85%, transparent);
 }
 
-/* ── Retrato ────────────────────────────────────────────────── */
+/* ── Retrato: o sujeito rompe a moldura ─────────────────────── */
 
 .retrato {
   position: relative;
   align-self: end;
-  min-height: 22rem;
+  display: flex;
+  justify-content: center;
+  min-height: 20rem;
 }
 
-/* Campo de cor sólido atrás da foto — o azul como forma, não como luz. */
+/* Halo por trás — luz, não um bloco recortado. */
 .retrato::before {
   content: "";
   position: absolute;
-  inset: 12% -30% 0 8%;
-  background: var(--azul);
+  inset: 14% -6% 0 -6%;
+  z-index: -1;
+  background: radial-gradient(50% 55% at 50% 62%, rgb(22 104 245 / 0.5), transparent 72%);
+  filter: blur(6px);
 }
 
-@media (min-width: 62rem) {
-  .retrato::before {
-    inset: 18% -40% 0 4%;
-  }
+/* Painel de vidro no qual ele se apoia; a foto sobe acima da aresta. */
+.retrato__painel {
+  position: relative;
+  width: 100%;
+  max-width: 30rem;
+  margin-top: auto;
+  height: min(30rem, 62vh);
+  background: linear-gradient(165deg, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.03));
+  border: 1px solid rgb(255 255 255 / 0.13);
+  border-bottom: 0;
+  backdrop-filter: blur(20px) saturate(150%);
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.16);
 }
 
 .retrato img {
-  position: relative;
+  position: absolute;
   z-index: 2;
-  display: block;
-  width: 100%;
-  max-width: 34rem;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 118%;
+  max-width: none;
   height: auto;
-  margin-inline: auto;
-  /* A foto encosta no fim do bloco: sensação de recorte de cartaz. */
-  vertical-align: bottom;
+  /* Sobe acima da aresta do painel: o sujeito rompe a moldura. */
+  margin-bottom: 0;
 }
 
-/* Assinatura sobre o campo azul. */
 .retrato__cita {
   position: absolute;
   z-index: 3;
-  left: -1.5rem;
-  bottom: 0;
-  max-width: 15rem;
+  left: -1.25rem;
+  bottom: 1.75rem;
+  max-width: 14.5rem;
   padding: 0.9rem 1rem;
   background: rgb(15 16 18 / 0.72);
   backdrop-filter: blur(18px) saturate(150%);
-  border-left: 3px solid var(--azul);
+  border-left: 2px solid var(--azul);
   font-size: 0.8125rem;
   line-height: 1.45;
   color: var(--osso);
@@ -307,18 +333,25 @@ body:has(.sitio) {
   .retrato__cita {
     display: none;
   }
+
+  .retrato__painel {
+    height: 24rem;
+  }
 }
 
-/* ── Faixa de números: campo azul chapado ──────────────────── */
+/* ── Faixa de números: vidro, não campo saturado ────────────── */
 
 .faixa {
-  background: var(--azul);
-  color: #fff;
+  position: relative;
+  z-index: 2;
+  border-top: 1px solid rgb(255 255 255 / 0.12);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0.025));
+  backdrop-filter: blur(24px) saturate(150%);
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.13);
 }
 
 .faixa__grade {
   display: grid;
-  gap: 0;
 }
 
 @media (min-width: 48rem) {
@@ -328,15 +361,15 @@ body:has(.sitio) {
 }
 
 .faixa__item {
-  padding: 2rem 0 2.25rem;
-  border-bottom: 1px solid rgb(255 255 255 / 0.22);
+  padding: 1.85rem 0 2rem;
+  border-bottom: 1px solid rgb(255 255 255 / 0.09);
 }
 
 @media (min-width: 48rem) {
   .faixa__item {
-    padding: 2.5rem 1.75rem 2.75rem 0;
+    padding: 2.25rem 1.75rem 2.4rem 0;
     border-bottom: 0;
-    border-right: 1px solid rgb(255 255 255 / 0.22);
+    border-right: 1px solid rgb(255 255 255 / 0.09);
   }
 
   .faixa__item:last-child {
@@ -350,18 +383,19 @@ body:has(.sitio) {
 
 .faixa dt {
   font-family: var(--fonte-display), sans-serif;
-  font-size: clamp(2rem, 3.6vw, 2.85rem);
+  font-size: clamp(1.95rem, 3.4vw, 2.7rem);
   font-weight: 700;
   letter-spacing: -0.045em;
   line-height: 1;
+  color: var(--osso);
 }
 
 .faixa dd {
   margin-top: 0.6rem;
   font-size: 0.875rem;
   line-height: 1.45;
-  color: rgb(255 255 255 / 0.82);
-  max-width: 22ch;
+  color: var(--cinza);
+  max-width: 24ch;
 }
 
 /* ── Mural de clientes ──────────────────────────────────────── */

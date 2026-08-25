@@ -180,6 +180,9 @@
   display: block;
   height: 7rem;
   width: auto;
+  /* O relevo do mapa é cinza-claro sobre branco: na chapa ele some.
+     O contraste devolve a silhueta sem falsear as cores dos marcadores. */
+  filter: contrast(1.35) saturate(1.15);
 }
 
 .alcance p {
@@ -1430,11 +1433,12 @@
   background: radial-gradient(42rem 28rem at 65% 35%, rgb(22 104 245 / 0.24), transparent 70%);
 }
 
-/* A faixa azul e o mural ficam sólidos — o contraste é o ponto. */
-.faixa,
-.mural {
+/* A faixa fica acima da luz ambiente. O mural NÃO pode ganhar z-index:
+   isso cria contexto de empilhamento e quebra o mix-blend-mode que
+   dissolve o fundo branco dos logos, deixando caixas escuras. */
+.faixa {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -1669,4 +1673,13 @@
 
 .sitio .prazo-feixe {
   margin-top: 2rem;
+}
+
+/* ── Feixe: brilho contido ──────────────────────────────────────
+   O halo padrão do componente (0.35) estoura sobre o vidro e o
+   movimento fica chapado. Aqui ele é só uma insinuação de luz. */
+
+.sitio .mk-beam-glow {
+  opacity: 0.18;
+  filter: blur(20px);
 }

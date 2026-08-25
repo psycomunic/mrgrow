@@ -34,8 +34,9 @@ export function CtaFinal() {
             radius={0}
             thickness={2}
             beams={1}
-            idleSpeed={26}
-            colors={["#1668f5"]}
+            idleSpeed={9}
+            hoverSpeed={26}
+            colors={["#7fb2ff"]}
             className="prazo-feixe !border-transparent !bg-transparent !p-0"
           >
             <div className="prazo">
@@ -53,7 +54,10 @@ export function CtaFinal() {
         <BorderBeamPanel
           radius={0}
           thickness={2}
-          colors={["#1668f5", "#7fb2ff"]}
+          beams={1}
+          idleSpeed={11}
+          hoverSpeed={34}
+          colors={["#7fb2ff"]}
           className="!border-transparent !bg-transparent !p-0"
         >
           <FormularioDiagnostico />
