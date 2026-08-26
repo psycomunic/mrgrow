@@ -19,13 +19,37 @@ export const percentual = (valor: number | null | undefined, casas = 1) =>
 export const compacto = (valor: number | null | undefined) =>
   new Intl.NumberFormat("pt-BR", { notation: "compact", maximumFractionDigits: 1 }).format(Number(valor ?? 0));
 
+/**
+ * `Intl.DateTimeFormat.format` lança RangeError quando recebe Invalid Date,
+ * e um eixo de gráfico chama isto para cada marcação. Sem esta guarda, um
+ * rótulo que não seja data (um "Mar" de mês, por exemplo) derruba a página
+ * inteira. Aqui o valor original volta como texto, que é o que o eixo quer.
+ */
+function paraData(valor: string | Date) {
+  if (valor instanceof Date) return valor;
+
+  /* "2026-08-26" sem hora é lido como meia-noite UTC. Em fuso negativo
+     (Brasil é UTC-3) isso cai no dia anterior e a data aparece um dia
+     antes do real: validade de proposta, vencimento de fatura, prazo de
+     tarefa. Datas puras são montadas no fuso local. */
+  const so = /^(\d{4})-(\d{2})-(\d{2})$/.exec(valor.trim());
+  if (so) return new Date(Number(so[1]), Number(so[2]) - 1, Number(so[3]));
+
+  return new Date(valor);
+}
+
+function formatarData(valor: string | Date | null | undefined, opcoes: Intl.DateTimeFormatOptions) {
+  if (!valor) return "—";
+  const data = paraData(valor);
+  if (Number.isNaN(data.getTime())) return String(valor);
+  return new Intl.DateTimeFormat("pt-BR", opcoes).format(data);
+}
+
 export const dataCurta = (valor: string | Date | null | undefined) =>
-  valor ? new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" }).format(new Date(valor)) : "—";
+  formatarData(valor, { day: "2-digit", month: "short" });
 
 export const dataCompleta = (valor: string | Date | null | undefined) =>
-  valor
-    ? new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(valor))
-    : "—";
+  formatarData(valor, { day: "2-digit", month: "2-digit", year: "numeric" });
 
 export function iniciais(nome?: string | null) {
   if (!nome) return "MR";
