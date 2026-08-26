@@ -1715,3 +1715,51 @@
   opacity: 0.18;
   filter: blur(20px);
 }
+
+/* ── Mural: disco azul no hover ─────────────────────────────────
+   Os arquivos vêm em cinza puro, sem cor para restaurar. Em vez de
+   colorir a marca, o disco entra por trás: como o logo está em
+   `mix-blend-mode: screen`, o preto do arquivo vira azul dentro do
+   círculo e o desenho segue branco por cima.
+
+   O `::before` é posicionado, então pintaria acima do <img>; por isso
+   a imagem também recebe `position: relative` e, vindo depois na
+   árvore, fica na frente. */
+
+.mural li {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.mural li::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5.25rem;
+  height: 5.25rem;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgb(22 104 245 / 0.92) 0%,
+    rgb(22 104 245 / 0.66) 60%,
+    rgb(22 104 245 / 0.1) 80%,
+    transparent 86%
+  );
+  transform: translate(-50%, -50%) scale(0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.26s ease,
+    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mural li:hover::before {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.mural li img {
+  position: relative;
+}
