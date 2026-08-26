@@ -5,8 +5,10 @@ import { AvisoDemo } from "@/components/painel/aviso-demo";
 import { Etiqueta } from "@/components/ui/etiqueta";
 import { BotaoLink } from "@/components/ui/botao";
 import { BotaoSincronizar } from "../metricas/botao-sincronizar";
-import { supabaseConfigurado } from "@/lib/dados";
+import { modoDemonstracao } from "@/lib/dados";
+import { STATUS_INTEGRACAO } from "@/lib/rotulos";
 import { DEMO_INTEGRACOES } from "@/lib/demo";
+import { numero } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Integrações" };
 
@@ -56,7 +58,7 @@ const CATALOGO = [
 ];
 
 export default function PaginaIntegracoes() {
-  const demo = !supabaseConfigurado();
+  const demo = modoDemonstracao();
   const estado = new Map(DEMO_INTEGRACOES.map((i) => [i.provedor, i]));
 
   return (
@@ -95,9 +97,9 @@ export default function PaginaIntegracoes() {
               <article key={item.provedor} className="cartao flex flex-col rounded-lg p-5">
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="font-display text-base font-bold text-tinta">{item.nome}</h3>
-                  <Etiqueta tom={conectada ? "sucesso" : "neutro"}>
+                  <Etiqueta tom={STATUS_INTEGRACAO.tom(atual?.status ?? "desconectada")}>
                     {conectada ? <CheckCircle2 className="size-3" /> : <CircleAlert className="size-3" />}
-                    {conectada ? "conectada" : "desconectada"}
+                    {STATUS_INTEGRACAO.rotulo(atual?.status ?? "desconectada")}
                   </Etiqueta>
                 </div>
 
@@ -111,9 +113,14 @@ export default function PaginaIntegracoes() {
                   ))}
                 </div>
 
+                {/* "1 conta vinculada", não "1 conta(s) vinculada(s)": o
+                    parêntese de plural é o atalho que denuncia texto não
+                    escrito para ser lido. */}
                 {conectada && (
                   <p className="mt-4 text-xs text-cinza-claro">
-                    {atual?.contas} conta(s) vinculada(s) · sincronizado {atual?.ultima}
+                    {numero(atual?.contas ?? 0)}{" "}
+                    {atual?.contas === 1 ? "conta vinculada" : "contas vinculadas"} · sincronizado{" "}
+                    {atual?.ultima}
                   </p>
                 )}
 

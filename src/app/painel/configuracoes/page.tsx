@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Topo } from "../_componentes/topo";
-import { Campo, Entrada } from "@/components/ui/campo";
-import { Botao } from "@/components/ui/botao";
+import { AvisoDemo } from "@/components/painel/aviso-demo";
+import { FormularioAgencia } from "./formulario";
+import { exigirPermissao } from "@/lib/sessao";
+import { carregarAgencia } from "@/lib/organizacao";
 
 export const metadata: Metadata = { title: "Configurações" };
 
@@ -17,26 +19,23 @@ const VARIAVEIS = [
   { chave: "CRON_SECRET", nota: "Protege as rotas /api/cron/*" },
 ];
 
-export default function PaginaConfiguracoes() {
+export default async function PaginaConfiguracoes() {
+  await exigirPermissao("configuracoes");
+  const { dados, demo } = await carregarAgencia();
+
   return (
     <>
       <Topo titulo="Configurações" descricao="Dados da agência, marca e credenciais das integrações." />
 
-      <div className="grid gap-6 p-5 sm:p-8 xl:grid-cols-2">
+      <div className="space-y-6 p-5 sm:p-8">
+        {demo && <AvisoDemo />}
+
+        <div className="grid gap-6 xl:grid-cols-2">
         <section className="cartao rounded-lg p-6">
           <h2 className="font-display text-base font-bold text-tinta">Dados da agência</h2>
           <p className="mt-1 text-sm text-cinza">Aparecem em propostas, relatórios e no portal do cliente.</p>
 
-          <form className="mt-6 space-y-4">
-            <Campo rotulo="Nome"><Entrada defaultValue="MR Grow" /></Campo>
-            <Campo rotulo="CNPJ"><Entrada placeholder="00.000.000/0001-00" /></Campo>
-            <Campo rotulo="E-mail de contato"><Entrada type="email" defaultValue="contato@mrgrow.com.br" /></Campo>
-            <Campo rotulo="WhatsApp comercial"><Entrada placeholder="(00) 00000-0000" /></Campo>
-            <Campo rotulo="Cor primária" dica="Usada no painel, nas propostas e nos relatórios.">
-              <Entrada defaultValue="#1668f5" />
-            </Campo>
-            <Botao type="button">Salvar alterações</Botao>
-          </form>
+          <FormularioAgencia inicial={dados} />
         </section>
 
         <section className="cartao rounded-lg p-6">
@@ -66,6 +65,7 @@ export default function PaginaConfiguracoes() {
             </ol>
           </div>
         </section>
+        </div>
       </div>
     </>
   );

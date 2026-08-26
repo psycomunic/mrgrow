@@ -1,5 +1,5 @@
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
+import { cn, numero } from "@/lib/utils";
 
 /** Tons pastel dos chips: cada indicador ganha uma cor própria e constante. */
 const CHIP = {
@@ -27,6 +27,7 @@ export function Kpi({
   icone,
   tom = "azul",
   serie,
+  dica,
 }: {
   rotulo: string;
   valor: string;
@@ -36,50 +37,76 @@ export function Kpi({
   invertido?: boolean;
   icone?: React.ReactNode;
   tom?: TomKpi;
-  /** Série curta para o traço de tendência ao lado do número. */
+  /** Série curta para o traço de tendência do cartão. */
   serie?: number[];
+  /** Texto de apoio no hover — explica de onde vem o número. */
+  dica?: string;
 }) {
-  const positivo = variacao === undefined ? null : invertido ? variacao < 0 : variacao > 0;
+  /* Três estados, não dois. Variação exatamente zero não é queda: antes ela
+     caía no `else` e o cartão mostrava seta para baixo em vermelho para uma
+     métrica que simplesmente não mudou. */
+  const direcao =
+    variacao === undefined || Math.abs(variacao) < 0.05
+      ? "estavel"
+      : (invertido ? variacao < 0 : variacao > 0)
+        ? "boa"
+        : "ruim";
+
+  /* Uma série com dois valores distintos não é tendência: desenharia uma linha
+     reta com um degrau, que informa menos do que engana. */
+  const temTraco = !!serie && new Set(serie.filter((v) => Number.isFinite(v))).size > 2;
+  const temRodape = variacao !== undefined || !!detalhe || temTraco;
 
   return (
-    <div className="cartao p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          {icone && (
-            <span
-              className={cn(
-                "mb-3 grid size-10 place-items-center rounded-full [&_svg]:size-5",
-                CHIP[tom],
-              )}
-            >
-              {icone}
-            </span>
+    <div className="cartao p-5" title={dica}>
+      {icone && (
+        <span
+          className={cn(
+            "mb-3 grid size-10 place-items-center rounded-full [&_svg]:size-5",
+            CHIP[tom],
           )}
-          <p className="font-display text-2xl font-extrabold tracking-tight text-tinta">{valor}</p>
-          <p className="mt-1 text-xs font-medium text-cinza">{rotulo}</p>
-        </div>
+        >
+          {icone}
+        </span>
+      )}
 
-        {/* Menos de dois meses com movimento não é tendência: seria uma
-            linha reta com um pico no fim, que engana mais do que informa. */}
-        {serie && serie.filter((v) => v !== 0).length > 1 && (
-          <Faisca pontos={serie} cor={TRACO[tom]} id={`${tom}-${rotulo}`} />
-        )}
-      </div>
+      {/* `tabular-nums` alinha os dígitos entre cartões vizinhos: sem isso,
+          quatro números lado a lado dançam de um para o outro. */}
+      <p className="font-display truncate text-[1.65rem] leading-none font-bold tracking-[-0.02em] tabular-nums text-tinta">
+        {valor}
+      </p>
+      <p className="mt-2 truncate text-[13px] font-medium text-cinza">{rotulo}</p>
 
-      {(variacao !== undefined || detalhe) && (
-        <div className="mt-3 flex items-center gap-2">
-          {variacao !== undefined && (
-            <span
-              className={cn(
-                "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-semibold",
-                positivo ? "bg-sucesso/12 text-sucesso" : "bg-perigo/12 text-perigo",
-              )}
-            >
-              {variacao > 0 ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />}
-              {Math.abs(variacao).toFixed(1)}%
-            </span>
-          )}
-          {detalhe && <span className="text-[11px] text-cinza-claro">{detalhe}</span>}
+      {/* O traço fica nesta linha, e não ao lado do número.
+          Alinhado ao número, ele disputava a mesma largura: em cartão estreito
+          o valor não tinha para onde encolher e o desenho passava por cima
+          de "R$ 246.202,00". */}
+      {temRodape && (
+        <div className="mt-3 flex items-end justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2">
+            {variacao !== undefined && (
+              <span
+                className={cn(
+                  "inline-flex shrink-0 items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular-nums",
+                  direcao === "boa" && "bg-sucesso/12 text-sucesso",
+                  direcao === "ruim" && "bg-perigo/12 text-perigo",
+                  direcao === "estavel" && "bg-nevoa-2 text-cinza",
+                )}
+              >
+                {direcao === "estavel" ? (
+                  <Minus className="size-3" />
+                ) : variacao > 0 ? (
+                  <ArrowUpRight className="size-3" />
+                ) : (
+                  <ArrowDownRight className="size-3" />
+                )}
+                {numero(Math.abs(variacao), 1)}%
+              </span>
+            )}
+            {detalhe && <span className="truncate text-[11px] text-cinza-claro">{detalhe}</span>}
+          </div>
+
+          {temTraco && <Faisca pontos={serie!} cor={TRACO[tom]} id={`${tom}-${rotulo}`} />}
         </div>
       )}
     </div>
@@ -87,19 +114,19 @@ export function Kpi({
 }
 
 /**
- * Traço de tendência em SVG puro. Não usa Recharts de propósito: são
- * quatro por tela e a biblioteca custaria mais que o desenho.
+ * Traço de tendência em SVG puro. Não usa Recharts de propósito: são quatro ou
+ * mais por tela e a biblioteca custaria mais que o desenho.
  */
 function Faisca({ pontos, cor, id }: { pontos: number[]; cor: string; id: string }) {
-  const L = 88;
-  const A = 40;
+  const L = 72;
+  const A = 26;
   const min = Math.min(...pontos);
   const max = Math.max(...pontos);
   const faixa = max - min || 1;
 
   const xy = pontos.map((p, i) => [
     (i / (pontos.length - 1)) * L,
-    A - 3 - ((p - min) / faixa) * (A - 6),
+    A - 2 - ((p - min) / faixa) * (A - 5),
   ]);
 
   // Curva suave por ponto médio: evita bicos sem precisar de spline.
@@ -114,15 +141,21 @@ function Faisca({ pontos, cor, id }: { pontos: number[]; cor: string; id: string
   const grad = `faisca-${id.replace(/[^a-z0-9]/gi, "")}`;
 
   return (
-    <svg width={L} height={A} viewBox={`0 0 ${L} ${A}`} className="shrink-0" aria-hidden>
+    <svg
+      width={L}
+      height={A}
+      viewBox={`0 0 ${L} ${A}`}
+      className="shrink-0 self-end"
+      aria-hidden
+    >
       <defs>
         <linearGradient id={grad} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={cor} stopOpacity={0.22} />
+          <stop offset="0%" stopColor={cor} stopOpacity={0.2} />
           <stop offset="100%" stopColor={cor} stopOpacity={0} />
         </linearGradient>
       </defs>
       <path d={`${d}L${L},${A}L0,${A}Z`} fill={`url(#${grad})`} />
-      <path d={d} fill="none" stroke={cor} strokeWidth={2} strokeLinecap="round" />
+      <path d={d} fill="none" stroke={cor} strokeWidth={1.75} strokeLinecap="round" />
     </svg>
   );
 }

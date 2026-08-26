@@ -1,8 +1,9 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, after, type NextRequest } from "next/server";
 import { z } from "zod";
 import { criarClienteAdmin } from "@/lib/supabase/servidor";
 import { dispararGatilho } from "@/lib/automacoes";
 import { enviarEventoCapi } from "@/lib/capi";
+import { ipDaRequisicao, limitar } from "@/lib/limite";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -45,7 +46,23 @@ function pontuar(dados: z.infer<typeof Esquema>) {
   return Math.min(p, 100);
 }
 
+/** Slug da organização que recebe os leads do site. */
+const SLUG_ORGANIZACAO = process.env.ORGANIZACAO_PADRAO_SLUG ?? "mr-grow";
+
 export async function POST(request: NextRequest) {
+  /* Rota pública sem limite era um convite: um script enchia a tabela de
+     leads, disparava as automações (e portanto notificações, e-mails e
+     WhatsApp) e mandava eventos falsos para a CAPI da Meta, estragando a
+     otimização das campanhas com dados inventados. */
+  const ipOrigem = ipDaRequisicao(request.headers);
+  const veredito = limitar(`leads:${ipOrigem}`, 5, 10 * 60_000);
+  if (!veredito.permitido) {
+    return NextResponse.json(
+      { erro: "Muitas tentativas. Tente novamente em alguns minutos." },
+      { status: 429, headers: { "Retry-After": String(veredito.esperarSegundos) } },
+    );
+  }
+
   let corpo: unknown;
   try {
     corpo = await request.json();
@@ -62,20 +79,36 @@ export async function POST(request: NextRequest) {
   }
 
   const dados = analise.data;
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    request.headers.get("x-real-ip") ??
-    undefined;
+  /* `ip` e `user_agent` ficam gravados para atribuição e antifraude. São dados
+     pessoais: a política de privacidade do site precisa declará-los e a
+     retenção deve ser limitada (uma rotina de expurgo em `leads` resolve). */
+  const ip = ipOrigem === "desconhecido" ? undefined : ipOrigem;
 
   try {
     const db = criarClienteAdmin();
 
-    const { data: org } = await db.from("organizacoes").select("id").eq("slug", "mr-grow").maybeSingle();
+    const { data: org, error: erroOrg } = await db
+      .from("organizacoes")
+      .select("id")
+      .eq("slug", SLUG_ORGANIZACAO)
+      .maybeSingle();
+
+    /* Gravar com `organizacao_id: null` era o pior desfecho possível: o lead
+       ficava órfão, fora da RLS de qualquer organização e legível por
+       qualquer visitante com a chave anônima (que é pública por natureza).
+       Sem organização resolvida, a rota falha e o erro aparece no log. */
+    if (erroOrg || !org?.id) {
+      console.error(
+        `[leads] organização "${SLUG_ORGANIZACAO}" não encontrada — lead recusado`,
+        erroOrg,
+      );
+      return NextResponse.json({ erro: "Não foi possível registrar o lead" }, { status: 503 });
+    }
 
     const { data: lead, error } = await db
       .from("leads")
       .insert({
-        organizacao_id: org?.id ?? null,
+        organizacao_id: org.id,
         nome: dados.nome,
         email: dados.email,
         telefone: dados.telefone,
@@ -100,25 +133,38 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
-    // Efeitos colaterais não bloqueiam a resposta ao usuário.
-    if (org?.id) {
-      void dispararGatilho(org.id, "lead_criado", {
-        lead_id: lead.id,
-        nome: dados.nome,
-        origem: dados.origem,
-        url: "/painel/crm",
-      });
-    }
+    /* `after` em vez de `void`: numa função serverless o processo é congelado
+       assim que a resposta sai, e o disparo com `void` morria pelo caminho de
+       forma intermitente — o lead entrava e ninguém era avisado. */
+    const userAgent = request.headers.get("user-agent") ?? undefined;
+    const urlOrigem = `${request.nextUrl.origin}${dados.pagina}`;
 
-    void enviarEventoCapi({
-      evento: "Lead",
-      eventId: dados.event_id,
-      email: dados.email,
-      telefone: dados.telefone,
-      ip,
-      userAgent: request.headers.get("user-agent") ?? undefined,
-      urlOrigem: `${request.nextUrl.origin}${dados.pagina}`,
-      fbclid: dados.utm?.fbclid,
+    after(async () => {
+      try {
+        await dispararGatilho(org.id, "lead_criado", {
+          lead_id: lead.id,
+          nome: dados.nome,
+          origem: dados.origem,
+          url: "/painel/crm",
+        });
+      } catch (erro) {
+        console.error("[leads] gatilho lead_criado falhou", erro);
+      }
+
+      try {
+        await enviarEventoCapi({
+          evento: "Lead",
+          eventId: dados.event_id,
+          email: dados.email,
+          telefone: dados.telefone,
+          ip,
+          userAgent,
+          urlOrigem,
+          fbclid: dados.utm?.fbclid,
+        });
+      } catch (erro) {
+        console.error("[leads] evento da CAPI falhou", erro);
+      }
     });
 
     return NextResponse.json({ ok: true, id: lead.id }, { status: 201 });

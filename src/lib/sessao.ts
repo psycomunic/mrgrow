@@ -1,8 +1,8 @@
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
-import { supabaseConfigurado } from "@/lib/dados";
-import type { Papel } from "@/lib/papeis";
+import { modoDemonstracao, registrarFalha } from "@/lib/dados";
+import { pode, type Acao, type Papel, type Recurso } from "@/lib/papeis";
 
 /** Sessão fictícia usada enquanto o Supabase não está conectado. */
 const SESSAO_DEMO: Sessao = {
@@ -32,7 +32,7 @@ export type Sessao = {
  * Memoizada por request via React cache.
  */
 export const obterSessao = cache(async (): Promise<Sessao | null> => {
-  if (!supabaseConfigurado()) return SESSAO_DEMO;
+  if (modoDemonstracao()) return SESSAO_DEMO;
 
   const supabase = await criarClienteServidor();
   const {
@@ -40,7 +40,7 @@ export const obterSessao = cache(async (): Promise<Sessao | null> => {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: vinculo } = await supabase
+  const { data: vinculo, error } = await supabase
     .from("membros_organizacao")
     .select(
       "papel, clientes_permitidos, organizacao_id, organizacoes(nome), perfis(nome_completo, avatar_url)",
@@ -51,6 +51,7 @@ export const obterSessao = cache(async (): Promise<Sessao | null> => {
     .limit(1)
     .maybeSingle();
 
+  if (error) registrarFalha("obterSessao/membros_organizacao", error);
   if (!vinculo) return null;
 
   const org = vinculo.organizacoes as unknown as { nome: string } | null;
@@ -81,5 +82,18 @@ export async function exigirSessao(): Promise<Sessao> {
 export async function exigirEquipe(): Promise<Sessao> {
   const sessao = await exigirSessao();
   if (sessao.papel === "cliente") redirect("/portal");
+  return sessao;
+}
+
+/**
+ * Exige que o papel do usuário permita a ação no recurso.
+ *
+ * Usada nas páginas do painel: o filtro do menu lateral esconde o item, mas
+ * quem digita a URL na barra de endereço passa por cima dele. Sem isto um
+ * operador abre /painel/financeiro e lê o contas-a-receber da agência.
+ */
+export async function exigirPermissao(recurso: Recurso, acao: Acao = "ver"): Promise<Sessao> {
+  const sessao = await exigirEquipe();
+  if (!pode(sessao.papel, recurso, acao)) redirect("/painel");
   return sessao;
 }

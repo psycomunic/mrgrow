@@ -9,6 +9,22 @@ import { Botao } from "@/components/ui/botao";
 import { Campo, Entrada } from "@/components/ui/campo";
 import { criarClienteNavegador } from "@/lib/supabase/cliente";
 
+/**
+ * Destino pós-login, sempre interno.
+ *
+ * `router.push(params.get("proximo"))` aceitava URL absoluta: um link
+ * `/entrar?proximo=https://site-falso.com` levava a pessoa para fora do
+ * domínio logo depois de ela digitar a senha — com a aparência de que o
+ * próprio sistema a mandou para lá.
+ */
+function destinoSeguro(proximo: string | null, convite: string | null) {
+  if (convite && /^[0-9a-f]{32,48}$/i.test(convite)) return `/convite/${convite}`;
+  if (!proximo) return "/painel";
+  if (!proximo.startsWith("/") || proximo.startsWith("//")) return "/painel";
+  const permitidas = ["/painel", "/portal", "/convite"];
+  return permitidas.some((r) => proximo.startsWith(r)) ? proximo : "/painel";
+}
+
 export function FormularioEntrar() {
   const router = useRouter();
   const params = useSearchParams();
@@ -27,7 +43,7 @@ export function FormularioEntrar() {
       toast.error("E-mail ou senha incorretos.");
       return;
     }
-    router.push(params.get("proximo") ?? "/painel");
+    router.push(destinoSeguro(params.get("proximo"), params.get("convite")));
     router.refresh();
   }
 

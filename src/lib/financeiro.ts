@@ -1,6 +1,6 @@
 import "server-only";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
-import { supabaseConfigurado } from "@/lib/dados";
+import { modoDemonstracao, registrarFalha } from "@/lib/dados";
 import { obterSessao } from "@/lib/sessao";
 import { DEMO_LANCAMENTOS } from "@/lib/demo";
 
@@ -50,15 +50,17 @@ type Linha = {
   clientes: { nome: string } | { nome: string }[] | null;
 };
 
+const VAZIO: Financeiro = { lancamentos: [], demo: false };
+
 export async function carregarFinanceiro(): Promise<Financeiro> {
-  if (!supabaseConfigurado()) return demo();
+  if (modoDemonstracao()) return demo();
 
   try {
     const sessao = await obterSessao();
-    if (!sessao) return demo();
+    if (!sessao) return VAZIO;
 
     const db = await criarClienteServidor();
-    const { data } = await db
+    const { data, error } = await db
       .from("lancamentos")
       .select(
         "id, descricao, cliente_id, tipo, status, valor, vencimento, pago_em, observacoes, clientes(nome)",
@@ -67,7 +69,11 @@ export async function carregarFinanceiro(): Promise<Financeiro> {
       .order("vencimento", { ascending: false })
       .limit(200);
 
-    if (!data) return demo();
+    if (error) {
+      registrarFalha("carregarFinanceiro", error);
+      return VAZIO;
+    }
+    if (!data) return VAZIO;
 
     return {
       lancamentos: (data as unknown as Linha[]).map((l) => {
@@ -87,14 +93,15 @@ export async function carregarFinanceiro(): Promise<Financeiro> {
       }),
       demo: false,
     };
-  } catch {
-    return demo();
+  } catch (e) {
+    registrarFalha("carregarFinanceiro", e);
+    return VAZIO;
   }
 }
 
 /** Nomes para o seletor de cliente do formulário. */
 export async function listarClientesSimples(): Promise<{ id: string; nome: string }[]> {
-  if (!supabaseConfigurado()) return [];
+  if (modoDemonstracao()) return [];
   try {
     const sessao = await obterSessao();
     if (!sessao) return [];
@@ -105,7 +112,8 @@ export async function listarClientesSimples(): Promise<{ id: string; nome: strin
       .eq("organizacao_id", sessao.organizacaoId)
       .order("nome");
     return (data ?? []) as { id: string; nome: string }[];
-  } catch {
+  } catch (e) {
+    registrarFalha("listarClientesSimples", e);
     return [];
   }
 }

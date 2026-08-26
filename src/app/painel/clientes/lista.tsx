@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { ArrowUpRight, Search, User } from "lucide-react";
 import { Kpi } from "@/components/painel/kpi";
 import { Etiqueta } from "@/components/ui/etiqueta";
-import { brl, iniciais, numero, slugificar } from "@/lib/utils";
+import { brl, iniciais, multiplo, numero, slugificar } from "@/lib/utils";
 import { FichaCliente, TOM, ROTULO_STATUS, corSaude } from "./ficha";
 import type { ClienteCarteira } from "@/lib/clientes";
 
@@ -64,13 +64,15 @@ export function ListaClientes({ clientes }: { clientes: ClienteCarteira[] }) {
           detalhe={`${visiveis.length} no recorte`}
         />
         <Kpi rotulo="MRR da carteira" valor={brl(mrr)} detalhe="somente contas ativas" />
-        <Kpi rotulo="Mídia sob gestão" valor={brl(midia)} detalhe="previsto no mês" />
+        {/* "Prevista" e não "gerida": este número é a soma do que foi orçado com
+            os clientes. O investimento realizado vive em Métricas, e ver os dois
+            com o mesmo rótulo em telas vizinhas confunde mais do que informa. */}
+        <Kpi rotulo="Verba prevista no mês" valor={brl(midia)} detalhe="somado dos contratos" />
         <Kpi
           rotulo="Contas em risco"
           valor={numero(emRisco)}
-          detalhe={`saúde média ${numero(saude)}`}
-          variacao={emRisco > 0 ? -emRisco : undefined}
-          invertido
+          detalhe={`saúde média ${numero(saude)}/100`}
+          tom={emRisco ? "rosa" : "menta"}
         />
       </section>
 
@@ -163,7 +165,7 @@ export function ListaClientes({ clientes }: { clientes: ClienteCarteira[] }) {
                 <div>
                   <dt className="text-[10px] tracking-wide text-cinza-claro uppercase">ROAS</dt>
                   <dd className="mt-0.5 text-sm font-bold text-tinta">
-                    {c.roas ? `${c.roas.toFixed(1)}x` : "—"}
+                    {c.roas ? multiplo(c.roas, 1) : "—"}
                   </dd>
                 </div>
                 <div>

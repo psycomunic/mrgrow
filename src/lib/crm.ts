@@ -1,6 +1,6 @@
 import "server-only";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
-import { supabaseConfigurado } from "@/lib/dados";
+import { modoDemonstracao, registrarFalha } from "@/lib/dados";
 import { obterSessao } from "@/lib/sessao";
 import { DEMO_ETAPAS, DEMO_NEGOCIOS } from "@/lib/demo";
 import type { EtapaFunil } from "@/types/dominio";
@@ -67,17 +67,23 @@ function nomeDoContato(c: LinhaNegocio["contatos"]) {
   return Array.isArray(c) ? (c[0]?.nome ?? null) : c.nome;
 }
 
+/** Sem funil configurado o quadro abre vazio e convida a criar o primeiro. */
+const FUNIL_VAZIO: Funil = { funilId: null, etapas: [], negocios: [], demo: false };
+
 /**
  * Carrega o funil padrão da organização com as etapas e os negócios abertos.
- * Cai para a demonstração quando o Supabase ainda não está conectado ou a
- * consulta falha, para o painel nunca abrir vazio.
+ *
+ * Só cai na demonstração quando não existe Supabase configurado. Com banco
+ * ligado, ausência de dados é ausência de dados: mostrar o funil fictício
+ * fazia o quadro operar sobre etapas inexistentes, e toda ação de arrastar
+ * falhava depois no servidor.
  */
 export async function carregarFunil(): Promise<Funil> {
-  if (!supabaseConfigurado()) return funilDemo();
+  if (modoDemonstracao()) return funilDemo();
 
   try {
     const sessao = await obterSessao();
-    if (!sessao) return funilDemo();
+    if (!sessao) return FUNIL_VAZIO;
 
     const db = await criarClienteServidor();
 
@@ -90,7 +96,7 @@ export async function carregarFunil(): Promise<Funil> {
       .limit(1)
       .maybeSingle();
 
-    if (!funil) return funilDemo();
+    if (!funil) return FUNIL_VAZIO;
     const funilId = (funil as { id: string }).id;
 
     const [{ data: etapas }, { data: negocios }] = await Promise.all([
@@ -109,7 +115,7 @@ export async function carregarFunil(): Promise<Funil> {
         .order("ordem_kanban", { ascending: true }),
     ]);
 
-    if (!etapas?.length) return funilDemo();
+    if (!etapas?.length) return FUNIL_VAZIO;
 
     return {
       funilId,
@@ -128,7 +134,8 @@ export async function carregarFunil(): Promise<Funil> {
       })),
       demo: false,
     };
-  } catch {
-    return funilDemo();
+  } catch (e) {
+    registrarFalha("carregarFunil", e);
+    return FUNIL_VAZIO;
   }
 }

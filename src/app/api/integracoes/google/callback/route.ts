@@ -1,25 +1,41 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { exigirSessao } from "@/lib/sessao";
-import { criarClienteAdmin } from "@/lib/supabase/servidor";
+import { exigirEquipe } from "@/lib/sessao";
+import { pode } from "@/lib/papeis";
+import { cookieDoEstado, estadoValido } from "@/lib/oauth";
+import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { cifrar } from "@/lib/cripto";
 import { trocarCodigoPorTokenGoogle, listarContasGoogleAds } from "@/lib/integracoes/google";
 
 export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
-  const sessao = await exigirSessao();
+  const sessao = await exigirEquipe();
   const { searchParams, origin } = request.nextUrl;
+
+  if (!pode(sessao.papel, "integracoes", "editar")) {
+    return NextResponse.redirect(`${origin}/painel/integracoes?erro=sem_permissao`);
+  }
+
   const codigo = searchParams.get("code");
   const estado = searchParams.get("state");
-  const esperado = request.cookies.get("mrg_oauth_estado")?.value;
+  const doCookie = request.cookies.get(cookieDoEstado("google"))?.value;
 
-  if (!codigo || !estado || estado !== esperado) {
-    return NextResponse.redirect(`${origin}/painel/integracoes?erro=estado_invalido`);
+  /* Um cookie de estado usado é um cookie queimado: apagar sempre, mesmo
+     quando a validação falha, para não deixar 10 minutos de janela de reuso. */
+  const limpar = (resposta: NextResponse) => {
+    resposta.cookies.delete(cookieDoEstado("google"));
+    return resposta;
+  };
+
+  if (!codigo || !estadoValido(estado, doCookie, sessao.organizacaoId)) {
+    return limpar(NextResponse.redirect(`${origin}/painel/integracoes?erro=estado_invalido`));
   }
 
   try {
     const token = await trocarCodigoPorTokenGoogle(codigo);
-    const db = criarClienteAdmin();
+    /* Cliente autenticado, não service role: assim a policy `integracoes_escrever`
+       (restrita a gestor) também vale, em vez de ser ignorada. */
+    const db = await criarClienteServidor();
 
     const { data: integracao, error } = await db
       .from("integracoes")
@@ -66,9 +82,9 @@ export async function GET(request: NextRequest) {
       console.warn("[google callback] não foi possível listar contas", erro);
     }
 
-    return NextResponse.redirect(`${origin}/painel/integracoes?conectado=google&contas=${quantidade}`);
+    return limpar(NextResponse.redirect(`${origin}/painel/integracoes?conectado=google&contas=${quantidade}`));
   } catch (erro) {
     console.error("[google callback]", erro);
-    return NextResponse.redirect(`${origin}/painel/integracoes?erro=google`);
+    return limpar(NextResponse.redirect(`${origin}/painel/integracoes?erro=google`));
   }
 }

@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { Outfit, Manrope } from "next/font/google";
 import { Deck } from "./deck";
 import { carregarPorToken } from "@/lib/propostas";
-import { MARCA } from "@/lib/marca";
 import "./deck.css";
 
 const display = Outfit({
@@ -29,7 +28,9 @@ export async function generateMetadata({
   const proposta = await carregarPorToken(token);
 
   return {
-    title: proposta ? `${proposta.titulo} · ${MARCA.nome}` : "Proposta",
+    /* O layout raiz já aplica o template "%s · MR Grow"; repetir a marca aqui
+       produzia "… · MR Grow · MR Grow" na aba do navegador. */
+    title: proposta ? proposta.titulo : "Proposta",
     // Documento comercial de terceiro: fora do índice de busca.
     robots: { index: false, follow: false },
   };

@@ -7,7 +7,7 @@ import { Botao } from "@/components/ui/botao";
 import { Etiqueta } from "@/components/ui/etiqueta";
 import { Kpi } from "@/components/painel/kpi";
 import { Tabela, Cabecalhos, Linha, Celula } from "@/components/painel/tabela";
-import { brl, dataCompleta, numero } from "@/lib/utils";
+import { brl, dataCompleta, numero, percentual } from "@/lib/utils";
 import { Construtor } from "./construtor";
 import { excluirProposta } from "./acoes";
 import type { Proposta } from "@/lib/propostas";
@@ -84,7 +84,7 @@ export function ListaPropostas({ propostas: iniciais }: { propostas: Proposta[] 
         <Kpi rotulo="Valor em negociação" valor={brl(kpis.valorAberto)} detalhe="recorrente mensal" />
         <Kpi
           rotulo="Taxa de aceite"
-          valor={`${kpis.taxa.toFixed(0)}%`}
+          valor={percentual(kpis.taxa, 0)}
           detalhe="sobre as respondidas"
         />
         <Kpi rotulo="Ganho fechado" valor={brl(kpis.ganho)} detalhe="propostas aceitas" />

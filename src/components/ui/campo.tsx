@@ -33,10 +33,12 @@ export const Selecao = React.forwardRef<
       className={cn(
         base,
         "appearance-none bg-carta pr-9",
-        /* A lista suspensa é desenhada pelo sistema, não por este CSS. Sem
-           pintar as <option> e sem declarar color-scheme, ela abre clara e
-           herda o texto claro do campo, ficando ilegível. */
-        "[color-scheme:dark] [&>option]:bg-carta [&>option]:text-tinta",
+        /* A lista suspensa é desenhada pelo sistema operacional, não por
+           este CSS: o que o navegador usa para decidir se ela abre clara ou
+           escura é `color-scheme`. Este painel é claro — quando o valor aqui
+           era `dark` (herança da época em que o tema era escuro), a lista
+           abria preta sobre um campo branco e o texto ficava ilegível. */
+        "[color-scheme:light] [&>option]:bg-carta [&>option]:text-tinta",
         className,
       )}
       {...props}

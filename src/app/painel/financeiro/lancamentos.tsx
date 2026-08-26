@@ -6,12 +6,15 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Botao } from "@/components/ui/botao";
+import { Sobreposicao } from "@/components/ui/sobreposicao";
 import { Campo, Entrada, AreaTexto, Selecao } from "@/components/ui/campo";
 import { Etiqueta } from "@/components/ui/etiqueta";
 import { Kpi } from "@/components/painel/kpi";
 import { GraficoArea } from "@/components/painel/grafico-area";
 import { Tabela, Cabecalhos, Linha, Celula } from "@/components/painel/tabela";
 import { brl, dataCompleta, numero } from "@/lib/utils";
+import { STATUS_LANCAMENTO } from "@/lib/rotulos";
+import { hoje } from "@/lib/tempo";
 import {
   criarLancamento,
   atualizarLancamento,
@@ -21,22 +24,6 @@ import {
 } from "./acoes";
 import type { Lancamento } from "@/lib/financeiro";
 
-const TOM: Record<string, "sucesso" | "alerta" | "perigo" | "neutro" | "azul"> = {
-  pago: "sucesso",
-  pendente: "alerta",
-  atrasado: "perigo",
-  previsto: "azul",
-  cancelado: "neutro",
-};
-
-const ROTULO: Record<string, string> = {
-  pago: "Pago",
-  pendente: "Pendente",
-  atrasado: "Atrasado",
-  previsto: "Previsto",
-  cancelado: "Cancelado",
-};
-
 const BARRA: Record<string, string> = {
   pago: "bg-sucesso",
   pendente: "bg-alerta",
@@ -44,16 +31,26 @@ const BARRA: Record<string, string> = {
   atrasado: "bg-perigo",
 };
 
+/**
+ * Recorte temporal do razão.
+ *
+ * Sem ele, "Receitas no período" somava tudo o que existia na tabela — com
+ * seis meses de histórico isso vira um número de semestre com rótulo de mês.
+ * O gráfico de fluxo continua olhando seis meses sempre, porque é a
+ * comparação que ele existe para mostrar.
+ */
+const PERIODOS = [
+  { v: "mes", r: "Este mês", meses: 1 },
+  { v: "trimestre", r: "Últimos 3 meses", meses: 3 },
+  { v: "tudo", r: "Tudo", meses: 0 },
+];
+
 const FILTROS = [
   { v: "todos", r: "Todos" },
   { v: "receita", r: "Receitas" },
   { v: "despesa", r: "Despesas" },
   { v: "atrasado", r: "Em atraso" },
 ];
-
-function hoje() {
-  return new Date().toISOString().slice(0, 10);
-}
 
 function vazio(): DadosLancamento {
   return {
@@ -95,6 +92,7 @@ export function Lancamentos({
   const [lancamentos, setLancamentos] = useState(iniciais);
   const [doServidor, setDoServidor] = useState(iniciais);
   const [filtro, setFiltro] = useState("todos");
+  const [periodo, setPeriodo] = useState("mes");
   const [criando, setCriando] = useState(false);
   const [editando, setEditando] = useState<Lancamento | null>(null);
 
@@ -104,13 +102,26 @@ export function Lancamentos({
     setLancamentos(iniciais);
   }
 
+  /* Corte do período em texto: comparar "2026-08-26" >= "2026-06-01" resolve
+     sem construir Date, e sem o risco de fuso que isso traria. */
+  const noPeriodo = useMemo(() => {
+    const meses = PERIODOS.find((x) => x.v === periodo)?.meses ?? 0;
+    if (!meses) return lancamentos;
+    const [ano, mes] = hoje().split("-").map(Number);
+    const total = ano * 12 + (mes - 1) - (meses - 1);
+    const corte = `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, "0")}-01`;
+    return lancamentos.filter((l) => l.vencimento >= corte);
+  }, [lancamentos, periodo]);
+
   const visiveis = useMemo(
     () =>
-      lancamentos.filter((l) =>
+      noPeriodo.filter((l) =>
         filtro === "todos" ? true : filtro === "atrasado" ? l.status === "atrasado" : l.tipo === filtro,
       ),
-    [lancamentos, filtro],
+    [noPeriodo, filtro],
   );
+
+  const rotuloPeriodo = (PERIODOS.find((x) => x.v === periodo)?.r ?? "").toLowerCase();
 
   /* Fluxo dos ultimos 6 meses somado dos proprios lancamentos. Antes era
      uma constante inventada dentro do arquivo da pagina. */
@@ -136,7 +147,7 @@ export function Lancamentos({
   }, [lancamentos]);
 
   const kpis = useMemo(() => {
-    const vivos = lancamentos.filter((l) => l.status !== "cancelado");
+    const vivos = noPeriodo.filter((l) => l.status !== "cancelado");
     const soma = (xs: Lancamento[]) => xs.reduce((s, l) => s + l.valor, 0);
     const receita = vivos.filter((l) => l.tipo === "receita");
     const despesa = vivos.filter((l) => l.tipo === "despesa");
@@ -148,11 +159,11 @@ export function Lancamentos({
       atrasado: soma(atrasadas),
       qtdAtrasada: atrasadas.length,
     };
-  }, [lancamentos]);
+  }, [noPeriodo]);
 
   /* Recebiveis por situacao: onde o dinheiro a receber esta parado. */
   const recebiveis = useMemo(() => {
-    const receita = lancamentos.filter((l) => l.tipo === "receita" && l.status !== "cancelado");
+    const receita = noPeriodo.filter((l) => l.tipo === "receita" && l.status !== "cancelado");
     const total = receita.reduce((s, l) => s + l.valor, 0) || 1;
     return (["pago", "pendente", "previsto", "atrasado"] as const)
       .map((s) => {
@@ -161,7 +172,7 @@ export function Lancamentos({
         return { status: s as string, valor, qtd: doStatus.length, parte: valor / total };
       })
       .filter((f) => f.qtd > 0);
-  }, [lancamentos]);
+  }, [noPeriodo]);
 
   async function baixar(l: Lancamento) {
     const anterior = lancamentos;
@@ -192,14 +203,14 @@ export function Lancamentos({
     <>
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi
-          rotulo="Receitas no período"
+          rotulo={`Receitas · ${rotuloPeriodo}`}
           valor={brl(kpis.receita)}
           tom="menta"
           icone={<TrendingUp />}
           serie={fluxo.map((m) => m.receitas)}
         />
         <Kpi
-          rotulo="Despesas no período"
+          rotulo={`Despesas · ${rotuloPeriodo}`}
           valor={brl(kpis.despesa)}
           tom="rosa"
           icone={<TrendingDown />}
@@ -251,7 +262,7 @@ export function Lancamentos({
               {recebiveis.map((f) => (
                 <li key={f.status}>
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-sm font-medium text-grafite">{ROTULO[f.status]}</span>
+                    <span className="text-sm font-medium text-grafite">{STATUS_LANCAMENTO.rotulo(f.status)}</span>
                     <span className="font-display text-sm font-bold text-tinta">{brl(f.valor)}</span>
                   </div>
                   <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-nevoa-2">
@@ -262,7 +273,7 @@ export function Lancamentos({
                   </div>
                   <p className="mt-1 text-[11px] text-cinza-claro">
                     {numero(f.qtd)} {f.qtd === 1 ? "lançamento" : "lançamentos"} ·{" "}
-                    {(f.parte * 100).toFixed(0)}% do total
+                    {numero(f.parte * 100, 0)}% do total
                   </p>
                 </li>
               ))}
@@ -274,6 +285,23 @@ export function Lancamentos({
       <section className="space-y-4">
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="font-display text-base font-bold text-tinta">Lançamentos</h2>
+
+          <div className="flex flex-wrap gap-1 rounded-full bg-nevoa p-0.5">
+            {PERIODOS.map((x) => (
+              <button
+                key={x.v}
+                onClick={() => setPeriodo(x.v)}
+                aria-pressed={periodo === x.v}
+                className={[
+                  "rounded-full px-3 py-1 text-xs font-medium transition-colors foco-anel",
+                  periodo === x.v ? "bg-carta text-tinta shadow-card" : "text-cinza hover:text-grafite",
+                ].join(" ")}
+              >
+                {x.r}
+              </button>
+            ))}
+          </div>
+
           <div className="flex flex-wrap gap-1">
             {FILTROS.map((f) => (
               <button
@@ -325,11 +353,11 @@ export function Lancamentos({
                       <span className="font-medium text-tinta">{l.descricao}</span>
                     </div>
                   </Celula>
-                  <Celula className="text-cinza">{l.cliente ?? "sem cliente"}</Celula>
+                  <Celula className="text-cinza">{l.cliente ?? "Agência"}</Celula>
                   <Celula className="text-cinza">{dataCompleta(l.vencimento)}</Celula>
                   <Celula>
-                    <Etiqueta tom={TOM[l.status] ?? "neutro"}>
-                      {ROTULO[l.status] ?? l.status}
+                    <Etiqueta tom={STATUS_LANCAMENTO.tom(l.status)}>
+                      {STATUS_LANCAMENTO.rotulo(l.status)}
                     </Etiqueta>
                   </Celula>
                   <Celula
@@ -468,7 +496,7 @@ function Dialogo({
   }
 
   return (
-    <div
+    <Sobreposicao
       className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-tinta/25 p-4 backdrop-blur-sm"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) aoFechar();
@@ -581,6 +609,6 @@ function Dialogo({
           </div>
         </form>
       </div>
-    </div>
+    </Sobreposicao>
   );
 }

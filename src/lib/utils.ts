@@ -16,6 +16,16 @@ export const numero = (valor: number | null | undefined, casas = 0) =>
 export const percentual = (valor: number | null | undefined, casas = 1) =>
   `${numero(Number(valor ?? 0), casas)}%`;
 
+/**
+ * "4,31x" — múltiplo com vírgula decimal.
+ *
+ * `toFixed` sempre devolve ponto, então um painel inteiro em português exibia
+ * "4.31x" ao lado de "R$ 1.060.162,00". Em pt-BR o ponto é separador de
+ * milhar: o número saía com a pontuação de outro idioma.
+ */
+export const multiplo = (valor: number | null | undefined, casas = 2) =>
+  `${numero(Number(valor ?? 0), casas)}x`;
+
 export const compacto = (valor: number | null | undefined) =>
   new Intl.NumberFormat("pt-BR", { notation: "compact", maximumFractionDigits: 1 }).format(Number(valor ?? 0));
 

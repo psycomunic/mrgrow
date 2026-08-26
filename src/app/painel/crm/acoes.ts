@@ -1,11 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { criarClienteServidor } from "@/lib/supabase/servidor";
-import { supabaseConfigurado } from "@/lib/dados";
-import { obterSessao } from "@/lib/sessao";
+import { contextoDeAcao, falha, fkDaOrganizacao, pertence, type Resultado } from "@/lib/acoes";
 
-export type Resultado = { ok: boolean; demo: boolean; erro?: string };
+export type { Resultado };
 
 /** Campos que o formulário do quadro edita. */
 export type DadosNegocio = {
@@ -20,61 +18,49 @@ export type DadosNegocio = {
 };
 
 const TEMPERATURAS = ["quente", "morno", "frio"];
+const ORIGENS = ["meta_ads", "google_ads", "indicacao", "organico", "outbound"];
 
 function validar(d: DadosNegocio): string | null {
   if (!d.titulo.trim()) return "Informe o nome do negócio.";
   if (d.titulo.trim().length > 120) return "O nome ficou longo demais.";
+  if (d.contato.trim().length > 120) return "O nome do contato ficou longo demais.";
   if (!d.etapa_id) return "Selecione a etapa.";
   if (!TEMPERATURAS.includes(d.temperatura)) return "Temperatura inválida.";
+  if (d.origem && !ORIGENS.includes(d.origem)) return "Origem inválida.";
   if (!Number.isFinite(d.valor_mensal) || d.valor_mensal < 0) return "Valor mensal inválido.";
   if (!Number.isFinite(d.valor_unico) || d.valor_unico < 0) return "Valor de setup inválido.";
+  if (d.valor_mensal > 10_000_000 || d.valor_unico > 10_000_000) return "Valor fora da faixa.";
+  if (d.previsao && !/^\d{4}-\d{2}-\d{2}$/.test(d.previsao)) return "Data de previsão inválida.";
   return null;
-}
-
-/**
- * Sem Supabase o painel roda em demonstração: as ações respondem `ok` para a
- * interface seguir viva, mas nada é gravado. O aviso no topo da tela já diz
- * isso ao usuário, então aqui basta sinalizar `demo`.
- */
-async function contexto() {
-  if (!supabaseConfigurado()) return null;
-  const sessao = await obterSessao();
-  if (!sessao) return null;
-  return { sessao, db: await criarClienteServidor() };
-}
-
-/** Garante que o negócio pertence à organização de quem está editando. */
-async function pertence(
-  db: Awaited<ReturnType<typeof criarClienteServidor>>,
-  organizacaoId: string,
-  negocioId: string,
-) {
-  const { data } = await db
-    .from("negocios")
-    .select("id")
-    .eq("id", negocioId)
-    .eq("organizacao_id", organizacaoId)
-    .maybeSingle();
-  return !!data;
 }
 
 export async function criarNegocio(funilId: string | null, d: DadosNegocio): Promise<Resultado> {
   const erro = validar(d);
   if (erro) return { ok: false, demo: false, erro };
 
-  const ctx = await contexto();
-  if (!ctx || !funilId) return { ok: true, demo: true };
-
+  const ctx = await contextoDeAcao("crm", "criar");
+  if (ctx.estado === "demo") return { ok: true, demo: true };
+  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
   const { sessao, db } = ctx;
 
+  if (!funilId) return { ok: false, demo: false, erro: "Nenhum funil configurado." };
+
   try {
+    if (!(await fkDaOrganizacao(db, "funis", funilId, sessao.organizacaoId))) {
+      return { ok: false, demo: false, erro: "Funil não encontrado." };
+    }
+    if (!(await fkDaOrganizacao(db, "etapas_funil", d.etapa_id, sessao.organizacaoId))) {
+      return { ok: false, demo: false, erro: "Etapa não encontrada." };
+    }
+
     let contatoId: string | null = null;
     if (d.contato.trim()) {
-      const { data: contato } = await db
+      const { data: contato, error: erroContato } = await db
         .from("contatos")
         .insert({ organizacao_id: sessao.organizacaoId, nome: d.contato.trim() })
         .select("id")
         .single();
+      if (erroContato) return falha("criarNegocio/contato", erroContato, "Não foi possível salvar o contato.");
       contatoId = (contato as { id: string } | null)?.id ?? null;
     }
 
@@ -92,11 +78,11 @@ export async function criarNegocio(funilId: string | null, d: DadosNegocio): Pro
       previsao_fechamento: d.previsao || null,
     });
 
-    if (error) return { ok: false, demo: false, erro: "Não foi possível criar o negócio." };
+    if (error) return falha("criarNegocio", error, "Não foi possível criar o negócio.");
     revalidatePath("/painel/crm");
     return { ok: true, demo: false };
-  } catch {
-    return { ok: false, demo: false, erro: "Não foi possível criar o negócio." };
+  } catch (e) {
+    return falha("criarNegocio", e, "Não foi possível criar o negócio.");
   }
 }
 
@@ -104,13 +90,17 @@ export async function atualizarNegocio(id: string, d: DadosNegocio): Promise<Res
   const erro = validar(d);
   if (erro) return { ok: false, demo: false, erro };
 
-  const ctx = await contexto();
-  if (!ctx) return { ok: true, demo: true };
+  const ctx = await contextoDeAcao("crm", "editar");
+  if (ctx.estado === "demo") return { ok: true, demo: true };
+  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
   const { sessao, db } = ctx;
 
   try {
-    if (!(await pertence(db, sessao.organizacaoId, id))) {
+    if (!(await pertence(db, "negocios", id, sessao.organizacaoId))) {
       return { ok: false, demo: false, erro: "Negócio não encontrado." };
+    }
+    if (!(await fkDaOrganizacao(db, "etapas_funil", d.etapa_id, sessao.organizacaoId))) {
+      return { ok: false, demo: false, erro: "Etapa não encontrada." };
     }
 
     const { error } = await db
@@ -124,13 +114,14 @@ export async function atualizarNegocio(id: string, d: DadosNegocio): Promise<Res
         origem: d.origem || null,
         previsao_fechamento: d.previsao || null,
       })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("organizacao_id", sessao.organizacaoId);
 
-    if (error) return { ok: false, demo: false, erro: "Não foi possível salvar." };
+    if (error) return falha("atualizarNegocio", error, "Não foi possível salvar.");
     revalidatePath("/painel/crm");
     return { ok: true, demo: false };
-  } catch {
-    return { ok: false, demo: false, erro: "Não foi possível salvar." };
+  } catch (e) {
+    return falha("atualizarNegocio", e, "Não foi possível salvar.");
   }
 }
 
@@ -138,30 +129,33 @@ export async function atualizarNegocio(id: string, d: DadosNegocio): Promise<Res
  * Move o negócio de etapa. O trigger `ao_mover_negocio` grava o histórico
  * sozinho, então aqui só o `etapa_id` e a ordem mudam.
  */
-export async function moverNegocio(
-  id: string,
-  etapaId: string,
-  ordem: number,
-): Promise<Resultado> {
-  const ctx = await contexto();
-  if (!ctx) return { ok: true, demo: true };
+export async function moverNegocio(id: string, etapaId: string, ordem: number): Promise<Resultado> {
+  if (!Number.isInteger(ordem) || ordem < 0) return { ok: false, demo: false, erro: "Ordem inválida." };
+
+  const ctx = await contextoDeAcao("crm", "editar");
+  if (ctx.estado === "demo") return { ok: true, demo: true };
+  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
   const { sessao, db } = ctx;
 
   try {
-    if (!(await pertence(db, sessao.organizacaoId, id))) {
+    if (!(await pertence(db, "negocios", id, sessao.organizacaoId))) {
       return { ok: false, demo: false, erro: "Negócio não encontrado." };
+    }
+    if (!(await fkDaOrganizacao(db, "etapas_funil", etapaId, sessao.organizacaoId))) {
+      return { ok: false, demo: false, erro: "Etapa não encontrada." };
     }
 
     const { error } = await db
       .from("negocios")
       .update({ etapa_id: etapaId, ordem_kanban: ordem })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("organizacao_id", sessao.organizacaoId);
 
-    if (error) return { ok: false, demo: false, erro: "Não foi possível mover." };
+    if (error) return falha("moverNegocio", error, "Não foi possível mover.");
     revalidatePath("/painel/crm");
     return { ok: true, demo: false };
-  } catch {
-    return { ok: false, demo: false, erro: "Não foi possível mover." };
+  } catch (e) {
+    return falha("moverNegocio", e, "Não foi possível mover.");
   }
 }
 
@@ -171,44 +165,59 @@ export async function fecharNegocio(
   status: "ganho" | "perdido",
   motivo?: string,
 ): Promise<Resultado> {
-  const ctx = await contexto();
-  if (!ctx) return { ok: true, demo: true };
+  if (status !== "ganho" && status !== "perdido") {
+    return { ok: false, demo: false, erro: "Status inválido." };
+  }
+
+  const ctx = await contextoDeAcao("crm", "editar");
+  if (ctx.estado === "demo") return { ok: true, demo: true };
+  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
   const { sessao, db } = ctx;
 
   try {
-    if (!(await pertence(db, sessao.organizacaoId, id))) {
+    if (!(await pertence(db, "negocios", id, sessao.organizacaoId))) {
       return { ok: false, demo: false, erro: "Negócio não encontrado." };
     }
 
     const { error } = await db
       .from("negocios")
-      .update({ status, motivo_perda: status === "perdido" ? (motivo ?? null) : null })
-      .eq("id", id);
+      .update({
+        status,
+        motivo_perda: status === "perdido" ? (motivo?.slice(0, 500) ?? null) : null,
+      })
+      .eq("id", id)
+      .eq("organizacao_id", sessao.organizacaoId);
 
-    if (error) return { ok: false, demo: false, erro: "Não foi possível fechar." };
+    if (error) return falha("fecharNegocio", error, "Não foi possível fechar.");
     revalidatePath("/painel/crm");
     return { ok: true, demo: false };
-  } catch {
-    return { ok: false, demo: false, erro: "Não foi possível fechar." };
+  } catch (e) {
+    return falha("fecharNegocio", e, "Não foi possível fechar.");
   }
 }
 
 export async function excluirNegocio(id: string): Promise<Resultado> {
-  const ctx = await contexto();
-  if (!ctx) return { ok: true, demo: true };
+  const ctx = await contextoDeAcao("crm", "excluir");
+  if (ctx.estado === "demo") return { ok: true, demo: true };
+  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
   const { sessao, db } = ctx;
 
   try {
-    if (!(await pertence(db, sessao.organizacaoId, id))) {
+    if (!(await pertence(db, "negocios", id, sessao.organizacaoId))) {
       return { ok: false, demo: false, erro: "Negócio não encontrado." };
     }
 
-    const { error } = await db.from("negocios").delete().eq("id", id);
-    if (error) return { ok: false, demo: false, erro: "Não foi possível excluir." };
+    const { error } = await db
+      .from("negocios")
+      .delete()
+      .eq("id", id)
+      .eq("organizacao_id", sessao.organizacaoId);
+
+    if (error) return falha("excluirNegocio", error, "Não foi possível excluir.");
     revalidatePath("/painel/crm");
     return { ok: true, demo: false };
-  } catch {
-    return { ok: false, demo: false, erro: "Não foi possível excluir." };
+  } catch (e) {
+    return falha("excluirNegocio", e, "Não foi possível excluir.");
   }
 }
 
@@ -245,18 +254,24 @@ const ATIVIDADES_DEMO: Atividade[] = [
 ];
 
 export async function listarAtividades(negocioId: string): Promise<Atividade[]> {
-  const ctx = await contexto();
-  if (!ctx) return ATIVIDADES_DEMO;
+  const ctx = await contextoDeAcao("crm", "ver");
+  if (ctx.estado === "demo") return ATIVIDADES_DEMO;
+  if (ctx.estado === "negado") return [];
   const { sessao, db } = ctx;
 
   try {
-    const { data } = await db
+    const { data, error } = await db
       .from("atividades")
       .select("id, tipo, conteudo, criado_em, perfis(nome_completo)")
       .eq("negocio_id", negocioId)
       .eq("organizacao_id", sessao.organizacaoId)
       .order("criado_em", { ascending: false })
       .limit(50);
+
+    if (error) {
+      falha("listarAtividades", error, "");
+      return [];
+    }
 
     type Linha = {
       id: string;
@@ -276,7 +291,8 @@ export async function listarAtividades(negocioId: string): Promise<Atividade[]> 
         autor: p?.nome_completo ?? null,
       };
     });
-  } catch {
+  } catch (e) {
+    falha("listarAtividades", e, "");
     return [];
   }
 }
@@ -290,12 +306,13 @@ export async function registrarAtividade(
   if (conteudo.length > 2000) return { ok: false, demo: false, erro: "Texto longo demais." };
   if (!TIPOS_ATIVIDADE.includes(tipo)) return { ok: false, demo: false, erro: "Tipo inválido." };
 
-  const ctx = await contexto();
-  if (!ctx) return { ok: true, demo: true };
+  const ctx = await contextoDeAcao("crm", "editar");
+  if (ctx.estado === "demo") return { ok: true, demo: true };
+  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
   const { sessao, db } = ctx;
 
   try {
-    if (!(await pertence(db, sessao.organizacaoId, negocioId))) {
+    if (!(await pertence(db, "negocios", negocioId, sessao.organizacaoId))) {
       return { ok: false, demo: false, erro: "Negócio não encontrado." };
     }
 
@@ -307,10 +324,10 @@ export async function registrarAtividade(
       usuario_id: sessao.usuarioId,
     });
 
-    if (error) return { ok: false, demo: false, erro: "Não foi possível registrar." };
+    if (error) return falha("registrarAtividade", error, "Não foi possível registrar.");
     revalidatePath("/painel/crm");
     return { ok: true, demo: false };
-  } catch {
-    return { ok: false, demo: false, erro: "Não foi possível registrar." };
+  } catch (e) {
+    return falha("registrarAtividade", e, "Não foi possível registrar.");
   }
 }

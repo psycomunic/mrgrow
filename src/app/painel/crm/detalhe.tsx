@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Botao } from "@/components/ui/botao";
+import { Sobreposicao } from "@/components/ui/sobreposicao";
 import { Etiqueta } from "@/components/ui/etiqueta";
 import { brl, dataCompleta } from "@/lib/utils";
 import { listarAtividades, registrarAtividade, type Atividade } from "./acoes";
@@ -105,7 +106,7 @@ export function DetalheNegocio({
 
   return (
     <>
-      <div
+      <Sobreposicao
         className="fixed inset-0 z-50 flex justify-end bg-papel/70 backdrop-blur-sm"
         onMouseDown={(e) => {
           if (e.target === e.currentTarget) aoFechar();
@@ -305,7 +306,7 @@ export function DetalheNegocio({
             </Botao>
           </footer>
         </aside>
-      </div>
+      </Sobreposicao>
 
       {editando && <DialogoNegocio negocio={negocio} aoFechar={() => setEditando(false)} />}
     </>

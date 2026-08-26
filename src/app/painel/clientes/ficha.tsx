@@ -12,8 +12,9 @@ import {
   X,
 } from "lucide-react";
 import { Botao, BotaoLink } from "@/components/ui/botao";
+import { Sobreposicao } from "@/components/ui/sobreposicao";
 import { Etiqueta } from "@/components/ui/etiqueta";
-import { brl, dataCompleta, iniciais } from "@/lib/utils";
+import { brl, dataCompleta, iniciais, multiplo } from "@/lib/utils";
 import type { ClienteCarteira } from "@/lib/clientes";
 
 const TOM: Record<string, "sucesso" | "azul" | "alerta" | "neutro"> = {
@@ -67,7 +68,7 @@ export function FichaCliente({
   const anual = cliente.fee_mensal * 12;
 
   return (
-    <div
+    <Sobreposicao
       className="fixed inset-0 z-50 flex justify-end bg-papel/70 backdrop-blur-sm"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) aoFechar();
@@ -148,7 +149,7 @@ export function FichaCliente({
             />
             <Bloco
               rotulo="ROAS"
-              valor={cliente.roas ? `${cliente.roas.toFixed(1)}x` : "—"}
+              valor={cliente.roas ? multiplo(cliente.roas, 1) : "—"}
               nota={cliente.roas ? "retorno sobre a mídia" : "sem dado sincronizado"}
             />
           </section>
@@ -229,7 +230,7 @@ export function FichaCliente({
           </Botao>
         </footer>
       </aside>
-    </div>
+    </Sobreposicao>
   );
 }
 
