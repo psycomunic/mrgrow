@@ -375,7 +375,12 @@ body:has(.sitio) {
   color: var(--cinza);
 }
 
-.mural ul {
+/* Classe própria, e não `.mural ul`: a lista de segmentos também é um
+   <ul> dentro desta seção, e o seletor de descendente vencia por
+   especificidade o `display: flex` dela. Os segmentos viravam grade de
+   três colunas e os nomes longos saíam da tela no celular. O círculo
+   azul de hover dos logos vazava para lá pelo mesmo caminho. */
+.mural__logos {
   margin-top: 1.75rem;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -384,18 +389,18 @@ body:has(.sitio) {
 }
 
 @media (min-width: 40rem) {
-  .mural ul {
+  .mural__logos {
     grid-template-columns: repeat(4, 1fr);
   }
 }
 
 @media (min-width: 68rem) {
-  .mural ul {
+  .mural__logos {
     grid-template-columns: repeat(8, 1fr);
   }
 }
 
-.mural li img {
+.mural__logos img {
   display: block;
   margin-inline: auto;
   height: 2.4rem;
@@ -406,7 +411,7 @@ body:has(.sitio) {
   transition: opacity 0.25s;
 }
 
-.mural li img:hover {
+.mural__logos img:hover {
   opacity: 1;
 }
 

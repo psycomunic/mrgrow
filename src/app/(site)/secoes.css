@@ -155,13 +155,20 @@
   padding-top: 2.5rem;
   border-top: 1px solid var(--linha);
   display: grid;
+  /* `minmax(0, 1fr)`, e não o `1fr` implícito: faixa automática é
+     dimensionada por max-content, e a lista de segmentos pede 419px.
+     A faixa crescia além do contêiner de 350 e o mapa, centralizado
+     por `margin-inline: auto`, era empurrado para fora da tela junto
+     com o fim da lista. Com o mínimo em zero a faixa pode encolher
+     até a largura real disponível. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 2rem;
   align-items: center;
 }
 
 @media (min-width: 52rem) {
   .alcance {
-    grid-template-columns: 21.25rem 1fr;
+    grid-template-columns: 21.25rem minmax(0, 1fr);
     gap: 3.5rem;
   }
 }
@@ -1595,7 +1602,7 @@
    Mira a lista, não `.mural img`: o mapa também vive nesta seção e
    herdava altura fixa, invert e mix-blend-mode. */
 
-.mural li img {
+.mural__logos img {
   height: 2.75rem;
   opacity: 0.68;
 }
@@ -1726,13 +1733,13 @@
    a imagem também recebe `position: relative` e, vindo depois na
    árvore, fica na frente. */
 
-.mural li {
+.mural__logos li {
   position: relative;
   display: grid;
   place-items: center;
 }
 
-.mural li::before {
+.mural__logos li::before {
   content: "";
   position: absolute;
   top: 50%;
@@ -1755,12 +1762,12 @@
     transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.mural li:hover::before {
+.mural__logos li:hover::before {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
 }
 
-.mural li img {
+.mural__logos img {
   position: relative;
 }
 

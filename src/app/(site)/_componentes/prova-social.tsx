@@ -20,7 +20,7 @@ export function ProvaSocial() {
       <div className="area">
         <p className="mural__rot">Marcas que já passaram pela nossa operação</p>
 
-        <ul>
+        <ul className="mural__logos">
           {CLIENTES.map((n) => (
             <li key={n}>
               <Image
