@@ -211,3 +211,106 @@ export async function excluirNegocio(id: string): Promise<Resultado> {
     return { ok: false, demo: false, erro: "Não foi possível excluir." };
   }
 }
+
+/* ── Atividades do negócio ──────────────────────────────────────
+   A tabela `atividades` já existia no schema e nenhuma tela usava. É o
+   histórico de contato: nota, ligação, reunião, e-mail, WhatsApp. */
+
+export type Atividade = {
+  id: string;
+  tipo: string;
+  conteudo: string | null;
+  criado_em: string;
+  autor: string | null;
+};
+
+const TIPOS_ATIVIDADE = ["nota", "ligacao", "reuniao", "email", "whatsapp"];
+
+/** Demonstração: dá o que ler no painel antes do banco existir. */
+const ATIVIDADES_DEMO: Atividade[] = [
+  {
+    id: "a1",
+    tipo: "reuniao",
+    conteudo: "Diagnóstico feito. Conta com rastreamento quebrado e criativo parado há 3 meses.",
+    criado_em: new Date(Date.now() - 2 * 86_400_000).toISOString(),
+    autor: "Mateus Rodrigues",
+  },
+  {
+    id: "a2",
+    tipo: "whatsapp",
+    conteudo: "Retornou pedindo a proposta com o escopo de landing page incluso.",
+    criado_em: new Date(Date.now() - 86_400_000).toISOString(),
+    autor: "Mateus Rodrigues",
+  },
+];
+
+export async function listarAtividades(negocioId: string): Promise<Atividade[]> {
+  const ctx = await contexto();
+  if (!ctx) return ATIVIDADES_DEMO;
+  const { sessao, db } = ctx;
+
+  try {
+    const { data } = await db
+      .from("atividades")
+      .select("id, tipo, conteudo, criado_em, perfis(nome_completo)")
+      .eq("negocio_id", negocioId)
+      .eq("organizacao_id", sessao.organizacaoId)
+      .order("criado_em", { ascending: false })
+      .limit(50);
+
+    type Linha = {
+      id: string;
+      tipo: string;
+      conteudo: string | null;
+      criado_em: string;
+      perfis: { nome_completo: string | null } | { nome_completo: string | null }[] | null;
+    };
+
+    return ((data ?? []) as unknown as Linha[]).map((a) => {
+      const p = Array.isArray(a.perfis) ? a.perfis[0] : a.perfis;
+      return {
+        id: a.id,
+        tipo: a.tipo,
+        conteudo: a.conteudo,
+        criado_em: a.criado_em,
+        autor: p?.nome_completo ?? null,
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
+export async function registrarAtividade(
+  negocioId: string,
+  tipo: string,
+  conteudo: string,
+): Promise<Resultado> {
+  if (!conteudo.trim()) return { ok: false, demo: false, erro: "Escreva algo antes de salvar." };
+  if (conteudo.length > 2000) return { ok: false, demo: false, erro: "Texto longo demais." };
+  if (!TIPOS_ATIVIDADE.includes(tipo)) return { ok: false, demo: false, erro: "Tipo inválido." };
+
+  const ctx = await contexto();
+  if (!ctx) return { ok: true, demo: true };
+  const { sessao, db } = ctx;
+
+  try {
+    if (!(await pertence(db, sessao.organizacaoId, negocioId))) {
+      return { ok: false, demo: false, erro: "Negócio não encontrado." };
+    }
+
+    const { error } = await db.from("atividades").insert({
+      organizacao_id: sessao.organizacaoId,
+      negocio_id: negocioId,
+      tipo,
+      conteudo: conteudo.trim(),
+      usuario_id: sessao.usuarioId,
+    });
+
+    if (error) return { ok: false, demo: false, erro: "Não foi possível registrar." };
+    revalidatePath("/painel/crm");
+    return { ok: true, demo: false };
+  } catch {
+    return { ok: false, demo: false, erro: "Não foi possível registrar." };
+  }
+}

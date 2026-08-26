@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Flame, Snowflake, Thermometer, Plus, Check, X, Pencil, Trash2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { Flame, Snowflake, Thermometer, Plus } from "lucide-react";
 import { Etiqueta } from "@/components/ui/etiqueta";
 import { brl, dataCompleta } from "@/lib/utils";
 import { useCrm } from "./contexto";
 import { DialogoNegocio } from "./dialogo";
-import type { NegocioQuadro } from "@/lib/crm";
+import { DetalheNegocio } from "./detalhe";
 
 const ICONE_TEMP: Record<string, typeof Flame> = {
   quente: Flame,
@@ -25,11 +25,19 @@ const TOM_TEMP: Record<string, "perigo" | "alerta" | "azul"> = {
  * Server Action; o trigger `ao_mover_negocio` grava o histórico no banco.
  */
 export function Kanban() {
-  const { etapas, negocios, mover, fechar, excluir } = useCrm();
+  const { etapas, negocios, mover } = useCrm();
   const [arrastando, setArrastando] = useState<string | null>(null);
   const [sobre, setSobre] = useState<string | null>(null);
-  const [editando, setEditando] = useState<NegocioQuadro | null>(null);
+  const [aberto, setAberto] = useState<string | null>(null);
   const [criandoEm, setCriandoEm] = useState<string | null>(null);
+
+  // O clique dispara logo depois de um arrasto em alguns navegadores; a marca
+  // evita que soltar o cartão numa coluna também abra o painel.
+  const houveArrasto = useRef(false);
+
+  // Ler do estado vivo, e não da cópia guardada, mantém o painel em dia
+  // depois de mover ou editar.
+  const emFoco = negocios.find((n) => n.id === aberto) ?? null;
 
   return (
     <>
@@ -79,12 +87,23 @@ export function Kanban() {
                   {daEtapa.map((n) => {
                     const IconeTemp = ICONE_TEMP[n.temperatura] ?? Thermometer;
                     return (
-                      <article
+                      <button
+                        type="button"
                         key={n.id}
                         draggable
-                        onDragStart={() => setArrastando(n.id)}
+                        onDragStart={() => {
+                          houveArrasto.current = true;
+                          setArrastando(n.id);
+                        }}
                         onDragEnd={() => setArrastando(null)}
-                        className="cartao-vidro group/cartao cursor-grab rounded-md p-3.5 transition-shadow hover:border-mrg-500/30 active:cursor-grabbing"
+                        onClick={() => {
+                          if (houveArrasto.current) {
+                            houveArrasto.current = false;
+                            return;
+                          }
+                          setAberto(n.id);
+                        }}
+                        className="cartao-vidro w-full cursor-pointer rounded-md p-3.5 text-left transition-colors hover:border-mrg-500/40 active:cursor-grabbing foco-anel"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <h4 className="text-sm font-semibold text-white">{n.titulo}</h4>
@@ -109,39 +128,7 @@ export function Kanban() {
                             Previsão: {dataCompleta(n.previsao)}
                           </p>
                         )}
-
-                        {/* Ações do cartão: aparecem no hover e no foco por teclado. */}
-                        <div className="mt-3 flex items-center gap-1 border-t border-white/8 pt-2.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover/cartao:opacity-100">
-                          <BotaoCartao
-                            rotulo="Marcar como ganho"
-                            onClick={() => fechar(n.id, "ganho")}
-                            classe="hover:bg-sucesso/15 hover:text-sucesso"
-                          >
-                            <Check className="size-3.5" />
-                          </BotaoCartao>
-                          <BotaoCartao
-                            rotulo="Marcar como perdido"
-                            onClick={() => fechar(n.id, "perdido")}
-                            classe="hover:bg-perigo/15 hover:text-perigo"
-                          >
-                            <X className="size-3.5" />
-                          </BotaoCartao>
-                          <BotaoCartao rotulo="Editar" onClick={() => setEditando(n)}>
-                            <Pencil className="size-3.5" />
-                          </BotaoCartao>
-                          <BotaoCartao
-                            rotulo="Excluir"
-                            onClick={() => {
-                              if (confirm(`Excluir "${n.titulo}"? Isso não pode ser desfeito.`)) {
-                                excluir(n.id);
-                              }
-                            }}
-                            classe="ml-auto hover:bg-perigo/15 hover:text-perigo"
-                          >
-                            <Trash2 className="size-3.5" />
-                          </BotaoCartao>
-                        </div>
-                      </article>
+                      </button>
                     );
                   })}
 
@@ -161,31 +148,7 @@ export function Kanban() {
       {criandoEm && (
         <DialogoNegocio etapaPadrao={criandoEm} aoFechar={() => setCriandoEm(null)} />
       )}
-      {editando && <DialogoNegocio negocio={editando} aoFechar={() => setEditando(null)} />}
+      {emFoco && <DetalheNegocio negocio={emFoco} aoFechar={() => setAberto(null)} />}
     </>
-  );
-}
-
-function BotaoCartao({
-  rotulo,
-  onClick,
-  classe = "",
-  children,
-}: {
-  rotulo: string;
-  onClick: () => void;
-  classe?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      title={rotulo}
-      aria-label={rotulo}
-      onClick={onClick}
-      className={`rounded-sm p-1.5 text-ink-400 transition-colors hover:text-white foco-anel ${classe}`}
-    >
-      {children}
-    </button>
   );
 }
