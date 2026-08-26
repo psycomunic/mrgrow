@@ -1763,3 +1763,300 @@
 .mural li img {
   position: relative;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Vídeo institucional (VSL)
+
+   Entra entre os números da abertura e o mural de logos.
+
+   O vídeo é 720x1280, retrato. Mas em repouso o palco é largo: no
+   desktop um filete estreito de vídeo perdido no meio da tela
+   enfraquece a seção. Ao dar play ele encolhe para a proporção real,
+   e aí ninguém assiste com a imagem cortada. No celular já nasce
+   retrato, porque lá não sobra largura para preencher.
+
+   É a única seção centralizada da página: aqui não existe argumento
+   ao lado para competir com o play, e a régua de cabeça à esquerda
+   que vale no resto atrapalharia.
+   ══════════════════════════════════════════════════════════════ */
+
+.vsl {
+  padding-block: clamp(3.5rem, 7vw, 6rem);
+  position: relative;
+  isolation: isolate;
+  scroll-margin-top: 4.5rem;
+}
+
+/* Luz atrás do palco, senão o vidro da moldura não tem o que refratar
+   e lê como caixa cinza. */
+.vsl::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  inset: 12% 8% 18%;
+  background: radial-gradient(44rem 26rem at 50% 45%, rgb(22 104 245 / 0.22), transparent 70%);
+}
+
+.vsl__cabeca {
+  max-width: 44ch;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.vsl__cabeca .chapeu {
+  justify-content: center;
+}
+
+.vsl__cabeca h2 {
+  margin-top: 1.35rem;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-weight: 700;
+  /* Caixa alta acentuada precisa de mais entrelinha que os 0.95 do
+     resto: com menos, o til e a cedilha batem na linha de cima. */
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.vsl__apoio {
+  margin-top: 1.25rem;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--cinza);
+  text-wrap: pretty;
+}
+
+/* ── O palco ─────────────────────────────────────────────────── */
+
+.vsl__palco {
+  position: relative;
+  background: #000;
+  margin-top: clamp(2.25rem, 5vw, 3.25rem);
+  margin-inline: auto;
+  width: 100%;
+  max-width: 62rem;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  padding: 0;
+  transition:
+    max-width 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    aspect-ratio 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Ao dar play, encolhe para a proporção real do vídeo. */
+.vsl__palco--retrato {
+  max-width: 22rem;
+  aspect-ratio: 9 / 16;
+}
+
+/* No celular o palco já nasce retrato: não há largura sobrando para
+   justificar o corte, e o vídeo apareceria decepado em repouso. */
+@media (max-width: 60rem) {
+  .vsl__palco {
+    max-width: 22rem;
+    aspect-ratio: 9 / 16;
+    transition: none;
+  }
+}
+
+.vsl__midia {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  background: transparent;
+  /* `contain`, nunca `cover`: o vídeo é retrato e o palco em repouso é
+     paisagem. Cortar exigiria ampliar 2,4x, o que deceparia a cabeça e
+     ainda borraria, já que a fonte tem 720px de largura. Quem preenche
+     a moldura é o fundo desfocado. */
+  object-fit: contain;
+}
+
+/* O fundo desfocado. `scale` esconde as bordas moles que o blur cria,
+   e o escurecimento garante contraste para o play e o selo. */
+.vsl__fundo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(2.5rem) saturate(1.35) brightness(0.55);
+  scale: 1.18;
+  pointer-events: none;
+}
+
+/* No celular o palco já é retrato: o vídeo preenche sozinho e o fundo
+   desfocado só gastaria banda. */
+@media (max-width: 60rem) {
+  .vsl__fundo {
+    display: none;
+  }
+}
+
+/* A capa inteira é o botão: alvo de clique do tamanho do vídeo, que é
+   o que se quer num ponto de conversão. */
+.vsl__capa {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: block;
+  color: inherit;
+}
+
+.vsl__capa:disabled {
+  cursor: default;
+}
+
+.vsl__quadro {
+  object-fit: cover;
+}
+
+/* Escurece de baixo para cima: o selo e o play precisam de contraste
+   garantido, seja qual for o primeiro quadro do vídeo. */
+.vsl__veu {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(15 16 18 / 0.15) 0%,
+    rgb(15 16 18 / 0.05) 40%,
+    rgb(15 16 18 / 0.6) 100%
+  );
+  transition: background 0.35s;
+}
+
+.vsl__capa:hover .vsl__veu {
+  background: linear-gradient(
+    180deg,
+    rgb(15 16 18 / 0.05) 0%,
+    rgb(15 16 18 / 0) 40%,
+    rgb(15 16 18 / 0.5) 100%
+  );
+}
+
+.vsl__play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  width: clamp(4rem, 12vw, 5rem);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: var(--azul);
+  color: #fff;
+  box-shadow: 0 18px 50px -12px rgb(22 104 245 / 0.75);
+  transition: scale 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.vsl__play svg {
+  width: 42%;
+  height: 42%;
+  fill: currentColor;
+  /* O triângulo tem o peso à esquerda; empurrar acerta o centro óptico. */
+  margin-left: 6%;
+}
+
+.vsl__capa:hover .vsl__play {
+  scale: 1.08;
+}
+
+.vsl__capa:focus-visible {
+  outline: 2px solid var(--azul);
+  outline-offset: 4px;
+}
+
+/* Anel pulsante: chama o olho sem piscar nem gritar. */
+.vsl__play::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid var(--azul);
+  animation: vsl-pulso 2.8s ease-out infinite;
+}
+
+@keyframes vsl-pulso {
+  0% {
+    opacity: 0.7;
+    scale: 1;
+  }
+  70%,
+  100% {
+    opacity: 0;
+    scale: 1.55;
+  }
+}
+
+.vsl__capa:disabled .vsl__play {
+  background: rgb(255 255 255 / 0.14);
+}
+
+.vsl__capa:disabled .vsl__play::after {
+  animation: none;
+  border-color: rgb(255 255 255 / 0.2);
+}
+
+.vsl__selo {
+  position: absolute;
+  right: 0.85rem;
+  bottom: 0.85rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgb(15 16 18 / 0.7);
+  border: 1px solid var(--vidro-borda);
+  backdrop-filter: blur(10px);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--osso);
+}
+
+/* ── Chamada abaixo do vídeo ─────────────────────────────────── */
+
+.vsl__fecho {
+  margin-top: clamp(1.75rem, 3.5vw, 2.5rem);
+  display: grid;
+  justify-items: center;
+  gap: 0.85rem;
+  text-align: center;
+}
+
+.vsl__fecho p {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--cinza);
+}
+
+.vsl__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.25rem;
+  padding-inline: 2rem;
+  background: var(--azul);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  transition: background 0.25s, translate 0.25s, box-shadow 0.25s;
+  box-shadow: 0 16px 40px -18px rgb(22 104 245 / 0.9);
+}
+
+.vsl__cta:hover {
+  background: #2f7bff;
+  translate: 0 -2px;
+  box-shadow: 0 22px 50px -18px rgb(22 104 245 / 1);
+}

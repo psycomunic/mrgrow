@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Hero } from "./_componentes/hero";
+import { Vsl } from "./_componentes/vsl";
 import { ProvaSocial } from "./_componentes/prova-social";
 import { Dores } from "./_componentes/dores";
 import { Metodo } from "./_componentes/metodo";
@@ -67,6 +68,7 @@ export default function PaginaInicial() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
       />
       <Hero />
+      <Vsl />
       <ProvaSocial />
       <Dores />
       <Metodo />
