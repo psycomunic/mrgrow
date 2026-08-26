@@ -29,7 +29,7 @@ Landing page
 ## Fluxo de métricas
 
 ```
-/api/cron/sincronizar (a cada 4h)
+/api/cron/sincronizar (diario, 09:00 UTC)
   → para cada organização
       → para cada conta_externa ativa
           → decifra o token (AES-256-GCM)
@@ -46,7 +46,7 @@ Como `metricas_diarias` é a única fonte, painel, portal do cliente e relatóri
 Uma automação é `gatilho + condicoes + acoes[]`.
 
 - **Gatilhos de evento** (`lead_criado`, `negocio_ganho`, `fatura_paga`) são chamados no ponto do código onde o evento acontece.
-- **Gatilhos de tempo** (`fatura_vencendo`, `contrato_vencendo`, `tarefa_atrasada`, `conta_sem_veiculacao`) são avaliados de hora em hora por `/api/cron/automacoes`.
+- **Gatilhos de tempo** (`fatura_vencendo`, `contrato_vencendo`, `tarefa_atrasada`, `conta_sem_veiculacao`) são avaliados uma vez ao dia por `/api/cron/automacoes`, às 11:00 UTC.
 
 Cada execução vira uma linha em `execucoes_automacao` com contexto, resultado e duração — dá para auditar por que algo disparou (ou não).
 

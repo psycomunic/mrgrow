@@ -185,7 +185,7 @@ supabase/migrations/       10 migrations: schema completo + RLS + seed
 3. Preencher WhatsApp e domínio no `.env.local`.
 4. Rodar as migrations e criar o primeiro usuário (ver `SETUP.md`).
 5. Conectar Meta e Google na central de integrações.
-6. Publicar na Vercel — os crons de `vercel.json` já estão configurados.
+6. Publicar na Vercel — os crons de `vercel.json` já estão configurados, em cadência diária para caber no plano Hobby (ver SETUP).
 
 ### Selos de parceiro
 Os arquivos `Google Partner` e `Meta Business Partner` que vieram na pasta `imagenssite/`

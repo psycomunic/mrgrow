@@ -76,9 +76,13 @@ Permissões usadas: `ads_read`, `ads_management`, `business_management`, `read_i
 
 ## 6. Cron e sincronização
 
-`vercel.json` já agenda:
-- `/api/cron/sincronizar` a cada 4 horas — traz métricas de Meta, Google Ads e GA4.
-- `/api/cron/automacoes` a cada hora — avalia faturas, contratos e tarefas.
+`vercel.json` já agenda, em UTC:
+- `/api/cron/sincronizar` às 09:00 UTC, 06h de Brasília — traz métricas de Meta, Google Ads e GA4, prontas antes de o time chegar.
+- `/api/cron/automacoes` às 11:00 UTC, 08h de Brasília — avalia faturas, contratos e tarefas dentro do horário comercial, porque dispara cobrança e alerta.
+
+**Por que uma vez ao dia:** o plano Hobby da Vercel só aceita cron diário e no máximo dois jobs. A cadência original era de 4 em 4 horas e de hora em hora, o que faz o deploy ser recusado. No plano Pro, volte para `0 */4 * * *` e `0 * * * *`: os dados ficam mais frescos e as automações de tempo reagem mais rápido.
+
+Fora da Vercel não existe esse limite. Agende na cadência que quiser chamando as rotas direto.
 
 Gere um `CRON_SECRET` (`openssl rand -hex 24`) e cadastre nas variáveis da Vercel. Fora da Vercel, agende com qualquer scheduler chamando:
 
