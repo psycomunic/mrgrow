@@ -30,7 +30,15 @@ export const Selecao = React.forwardRef<
   <span className="relative block">
     <select
       ref={ref}
-      className={cn(base, "appearance-none bg-ink-900 pr-9", className)}
+      className={cn(
+        base,
+        "appearance-none bg-ink-900 pr-9",
+        /* A lista suspensa é desenhada pelo sistema, não por este CSS. Sem
+           pintar as <option> e sem declarar color-scheme, ela abre clara e
+           herda o texto claro do campo, ficando ilegível. */
+        "[color-scheme:dark] [&>option]:bg-ink-900 [&>option]:text-ink-100",
+        className,
+      )}
       {...props}
     />
     <ChevronDown
