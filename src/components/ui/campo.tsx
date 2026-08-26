@@ -3,7 +3,7 @@ import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const base =
-  "w-full rounded-md border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-sm text-ink-100 placeholder:text-ink-400 transition-colors focus:border-mrg-500/60 focus:bg-white/[0.05] foco-anel disabled:opacity-50";
+  "w-full rounded-md border border-borda bg-nevoa px-3.5 py-2.5 text-sm text-tinta placeholder:text-cinza transition-colors focus:border-mrg-500/60 focus:bg-nevoa foco-anel disabled:opacity-50";
 
 export const Entrada = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className, ...props }, ref) => <input ref={ref} className={cn(base, className)} {...props} />,
@@ -32,25 +32,25 @@ export const Selecao = React.forwardRef<
       ref={ref}
       className={cn(
         base,
-        "appearance-none bg-ink-900 pr-9",
+        "appearance-none bg-carta pr-9",
         /* A lista suspensa é desenhada pelo sistema, não por este CSS. Sem
            pintar as <option> e sem declarar color-scheme, ela abre clara e
            herda o texto claro do campo, ficando ilegível. */
-        "[color-scheme:dark] [&>option]:bg-ink-900 [&>option]:text-ink-100",
+        "[color-scheme:dark] [&>option]:bg-carta [&>option]:text-tinta",
         className,
       )}
       {...props}
     />
     <ChevronDown
       aria-hidden
-      className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-ink-400"
+      className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-cinza"
     />
   </span>
 ));
 Selecao.displayName = "Selecao";
 
 export function Rotulo({ className, ...props }: React.LabelHTMLAttributes<HTMLLabelElement>) {
-  return <label className={cn("mb-1.5 block text-xs font-medium text-ink-200", className)} {...props} />;
+  return <label className={cn("mb-1.5 block text-xs font-medium text-grafite", className)} {...props} />;
 }
 
 export function Campo({
@@ -70,7 +70,7 @@ export function Campo({
     <div className={cn("w-full", className)}>
       {rotulo && <Rotulo>{rotulo}</Rotulo>}
       {children}
-      {dica && !erro && <p className="mt-1 text-xs text-ink-400">{dica}</p>}
+      {dica && !erro && <p className="mt-1 text-xs text-cinza">{dica}</p>}
       {erro && <p className="mt-1 text-xs text-perigo">{erro}</p>}
     </div>
   );

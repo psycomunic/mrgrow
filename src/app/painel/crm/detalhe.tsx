@@ -106,7 +106,7 @@ export function DetalheNegocio({
   return (
     <>
       <div
-        className="fixed inset-0 z-50 flex justify-end bg-ink-950/70 backdrop-blur-sm"
+        className="fixed inset-0 z-50 flex justify-end bg-papel/70 backdrop-blur-sm"
         onMouseDown={(e) => {
           if (e.target === e.currentTarget) aoFechar();
         }}
@@ -115,32 +115,32 @@ export function DetalheNegocio({
           role="dialog"
           aria-modal="true"
           aria-label={negocio.titulo}
-          className="flex h-full w-full max-w-xl flex-col border-l border-white/10 bg-ink-950 shadow-2xl"
+          className="flex h-full w-full max-w-xl flex-col border-l border-borda bg-papel shadow-2xl"
         >
           {/* Cabeçalho */}
-          <header className="border-b border-white/8 px-6 py-5">
+          <header className="border-b border-borda px-6 py-5">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <span className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-ink-400 uppercase">
+                <span className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-cinza uppercase">
                   <span
                     className="size-2 rounded-full"
                     style={{ background: etapa?.cor ?? "#1668f5" }}
                   />
                   {etapa?.nome ?? "Sem etapa"}
-                  <span className="text-ink-600">·</span>
+                  <span className="text-cinza-claro">·</span>
                   {etapa?.probabilidade ?? 0}% de chance
                 </span>
-                <h2 className="mt-2 truncate font-display text-2xl font-extrabold text-white">
+                <h2 className="mt-2 truncate font-display text-2xl font-extrabold text-tinta">
                   {negocio.titulo}
                 </h2>
                 {negocio.contato && (
-                  <p className="mt-1 text-sm text-ink-300">{negocio.contato}</p>
+                  <p className="mt-1 text-sm text-grafite">{negocio.contato}</p>
                 )}
               </div>
               <button
                 onClick={aoFechar}
                 aria-label="Fechar"
-                className="shrink-0 rounded-sm p-2 text-ink-400 transition-colors hover:bg-white/5 hover:text-white foco-anel"
+                className="shrink-0 rounded-sm p-2 text-cinza transition-colors hover:bg-nevoa hover:text-tinta foco-anel"
               >
                 <X className="size-4" />
               </button>
@@ -168,7 +168,7 @@ export function DetalheNegocio({
 
             {/* Andamento no funil, clicável */}
             <section>
-              <h3 className="text-[11px] font-bold tracking-wider text-ink-500 uppercase">
+              <h3 className="text-[11px] font-bold tracking-wider text-cinza-claro uppercase">
                 Andamento
               </h3>
               <ol className="mt-3 flex items-stretch gap-1">
@@ -184,15 +184,15 @@ export function DetalheNegocio({
                         <span
                           className={[
                             "block h-1.5 rounded-full transition-colors",
-                            passada ? "bg-mrg-500" : "bg-white/10 group-hover:bg-white/25",
+                            passada ? "bg-mrg-500" : "bg-nevoa-2 group-hover:bg-borda-forte",
                           ].join(" ")}
                         />
                         <span
                           className={[
                             "mt-2 block text-[10px] leading-tight transition-colors",
                             i === indiceAtual
-                              ? "font-semibold text-white"
-                              : "text-ink-500 group-hover:text-ink-300",
+                              ? "font-semibold text-tinta"
+                              : "text-cinza-claro group-hover:text-grafite",
                           ].join(" ")}
                         >
                           {e.nome}
@@ -206,7 +206,7 @@ export function DetalheNegocio({
 
             {/* Histórico */}
             <section>
-              <h3 className="text-[11px] font-bold tracking-wider text-ink-500 uppercase">
+              <h3 className="text-[11px] font-bold tracking-wider text-cinza-claro uppercase">
                 Histórico de contato
               </h3>
 
@@ -220,8 +220,8 @@ export function DetalheNegocio({
                       className={[
                         "inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 text-xs transition-colors foco-anel",
                         tipo === v
-                          ? "bg-mrg-500/15 text-mrg-300 ring-1 ring-inset ring-mrg-500/40"
-                          : "text-ink-400 hover:bg-white/5 hover:text-ink-200",
+                          ? "bg-mrg-500/15 text-mrg-600 ring-1 ring-inset ring-mrg-500/40"
+                          : "text-cinza hover:bg-nevoa hover:text-grafite",
                       ].join(" ")}
                     >
                       <Icone className="size-3.5" />
@@ -235,7 +235,7 @@ export function DetalheNegocio({
                   onChange={(e) => setTexto(e.target.value)}
                   placeholder="O que aconteceu nesse contato?"
                   rows={3}
-                  className="w-full resize-y rounded-md border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-sm text-ink-100 placeholder:text-ink-500 transition-colors focus:border-mrg-500/60 foco-anel"
+                  className="w-full resize-y rounded-md border border-borda bg-nevoa px-3.5 py-2.5 text-sm text-tinta placeholder:text-cinza-claro transition-colors focus:border-mrg-500/60 foco-anel"
                 />
                 <div className="mt-2 flex justify-end">
                   <Botao type="submit" tamanho="sm" disabled={enviando || !texto.trim()}>
@@ -246,10 +246,10 @@ export function DetalheNegocio({
 
               <ul className="mt-5 space-y-4">
                 {atividades === null && (
-                  <li className="text-sm text-ink-500">Carregando…</li>
+                  <li className="text-sm text-cinza-claro">Carregando…</li>
                 )}
                 {atividades?.length === 0 && (
-                  <li className="rounded-md border border-dashed border-white/10 p-4 text-sm text-ink-500">
+                  <li className="rounded-md border border-dashed border-borda p-4 text-sm text-cinza-claro">
                     Nenhum contato registrado ainda. O primeiro fica aqui.
                   </li>
                 )}
@@ -257,16 +257,16 @@ export function DetalheNegocio({
                   const meta = TIPOS.find((t) => t.v === a.tipo) ?? TIPOS[0];
                   return (
                     <li key={a.id} className="flex gap-3">
-                      <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-mrg-500/12 text-mrg-300 ring-1 ring-inset ring-mrg-500/25">
+                      <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-mrg-500/12 text-mrg-600 ring-1 ring-inset ring-mrg-500/25">
                         <meta.Icone className="size-3.5" />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="flex items-center gap-2 text-xs text-ink-400">
-                          <span className="font-semibold text-ink-200">{meta.r}</span>
+                        <p className="flex items-center gap-2 text-xs text-cinza">
+                          <span className="font-semibold text-grafite">{meta.r}</span>
                           {a.autor && <span>· {a.autor}</span>}
                           <span>· {quando(a.criado_em)}</span>
                         </p>
-                        <p className="mt-1 text-sm leading-relaxed text-ink-200">{a.conteudo}</p>
+                        <p className="mt-1 text-sm leading-relaxed text-grafite">{a.conteudo}</p>
                       </div>
                     </li>
                   );
@@ -276,7 +276,7 @@ export function DetalheNegocio({
           </div>
 
           {/* Ações */}
-          <footer className="flex flex-wrap items-center gap-2 border-t border-white/8 px-6 py-4">
+          <footer className="flex flex-wrap items-center gap-2 border-t border-borda px-6 py-4">
             <Botao variante="sucesso" tamanho="sm" onClick={() => { fechar(negocio.id, "ganho"); aoFechar(); }}>
               <Check className="size-4" />
               Ganho
@@ -324,17 +324,17 @@ function Valor({
   destaque?: boolean;
 }) {
   return (
-    <div className="rounded-md border border-white/8 bg-white/[0.03] p-3.5">
-      <p className="text-[11px] tracking-wider text-ink-500 uppercase">{rotulo}</p>
+    <div className="rounded-md border border-borda bg-nevoa p-3.5">
+      <p className="text-[11px] tracking-wider text-cinza-claro uppercase">{rotulo}</p>
       <p
         className={[
-          "mt-1.5 font-display font-extrabold text-white",
+          "mt-1.5 font-display font-extrabold text-tinta",
           destaque ? "text-xl" : "text-base",
         ].join(" ")}
       >
         {valor}
       </p>
-      <p className="mt-0.5 text-[11px] text-ink-500">{sufixo}</p>
+      <p className="mt-0.5 text-[11px] text-cinza-claro">{sufixo}</p>
     </div>
   );
 }

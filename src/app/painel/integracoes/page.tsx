@@ -70,12 +70,12 @@ export default function PaginaIntegracoes() {
       <div className="space-y-6 p-5 sm:p-8">
         {demo && <AvisoDemo />}
 
-        <div className="cartao-vidro flex flex-col gap-4 rounded-lg p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="cartao flex flex-col gap-4 rounded-lg p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-            <Plug className="mt-0.5 size-5 text-mrg-400" />
+            <Plug className="mt-0.5 size-5 text-mrg-600" />
             <div>
-              <h2 className="font-display text-base font-bold text-white">Como funciona</h2>
-              <p className="mt-1 max-w-2xl text-sm text-ink-300">
+              <h2 className="font-display text-base font-bold text-tinta">Como funciona</h2>
+              <p className="mt-1 max-w-2xl text-sm text-grafite">
                 Cada conexão usa OAuth oficial da plataforma. Os tokens são cifrados com AES-256 antes de
                 ir para o banco e um job diário traz investimento, impressões, cliques, leads e receita
                 para o painel — por cliente e por campanha.
@@ -92,27 +92,27 @@ export default function PaginaIntegracoes() {
             const atual = estado.get(item.provedor);
             const conectada = atual?.status === "conectada";
             return (
-              <article key={item.provedor} className="cartao-vidro flex flex-col rounded-lg p-5">
+              <article key={item.provedor} className="cartao flex flex-col rounded-lg p-5">
                 <div className="flex items-start justify-between gap-3">
-                  <h3 className="font-display text-base font-bold text-white">{item.nome}</h3>
+                  <h3 className="font-display text-base font-bold text-tinta">{item.nome}</h3>
                   <Etiqueta tom={conectada ? "sucesso" : "neutro"}>
                     {conectada ? <CheckCircle2 className="size-3" /> : <CircleAlert className="size-3" />}
                     {conectada ? "conectada" : "desconectada"}
                   </Etiqueta>
                 </div>
 
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-300">{item.descricao}</p>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-grafite">{item.descricao}</p>
 
                 <div className="mt-4 flex flex-wrap gap-1.5">
                   {item.escopos.map((e) => (
-                    <span key={e} className="rounded bg-white/5 px-1.5 py-0.5 font-mono text-[10px] text-ink-400">
+                    <span key={e} className="rounded bg-nevoa px-1.5 py-0.5 font-mono text-[10px] text-cinza">
                       {e}
                     </span>
                   ))}
                 </div>
 
                 {conectada && (
-                  <p className="mt-4 text-xs text-ink-500">
+                  <p className="mt-4 text-xs text-cinza-claro">
                     {atual?.contas} conta(s) vinculada(s) · sincronizado {atual?.ultima}
                   </p>
                 )}

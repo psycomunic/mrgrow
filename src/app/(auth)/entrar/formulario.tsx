@@ -55,7 +55,7 @@ export function FormularioEntrar() {
       </Campo>
 
       <div className="flex justify-end">
-        <Link href="/recuperar-senha" className="text-xs text-ink-400 hover:text-ink-200 foco-anel">
+        <Link href="/recuperar-senha" className="text-xs text-cinza hover:text-grafite foco-anel">
           Esqueci minha senha
         </Link>
       </div>

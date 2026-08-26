@@ -100,10 +100,10 @@ export function ListaPropostas({ propostas: iniciais }: { propostas: Proposta[] 
       {/* O link é o entregável: fica visível até ser copiado. */}
       {linkNovo && (
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-mrg-500/40 bg-mrg-500/10 p-4">
-          <Check className="size-5 shrink-0 text-mrg-300" />
+          <Check className="size-5 shrink-0 text-mrg-600" />
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-white">Proposta criada. O link é este:</p>
-            <p className="mt-0.5 truncate font-mono text-xs text-mrg-200">{endereco(linkNovo)}</p>
+            <p className="text-sm font-semibold text-tinta">Proposta criada. O link é este:</p>
+            <p className="mt-0.5 truncate font-mono text-xs text-mrg-700">{endereco(linkNovo)}</p>
           </div>
           <Botao tamanho="sm" variante="contorno" onClick={() => copiar(linkNovo)}>
             <Copy className="size-4" /> Copiar
@@ -113,7 +113,7 @@ export function ListaPropostas({ propostas: iniciais }: { propostas: Proposta[] 
           </Botao>
           <button
             onClick={() => setLinkNovo(null)}
-            className="text-xs text-ink-400 hover:text-white foco-anel"
+            className="text-xs text-cinza hover:text-tinta foco-anel"
           >
             Dispensar
           </button>
@@ -121,7 +121,7 @@ export function ListaPropostas({ propostas: iniciais }: { propostas: Proposta[] 
       )}
 
       {propostas.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-white/10 p-8 text-center text-sm text-ink-500">
+        <p className="rounded-lg border border-dashed border-borda p-8 text-center text-sm text-cinza-claro">
           Nenhuma proposta ainda. Crie a primeira e envie o link para o cliente.
         </p>
       ) : (
@@ -130,18 +130,18 @@ export function ListaPropostas({ propostas: iniciais }: { propostas: Proposta[] 
           <tbody>
             {propostas.map((p) => (
               <Linha key={p.id}>
-                <Celula className="font-mono text-xs text-ink-400">{p.numero}</Celula>
-                <Celula className="text-white">
+                <Celula className="font-mono text-xs text-cinza">{p.numero}</Celula>
+                <Celula className="text-tinta">
                   <span className="block font-medium">{p.titulo}</span>
                   {p.cliente_nome && (
-                    <span className="text-xs text-ink-400">{p.cliente_nome}</span>
+                    <span className="text-xs text-cinza">{p.cliente_nome}</span>
                   )}
                 </Celula>
-                <Celula className="font-medium text-white">
+                <Celula className="font-medium text-tinta">
                   {brl(p.valor_mensal)}
-                  <span className="text-xs font-normal text-ink-500">/mês</span>
+                  <span className="text-xs font-normal text-cinza-claro">/mês</span>
                 </Celula>
-                <Celula className="text-ink-400">
+                <Celula className="text-cinza">
                   {p.validade ? dataCompleta(p.validade) : "—"}
                 </Celula>
                 <Celula>
@@ -211,7 +211,7 @@ function Acao({
       title={rotulo}
       aria-label={rotulo}
       onClick={onClick}
-      className={`rounded-sm p-2 text-ink-400 transition-colors hover:bg-white/5 hover:text-white foco-anel ${classe}`}
+      className={`rounded-sm p-2 text-cinza transition-colors hover:bg-nevoa hover:text-tinta foco-anel ${classe}`}
     >
       {children}
     </button>

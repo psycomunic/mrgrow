@@ -25,11 +25,11 @@ export function BarraLateral({
 
   const conteudo = (
     <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center gap-2.5 border-b border-white/8 px-5">
+      <div className="flex h-[4.25rem] items-center gap-2.5 px-5">
         <Lampada className="size-8 shrink-0" />
         <div className="min-w-0">
-          <p className="truncate font-display text-sm font-extrabold text-white">{organizacao}</p>
-          <p className="text-[11px] text-ink-500">Plataforma da agência</p>
+          <p className="truncate font-display text-sm font-extrabold text-tinta">{organizacao}</p>
+          <p className="text-[11px] text-cinza-claro">Plataforma da agência</p>
         </div>
       </div>
 
@@ -39,7 +39,7 @@ export function BarraLateral({
           if (!doGrupo.length) return null;
           return (
             <div key={grupo}>
-              <p className="px-3 pb-2 text-[10px] font-bold tracking-[0.16em] text-ink-500 uppercase">
+              <p className="px-3 pb-2 text-[10px] font-bold tracking-[0.16em] text-cinza-claro uppercase">
                 {grupo}
               </p>
               <ul className="space-y-0.5">
@@ -52,13 +52,22 @@ export function BarraLateral({
                         href={item.href}
                         onClick={() => setAberto(false)}
                         className={cn(
-                          "flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm font-medium transition-colors foco-anel",
+                          "relative flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm transition-colors foco-anel",
                           ativo
-                            ? "bg-mrg-500/15 text-white ring-1 ring-inset ring-mrg-500/30"
-                            : "text-ink-300 hover:bg-white/5 hover:text-white",
+                            ? "bg-mrg-50 font-semibold text-mrg-700"
+                            : "font-medium text-grafite hover:bg-nevoa hover:text-tinta",
                         )}
                       >
-                        <Icone nome={item.icone} className={cn("size-4.5", ativo && "text-mrg-400")} />
+                        {ativo && (
+                          <span
+                            aria-hidden
+                            className="absolute inset-y-1.5 left-0 w-1 rounded-full bg-mrg-500"
+                          />
+                        )}
+                        <Icone
+                          nome={item.icone}
+                          className={cn("size-4.5", ativo ? "text-mrg-600" : "text-cinza-claro")}
+                        />
                         {item.rotulo}
                       </Link>
                     </li>
@@ -70,20 +79,20 @@ export function BarraLateral({
         })}
       </nav>
 
-      <div className="border-t border-white/8 p-3">
+      <div className="m-3 mt-0 rounded-lg bg-nevoa p-1.5">
         <div className="flex items-center gap-3 rounded-sm px-2 py-2">
-          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-mrg-500/20 text-xs font-bold text-mrg-300">
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-mrg-500 text-xs font-bold text-white">
             {iniciais(nome)}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-ink-100">{nome ?? "Usuário"}</p>
-            <p className="text-[11px] text-ink-500">{ROTULO_PAPEL[papel]}</p>
+            <p className="truncate text-sm font-medium text-tinta">{nome ?? "Usuário"}</p>
+            <p className="text-[11px] text-cinza-claro">{ROTULO_PAPEL[papel]}</p>
           </div>
           <form action="/api/auth/sair" method="post">
             <button
               type="submit"
               aria-label="Sair"
-              className="rounded-sm p-2 text-ink-400 transition-colors hover:bg-white/5 hover:text-perigo foco-anel"
+              className="rounded-sm p-2 text-cinza transition-colors hover:bg-carta hover:text-perigo foco-anel"
             >
               <LogOut className="size-4" />
             </button>
@@ -95,13 +104,13 @@ export function BarraLateral({
 
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-white/8 bg-ink-900/60 backdrop-blur-xl lg:block">
+      <aside className="fixed inset-y-3 left-3 z-40 hidden w-60 rounded-xl bg-carta shadow-concha lg:block">
         {conteudo}
       </aside>
 
       <button
         onClick={() => setAberto(true)}
-        className="fixed top-3.5 left-4 z-50 rounded-sm border border-white/10 bg-ink-900/90 p-2 text-ink-200 backdrop-blur lg:hidden foco-anel"
+        className="fixed top-3.5 left-4 z-50 rounded-sm border border-borda bg-carta p-2 text-grafite shadow-card lg:hidden foco-anel"
         aria-label="Abrir menu"
       >
         <Menu className="size-5" />
@@ -109,11 +118,11 @@ export function BarraLateral({
 
       {aberto && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setAberto(false)} />
-          <aside className="absolute inset-y-0 left-0 w-72 border-r border-white/10 bg-ink-950">
+          <div className="absolute inset-0 bg-tinta/40" onClick={() => setAberto(false)} />
+          <aside className="absolute inset-y-0 left-0 w-72 bg-carta shadow-concha">
             <button
               onClick={() => setAberto(false)}
-              className="absolute top-4 right-3 rounded-sm p-2 text-ink-300 foco-anel"
+              className="absolute top-4 right-3 rounded-sm p-2 text-grafite foco-anel"
               aria-label="Fechar menu"
             >
               <X className="size-5" />

@@ -54,7 +54,7 @@ export function Kanban() {
                   "flex w-72 shrink-0 flex-col rounded-lg border p-3 transition-colors",
                   sobre === etapa.id
                     ? "border-mrg-500/50 bg-mrg-500/5"
-                    : "border-white/8 bg-white/[0.02]",
+                    : "border-borda bg-nevoa",
                 ].join(" ")}
               >
                 <div className="mb-3 flex items-center justify-between gap-2 px-1">
@@ -63,15 +63,15 @@ export function Kanban() {
                       className="size-2 rounded-full"
                       style={{ background: etapa.cor ?? "#1668f5" }}
                     />
-                    <h3 className="text-sm font-semibold text-white">{etapa.nome}</h3>
-                    <span className="rounded-full bg-white/8 px-1.5 text-[11px] text-ink-300">
+                    <h3 className="text-sm font-semibold text-tinta">{etapa.nome}</h3>
+                    <span className="rounded-full bg-nevoa-2 px-1.5 text-[11px] text-grafite">
                       {daEtapa.length}
                     </span>
                   </div>
-                  <span className="text-[11px] text-ink-500">{etapa.probabilidade}%</span>
+                  <span className="text-[11px] text-cinza-claro">{etapa.probabilidade}%</span>
                 </div>
 
-                <p className="mb-3 px-1 text-xs text-ink-400">{brl(soma)} /mês</p>
+                <p className="mb-3 px-1 text-xs text-cinza">{brl(soma)} /mês</p>
 
                 <div className="flex-1 space-y-2">
                   {daEtapa.map((n) => {
@@ -93,20 +93,20 @@ export function Kanban() {
                           }
                           setAberto(n.id);
                         }}
-                        className="cartao-vidro w-full cursor-pointer rounded-md p-3.5 text-left transition-colors hover:border-mrg-500/40 active:cursor-grabbing foco-anel"
+                        className="cartao w-full cursor-pointer rounded-md p-3.5 text-left transition-colors hover:border-mrg-500/40 active:cursor-grabbing foco-anel"
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <h4 className="text-sm font-semibold text-white">{n.titulo}</h4>
-                          <temp.Icone className="size-3.5 shrink-0 text-ink-400" />
+                          <h4 className="text-sm font-semibold text-tinta">{n.titulo}</h4>
+                          <temp.Icone className="size-3.5 shrink-0 text-cinza" />
                         </div>
-                        {n.contato && <p className="mt-1 text-xs text-ink-400">{n.contato}</p>}
+                        {n.contato && <p className="mt-1 text-xs text-cinza">{n.contato}</p>}
 
-                        <p className="mt-3 font-display text-base font-bold text-white">
+                        <p className="mt-3 font-display text-base font-bold text-tinta">
                           {brl(n.valor_mensal)}
-                          <span className="text-xs font-normal text-ink-400">/mês</span>
+                          <span className="text-xs font-normal text-cinza">/mês</span>
                         </p>
                         {n.valor_unico > 0 && (
-                          <p className="text-[11px] text-ink-500">+ {brl(n.valor_unico)} de setup</p>
+                          <p className="text-[11px] text-cinza-claro">+ {brl(n.valor_unico)} de setup</p>
                         )}
 
                         <div className="mt-3 flex flex-wrap items-center gap-1.5">
@@ -114,7 +114,7 @@ export function Kanban() {
                           {n.origem && <Etiqueta>{rotuloOrigem(n.origem)}</Etiqueta>}
                         </div>
                         {n.previsao && (
-                          <p className="mt-2.5 text-[11px] text-ink-500">
+                          <p className="mt-2.5 text-[11px] text-cinza-claro">
                             Previsão: {dataCompleta(n.previsao)}
                           </p>
                         )}
@@ -124,7 +124,7 @@ export function Kanban() {
 
                   <button
                     onClick={() => setCriandoEm(etapa.id)}
-                    className="flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-white/10 py-2.5 text-xs text-ink-500 transition-colors hover:border-mrg-500/40 hover:text-mrg-300 foco-anel"
+                    className="flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-borda py-2.5 text-xs text-cinza-claro transition-colors hover:border-mrg-500/40 hover:text-mrg-600 foco-anel"
                   >
                     <Plus className="size-3.5" /> Adicionar
                   </button>

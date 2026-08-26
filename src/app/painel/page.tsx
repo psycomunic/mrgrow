@@ -34,13 +34,13 @@ export default async function PaginaVisao() {
         </section>
 
         <section className="grid gap-4 lg:grid-cols-3">
-          <div className="cartao-vidro rounded-lg p-5 lg:col-span-2">
+          <div className="cartao rounded-lg p-5 lg:col-span-2">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h2 className="font-display text-base font-bold text-white">Investimento × receita atribuída</h2>
-                <p className="text-xs text-ink-400">Consolidado de todas as contas conectadas · 30 dias</p>
+                <h2 className="font-display text-base font-bold text-tinta">Investimento × receita atribuída</h2>
+                <p className="text-xs text-cinza">Consolidado de todas as contas conectadas · 30 dias</p>
               </div>
-              <Link href="/painel/metricas" className="inline-flex items-center gap-1 text-xs font-semibold text-mrg-400 hover:text-mrg-300">
+              <Link href="/painel/metricas" className="inline-flex items-center gap-1 text-xs font-semibold text-mrg-600 hover:text-mrg-600">
                 Detalhar <ArrowRight className="size-3.5" />
               </Link>
             </div>
@@ -64,22 +64,22 @@ export default async function PaginaVisao() {
 
         <section className="grid gap-4 xl:grid-cols-2">
           <div>
-            <h2 className="mb-3 font-display text-base font-bold text-white">Saúde das contas</h2>
+            <h2 className="mb-3 font-display text-base font-bold text-tinta">Saúde das contas</h2>
             <Tabela>
               <Cabecalhos colunas={["Cliente", "Segmento", "ROAS", "Saúde"]} />
               <tbody>
                 {DEMO_CLIENTES.slice(0, 6).map((c) => (
                   <Linha key={c.id}>
                     <Celula>
-                      <Link href={`/painel/clientes/${c.slug}`} className="font-medium text-white hover:text-mrg-300">
+                      <Link href={`/painel/clientes/${c.slug}`} className="font-medium text-tinta hover:text-mrg-600">
                         {c.nome}
                       </Link>
                     </Celula>
-                    <Celula className="text-ink-400">{c.segmento}</Celula>
+                    <Celula className="text-cinza">{c.segmento}</Celula>
                     <Celula>{c.roas ? `${c.roas.toFixed(1)}x` : "—"}</Celula>
                     <Celula>
                       <div className="flex items-center gap-2">
-                        <div className="h-1.5 w-20 overflow-hidden rounded-full bg-white/10">
+                        <div className="h-1.5 w-20 overflow-hidden rounded-full bg-nevoa-2">
                           <div
                             className={
                               c.saude >= 80 ? "h-full bg-sucesso" : c.saude >= 60 ? "h-full bg-alerta" : "h-full bg-perigo"
@@ -87,7 +87,7 @@ export default async function PaginaVisao() {
                             style={{ width: `${c.saude}%` }}
                           />
                         </div>
-                        <span className="text-xs text-ink-400">{c.saude}</span>
+                        <span className="text-xs text-cinza">{c.saude}</span>
                       </div>
                     </Celula>
                   </Linha>
@@ -97,15 +97,15 @@ export default async function PaginaVisao() {
           </div>
 
           <div>
-            <h2 className="mb-3 font-display text-base font-bold text-white">Tarefas da semana</h2>
+            <h2 className="mb-3 font-display text-base font-bold text-tinta">Tarefas da semana</h2>
             <Tabela>
               <Cabecalhos colunas={["Tarefa", "Cliente", "Prazo", "Status"]} />
               <tbody>
                 {DEMO_TAREFAS.map((t) => (
                   <Linha key={t.id}>
-                    <Celula className="max-w-64 truncate text-white">{t.titulo}</Celula>
-                    <Celula className="text-ink-400">{t.cliente}</Celula>
-                    <Celula className="text-ink-400">{dataCompleta(t.vence_em)}</Celula>
+                    <Celula className="max-w-64 truncate text-tinta">{t.titulo}</Celula>
+                    <Celula className="text-cinza">{t.cliente}</Celula>
+                    <Celula className="text-cinza">{dataCompleta(t.vence_em)}</Celula>
                     <Celula>
                       <Etiqueta
                         tom={

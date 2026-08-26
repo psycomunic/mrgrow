@@ -17,15 +17,15 @@ export default function PaginaNotificacoes() {
       <Topo titulo="Notificações" descricao="Alertas das automações e da operação." />
       <div className="space-y-3 p-5 sm:p-8">
         {NOTIFICACOES.map((n) => (
-          <article key={n.id} className="cartao-vidro flex items-start justify-between gap-4 rounded-lg p-5">
+          <article key={n.id} className="cartao flex items-start justify-between gap-4 rounded-lg p-5">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="font-semibold text-white">{n.titulo}</h2>
+                <h2 className="font-semibold text-tinta">{n.titulo}</h2>
                 <Etiqueta tom={n.tom}>novo</Etiqueta>
               </div>
-              <p className="mt-1 text-sm text-ink-300">{n.texto}</p>
+              <p className="mt-1 text-sm text-grafite">{n.texto}</p>
             </div>
-            <span className="shrink-0 text-xs text-ink-500">{n.tempo}</span>
+            <span className="shrink-0 text-xs text-cinza-claro">{n.tempo}</span>
           </article>
         ))}
       </div>

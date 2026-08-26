@@ -1,12 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
+import {
+  AlertTriangle, Check, Pencil, Plus, Scale, TrendingDown, TrendingUp, Trash2, X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Botao } from "@/components/ui/botao";
 import { Campo, Entrada, AreaTexto, Selecao } from "@/components/ui/campo";
 import { Etiqueta } from "@/components/ui/etiqueta";
 import { Kpi } from "@/components/painel/kpi";
+import { GraficoArea } from "@/components/painel/grafico-area";
 import { Tabela, Cabecalhos, Linha, Celula } from "@/components/painel/tabela";
 import { brl, dataCompleta, numero } from "@/lib/utils";
 import {
@@ -18,10 +21,11 @@ import {
 } from "./acoes";
 import type { Lancamento } from "@/lib/financeiro";
 
-const TOM: Record<string, "sucesso" | "alerta" | "perigo" | "neutro"> = {
+const TOM: Record<string, "sucesso" | "alerta" | "perigo" | "neutro" | "azul"> = {
   pago: "sucesso",
   pendente: "alerta",
   atrasado: "perigo",
+  previsto: "azul",
   cancelado: "neutro",
 };
 
@@ -29,7 +33,15 @@ const ROTULO: Record<string, string> = {
   pago: "Pago",
   pendente: "Pendente",
   atrasado: "Atrasado",
+  previsto: "Previsto",
   cancelado: "Cancelado",
+};
+
+const BARRA: Record<string, string> = {
+  pago: "bg-sucesso",
+  pendente: "bg-alerta",
+  previsto: "bg-mrg-500",
+  atrasado: "bg-perigo",
 };
 
 const FILTROS = [
@@ -67,6 +79,12 @@ function doLancamento(l: Lancamento): DadosLancamento {
   };
 }
 
+/** Chave "AAAA-MM" lida do texto, sem passar por Date e sem risco de fuso. */
+function mesDe(iso: string) {
+  const m = /^(\d{4})-(\d{2})/.exec(iso);
+  return m ? `${m[1]}-${m[2]}` : "";
+}
+
 export function Lancamentos({
   lancamentos: iniciais,
   clientes,
@@ -94,18 +112,55 @@ export function Lancamentos({
     [lancamentos, filtro],
   );
 
+  /* Fluxo dos ultimos 6 meses somado dos proprios lancamentos. Antes era
+     uma constante inventada dentro do arquivo da pagina. */
+  const fluxo = useMemo(() => {
+    const agora = new Date();
+    const meses = Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(agora.getFullYear(), agora.getMonth() - (5 - i), 1);
+      return {
+        chave: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+        data: d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""),
+        receitas: 0,
+        despesas: 0,
+      };
+    });
+    const porChave = new Map(meses.map((m) => [m.chave, m]));
+    for (const l of lancamentos) {
+      const m = porChave.get(mesDe(l.vencimento));
+      if (!m || l.status === "cancelado") continue;
+      if (l.tipo === "receita") m.receitas += l.valor;
+      else m.despesas += l.valor;
+    }
+    return meses;
+  }, [lancamentos]);
+
   const kpis = useMemo(() => {
-    const receita = lancamentos.filter((l) => l.tipo === "receita");
-    const despesa = lancamentos.filter((l) => l.tipo === "despesa");
-    const totalR = receita.reduce((s, l) => s + l.valor, 0);
-    const totalD = despesa.reduce((s, l) => s + l.valor, 0);
+    const vivos = lancamentos.filter((l) => l.status !== "cancelado");
+    const soma = (xs: Lancamento[]) => xs.reduce((s, l) => s + l.valor, 0);
+    const receita = vivos.filter((l) => l.tipo === "receita");
+    const despesa = vivos.filter((l) => l.tipo === "despesa");
+    const atrasadas = receita.filter((l) => l.status === "atrasado");
     return {
-      receita: totalR,
-      despesa: totalD,
-      resultado: totalR - totalD,
-      atrasado: receita.filter((l) => l.status === "atrasado").reduce((s, l) => s + l.valor, 0),
-      qtdAtrasada: receita.filter((l) => l.status === "atrasado").length,
+      receita: soma(receita),
+      despesa: soma(despesa),
+      resultado: soma(receita) - soma(despesa),
+      atrasado: soma(atrasadas),
+      qtdAtrasada: atrasadas.length,
     };
+  }, [lancamentos]);
+
+  /* Recebiveis por situacao: onde o dinheiro a receber esta parado. */
+  const recebiveis = useMemo(() => {
+    const receita = lancamentos.filter((l) => l.tipo === "receita" && l.status !== "cancelado");
+    const total = receita.reduce((s, l) => s + l.valor, 0) || 1;
+    return (["pago", "pendente", "previsto", "atrasado"] as const)
+      .map((s) => {
+        const doStatus = receita.filter((l) => l.status === s);
+        const valor = doStatus.reduce((a, l) => a + l.valor, 0);
+        return { status: s as string, valor, qtd: doStatus.length, parte: valor / total };
+      })
+      .filter((f) => f.qtd > 0);
   }, [lancamentos]);
 
   async function baixar(l: Lancamento) {
@@ -136,94 +191,183 @@ export function Lancamentos({
   return (
     <>
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Kpi rotulo="Receitas" valor={brl(kpis.receita)} detalhe="lançadas no período" />
-        <Kpi rotulo="Despesas" valor={brl(kpis.despesa)} detalhe="lançadas no período" />
         <Kpi
-          rotulo="Resultado"
-          valor={brl(kpis.resultado)}
-          detalhe={kpis.resultado >= 0 ? "no azul" : "no vermelho"}
+          rotulo="Receitas no período"
+          valor={brl(kpis.receita)}
+          tom="menta"
+          icone={<TrendingUp />}
+          serie={fluxo.map((m) => m.receitas)}
         />
         <Kpi
-          rotulo="Em atraso"
+          rotulo="Despesas no período"
+          valor={brl(kpis.despesa)}
+          tom="rosa"
+          icone={<TrendingDown />}
+          serie={fluxo.map((m) => m.despesas)}
+        />
+        <Kpi
+          rotulo={kpis.resultado >= 0 ? "Resultado, no azul" : "Resultado, no vermelho"}
+          valor={brl(kpis.resultado)}
+          tom="azul"
+          icone={<Scale />}
+          serie={fluxo.map((m) => m.receitas - m.despesas)}
+        />
+        <Kpi
+          rotulo="A receber em atraso"
           valor={brl(kpis.atrasado)}
-          detalhe={`${numero(kpis.qtdAtrasada)} a receber`}
+          tom="pessego"
+          icone={<AlertTriangle />}
+          detalhe={`${numero(kpis.qtdAtrasada)} ${kpis.qtdAtrasada === 1 ? "cobrança" : "cobranças"} vencida${kpis.qtdAtrasada === 1 ? "" : "s"}`}
         />
       </section>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex flex-wrap gap-1">
-          {FILTROS.map((f) => (
-            <button
-              key={f.v}
-              onClick={() => setFiltro(f.v)}
-              aria-pressed={filtro === f.v}
-              className={[
-                "rounded-sm px-3 py-1.5 text-xs font-medium transition-colors foco-anel",
-                filtro === f.v
-                  ? "bg-mrg-500/15 text-mrg-200 ring-1 ring-inset ring-mrg-500/40"
-                  : "text-ink-400 hover:bg-white/5 hover:text-ink-200",
-              ].join(" ")}
-            >
-              {f.r}
-            </button>
-          ))}
+      <section className="grid gap-4 lg:grid-cols-3">
+        <div className="cartao p-5 lg:col-span-2">
+          <h2 className="font-display text-base font-bold text-tinta">Fluxo de caixa</h2>
+          <p className="mt-0.5 mb-4 text-xs text-cinza">
+            Entradas e saídas somadas por mês de vencimento, últimos 6 meses.
+          </p>
+          <GraficoArea
+            dados={fluxo}
+            series={[
+              { chave: "receitas", rotulo: "Receitas", cor: "#067a55" },
+              { chave: "despesas", rotulo: "Despesas", cor: "#d92d3f" },
+            ]}
+            altura={248}
+            rotuloX={(v) => v}
+          />
         </div>
-        <Botao tamanho="sm" className="ml-auto" onClick={() => setCriando(true)}>
-          <Plus className="size-4" />
-          Novo lançamento
-        </Botao>
-      </div>
 
-      {visiveis.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-white/10 p-8 text-center text-sm text-ink-500">
-          Nenhum lançamento neste recorte.
-        </p>
-      ) : (
-        <Tabela>
-          <Cabecalhos colunas={["Descrição", "Cliente", "Tipo", "Vencimento", "Valor", "Status", ""]} />
-          <tbody>
-            {visiveis.map((l) => (
-              <Linha key={l.id}>
-                <Celula className="text-white">{l.descricao}</Celula>
-                <Celula className="text-ink-400">{l.cliente ?? "—"}</Celula>
-                <Celula>
-                  <Etiqueta tom={l.tipo === "receita" ? "sucesso" : "perigo"}>
-                    {l.tipo === "receita" ? "Receita" : "Despesa"}
-                  </Etiqueta>
-                </Celula>
-                <Celula className="text-ink-400">{dataCompleta(l.vencimento)}</Celula>
-                <Celula className="font-medium text-white">{brl(l.valor)}</Celula>
-                <Celula>
-                  <Etiqueta tom={TOM[l.status] ?? "neutro"}>{ROTULO[l.status] ?? l.status}</Etiqueta>
-                </Celula>
-                <Celula>
-                  <div className="flex items-center justify-end gap-1">
-                    {l.status !== "pago" && (
-                      <Acao
-                        rotulo="Dar baixa"
-                        onClick={() => baixar(l)}
-                        classe="hover:bg-sucesso/15 hover:text-sucesso"
-                      >
-                        <Check className="size-4" />
-                      </Acao>
-                    )}
-                    <Acao rotulo="Editar" onClick={() => setEditando(l)}>
-                      <Pencil className="size-4" />
-                    </Acao>
-                    <Acao
-                      rotulo="Excluir"
-                      onClick={() => remover(l)}
-                      classe="hover:bg-perigo/15 hover:text-perigo"
-                    >
-                      <Trash2 className="size-4" />
-                    </Acao>
+        <div className="cartao flex flex-col p-5">
+          <h2 className="font-display text-base font-bold text-tinta">Recebíveis</h2>
+          <p className="mt-0.5 mb-5 text-xs text-cinza">Onde o dinheiro a receber está parado.</p>
+
+          {recebiveis.length === 0 ? (
+            <p className="my-auto text-center text-sm text-cinza-claro">
+              Nenhuma receita lançada ainda.
+            </p>
+          ) : (
+            <ul className="space-y-4">
+              {recebiveis.map((f) => (
+                <li key={f.status}>
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-sm font-medium text-grafite">{ROTULO[f.status]}</span>
+                    <span className="font-display text-sm font-bold text-tinta">{brl(f.valor)}</span>
                   </div>
-                </Celula>
-              </Linha>
+                  <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-nevoa-2">
+                    <div
+                      className={`h-full rounded-full ${BARRA[f.status]}`}
+                      style={{ width: `${Math.max(f.parte * 100, 2)}%` }}
+                    />
+                  </div>
+                  <p className="mt-1 text-[11px] text-cinza-claro">
+                    {numero(f.qtd)} {f.qtd === 1 ? "lançamento" : "lançamentos"} ·{" "}
+                    {(f.parte * 100).toFixed(0)}% do total
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <h2 className="font-display text-base font-bold text-tinta">Lançamentos</h2>
+          <div className="flex flex-wrap gap-1">
+            {FILTROS.map((f) => (
+              <button
+                key={f.v}
+                onClick={() => setFiltro(f.v)}
+                aria-pressed={filtro === f.v}
+                className={[
+                  "rounded-full px-3 py-1.5 text-xs font-medium transition-colors foco-anel",
+                  filtro === f.v
+                    ? "bg-mrg-500 text-white"
+                    : "bg-carta text-cinza hover:text-grafite",
+                ].join(" ")}
+              >
+                {f.r}
+              </button>
             ))}
-          </tbody>
-        </Tabela>
-      )}
+          </div>
+          <Botao tamanho="sm" className="ml-auto" onClick={() => setCriando(true)}>
+            <Plus className="size-4" />
+            Novo lançamento
+          </Botao>
+        </div>
+
+        {visiveis.length === 0 ? (
+          <p className="cartao p-10 text-center text-sm text-cinza-claro">
+            Nenhum lançamento neste recorte.
+          </p>
+        ) : (
+          <Tabela>
+            <Cabecalhos colunas={["Descrição", "Cliente", "Vencimento", "Status", "Valor", ""]} />
+            <tbody>
+              {visiveis.map((l) => (
+                <Linha key={l.id}>
+                  <Celula>
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`grid size-8 shrink-0 place-items-center rounded-full ${
+                          l.tipo === "receita"
+                            ? "bg-chip-menta text-sucesso"
+                            : "bg-chip-rosa text-perigo"
+                        }`}
+                      >
+                        {l.tipo === "receita" ? (
+                          <TrendingUp className="size-4" />
+                        ) : (
+                          <TrendingDown className="size-4" />
+                        )}
+                      </span>
+                      <span className="font-medium text-tinta">{l.descricao}</span>
+                    </div>
+                  </Celula>
+                  <Celula className="text-cinza">{l.cliente ?? "sem cliente"}</Celula>
+                  <Celula className="text-cinza">{dataCompleta(l.vencimento)}</Celula>
+                  <Celula>
+                    <Etiqueta tom={TOM[l.status] ?? "neutro"}>
+                      {ROTULO[l.status] ?? l.status}
+                    </Etiqueta>
+                  </Celula>
+                  <Celula
+                    className={`text-right font-display font-bold whitespace-nowrap ${
+                      l.tipo === "receita" ? "text-sucesso" : "text-perigo"
+                    }`}
+                  >
+                    {l.tipo === "receita" ? "+" : "−"} {brl(l.valor)}
+                  </Celula>
+                  <Celula>
+                    <div className="flex items-center justify-end gap-1">
+                      {l.status !== "pago" && (
+                        <Acao
+                          rotulo="Dar baixa"
+                          onClick={() => baixar(l)}
+                          classe="hover:bg-chip-menta hover:text-sucesso"
+                        >
+                          <Check className="size-4" />
+                        </Acao>
+                      )}
+                      <Acao rotulo="Editar" onClick={() => setEditando(l)}>
+                        <Pencil className="size-4" />
+                      </Acao>
+                      <Acao
+                        rotulo="Excluir"
+                        onClick={() => remover(l)}
+                        classe="hover:bg-chip-rosa hover:text-perigo"
+                      >
+                        <Trash2 className="size-4" />
+                      </Acao>
+                    </div>
+                  </Celula>
+                </Linha>
+              ))}
+            </tbody>
+          </Tabela>
+        )}
+      </section>
 
       {criando && (
         <Dialogo
@@ -261,7 +405,7 @@ function Acao({
       title={rotulo}
       aria-label={rotulo}
       onClick={onClick}
-      className={`rounded-sm p-2 text-ink-400 transition-colors hover:bg-white/5 hover:text-white foco-anel ${classe}`}
+      className={`rounded-full p-2 text-cinza-claro transition-colors hover:bg-nevoa hover:text-tinta foco-anel ${classe}`}
     >
       {children}
     </button>
@@ -325,7 +469,7 @@ function Dialogo({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-ink-950/80 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-tinta/25 p-4 backdrop-blur-sm"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) aoFechar();
       }}
@@ -334,16 +478,16 @@ function Dialogo({
         role="dialog"
         aria-modal="true"
         aria-label={lancamento ? "Editar lançamento" : "Novo lançamento"}
-        className="cartao-vidro my-auto w-full max-w-xl overflow-hidden rounded-xl"
+        className="my-auto w-full max-w-xl overflow-hidden rounded-xl bg-carta shadow-concha"
       >
-        <div className="flex items-center justify-between border-b border-white/8 px-6 py-4">
-          <h2 className="font-display text-lg font-bold text-white">
+        <div className="flex items-center justify-between border-b border-borda px-6 py-4">
+          <h2 className="font-display text-lg font-bold text-tinta">
             {lancamento ? "Editar lançamento" : "Novo lançamento"}
           </h2>
           <button
             onClick={aoFechar}
             aria-label="Fechar"
-            className="rounded-sm p-1.5 text-ink-400 transition-colors hover:bg-white/5 hover:text-white foco-anel"
+            className="rounded-full p-1.5 text-cinza transition-colors hover:bg-nevoa hover:text-tinta foco-anel"
           >
             <X className="size-4" />
           </button>
@@ -394,6 +538,7 @@ function Dialogo({
                 onChange={(e) => setD((x) => ({ ...x, status: e.target.value }))}
               >
                 <option value="pendente">Pendente</option>
+                <option value="previsto">Previsto</option>
                 <option value="pago">Pago</option>
                 <option value="atrasado">Atrasado</option>
                 <option value="cancelado">Cancelado</option>

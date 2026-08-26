@@ -40,13 +40,13 @@ export default function PaginaEquipe() {
               <Linha key={m.id}>
                 <Celula>
                   <div className="flex items-center gap-3">
-                    <span className="grid size-8 place-items-center rounded-full bg-mrg-500/20 text-[11px] font-bold text-mrg-300">
+                    <span className="grid size-8 place-items-center rounded-full bg-mrg-500/20 text-[11px] font-bold text-mrg-600">
                       {iniciais(m.nome)}
                     </span>
-                    <span className="font-medium text-white">{m.nome}</span>
+                    <span className="font-medium text-tinta">{m.nome}</span>
                   </div>
                 </Celula>
-                <Celula className="text-ink-400">{m.email}</Celula>
+                <Celula className="text-cinza">{m.email}</Celula>
                 <Celula><Etiqueta tom={m.papel === "cliente" ? "neutro" : "azul"}>{ROTULO_PAPEL[m.papel]}</Etiqueta></Celula>
                 <Celula><Etiqueta tom={m.ativo ? "sucesso" : "neutro"}>{m.ativo ? "ativo" : "inativo"}</Etiqueta></Celula>
                 <Celula><BotaoLink href={`/painel/equipe/${m.id}`} variante="fantasma" tamanho="sm">Editar</BotaoLink></Celula>
@@ -56,24 +56,24 @@ export default function PaginaEquipe() {
         </Tabela>
 
         <section>
-          <h2 className="mb-3 font-display text-base font-bold text-white">Matriz de permissões</h2>
+          <h2 className="mb-3 font-display text-base font-bold text-tinta">Matriz de permissões</h2>
           <Tabela>
             <Cabecalhos colunas={["Papel", "Acesso"]} />
             <tbody>
               {papeis.map((p) => (
                 <Linha key={p}>
-                  <Celula className="font-medium whitespace-nowrap text-white">{ROTULO_PAPEL[p]}</Celula>
+                  <Celula className="font-medium whitespace-nowrap text-tinta">{ROTULO_PAPEL[p]}</Celula>
                   <Celula>
                     <div className="flex flex-wrap gap-1.5">
                       {Object.entries(MATRIZ[p]).map(([recurso, acoes]) => (
                         <span
                           key={recurso}
-                          className="rounded bg-white/5 px-2 py-0.5 text-[11px] text-ink-300"
+                          className="rounded bg-nevoa px-2 py-0.5 text-[11px] text-grafite"
                           title={acoes?.join(", ")}
                         >
                           {recurso}
                           {acoes && acoes.length > 1 && (
-                            <span className="ml-1 text-mrg-400">{acoes.length === 4 ? "total" : "edição"}</span>
+                            <span className="ml-1 text-mrg-600">{acoes.length === 4 ? "total" : "edição"}</span>
                           )}
                         </span>
                       ))}

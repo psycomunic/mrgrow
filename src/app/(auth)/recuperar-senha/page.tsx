@@ -27,11 +27,11 @@ export default function PaginaRecuperar() {
 
   return (
     <>
-      <h1 className="font-display text-2xl font-extrabold text-white">Recuperar senha</h1>
-      <p className="mt-2 text-sm text-ink-400">Enviamos um link para você definir uma nova senha.</p>
+      <h1 className="font-display text-2xl font-extrabold text-tinta">Recuperar senha</h1>
+      <p className="mt-2 text-sm text-cinza">Enviamos um link para você definir uma nova senha.</p>
 
       {enviado ? (
-        <div className="mt-8 rounded-lg border border-sucesso/25 bg-sucesso/10 p-5 text-sm text-ink-100">
+        <div className="mt-8 rounded-lg border border-sucesso/25 bg-sucesso/10 p-5 text-sm text-tinta">
           Se existir uma conta com <strong>{email}</strong>, o link já está a caminho.
         </div>
       ) : (
@@ -46,8 +46,8 @@ export default function PaginaRecuperar() {
         </form>
       )}
 
-      <p className="mt-6 text-sm text-ink-400">
-        <Link href="/entrar" className="font-semibold text-mrg-400 hover:text-mrg-300 foco-anel">
+      <p className="mt-6 text-sm text-cinza">
+        <Link href="/entrar" className="font-semibold text-mrg-600 hover:text-mrg-600 foco-anel">
           Voltar para o login
         </Link>
       </p>

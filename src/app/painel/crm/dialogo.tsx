@@ -94,7 +94,7 @@ export function DialogoNegocio({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-ink-950/80 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-papel/80 p-4 backdrop-blur-sm"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) aoFechar();
       }}
@@ -103,21 +103,21 @@ export function DialogoNegocio({
         role="dialog"
         aria-modal="true"
         aria-labelledby={`${idBase}-titulo`}
-        className="cartao-vidro my-auto w-full max-w-2xl overflow-hidden rounded-xl"
+        className="cartao my-auto w-full max-w-2xl overflow-hidden rounded-xl"
       >
-        <div className="flex items-center justify-between border-b border-white/8 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-borda px-6 py-4">
           <div>
-            <h2 id={`${idBase}-titulo`} className="font-display text-lg font-bold text-white">
+            <h2 id={`${idBase}-titulo`} className="font-display text-lg font-bold text-tinta">
               {negocio ? "Editar negócio" : "Novo negócio"}
             </h2>
-            <p className="mt-0.5 text-xs text-ink-400">
+            <p className="mt-0.5 text-xs text-cinza">
               {negocio ? "As mudanças aparecem no quadro na hora." : "Ele entra no funil já na etapa escolhida."}
             </p>
           </div>
           <button
             onClick={aoFechar}
             aria-label="Fechar"
-            className="rounded-sm p-1.5 text-ink-400 transition-colors hover:bg-white/5 hover:text-white foco-anel"
+            className="rounded-sm p-1.5 text-cinza transition-colors hover:bg-nevoa hover:text-tinta foco-anel"
           >
             <X className="size-4" />
           </button>
@@ -161,9 +161,9 @@ export function DialogoNegocio({
               </div>
 
               {/* O número que decide onde vale gastar esforço comercial. */}
-              <div className="mt-3 flex items-baseline justify-between rounded-md border border-white/8 bg-white/[0.03] px-4 py-3">
-                <span className="text-xs text-ink-400">Contrato em 12 meses</span>
-                <span className="font-display text-lg font-extrabold text-white">
+              <div className="mt-3 flex items-baseline justify-between rounded-md border border-borda bg-nevoa px-4 py-3">
+                <span className="text-xs text-cinza">Contrato em 12 meses</span>
+                <span className="font-display text-lg font-extrabold text-tinta">
                   {brl(contrato)}
                 </span>
               </div>
@@ -210,7 +210,7 @@ export function DialogoNegocio({
 
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <div>
-                  <span className="mb-1.5 block text-xs font-medium text-ink-200">Temperatura</span>
+                  <span className="mb-1.5 block text-xs font-medium text-grafite">Temperatura</span>
                   <div className="flex gap-1.5">
                     {TEMPERATURAS.map(({ v, r, Icone }) => (
                       <button
@@ -221,8 +221,8 @@ export function DialogoNegocio({
                         className={[
                           "inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-2.5 py-2.5 text-xs transition-colors foco-anel",
                           dados.temperatura === v
-                            ? "bg-mrg-500/15 text-mrg-200 ring-1 ring-inset ring-mrg-500/45"
-                            : "border border-white/10 bg-white/[0.03] text-ink-400 hover:text-ink-200",
+                            ? "bg-mrg-500/15 text-mrg-700 ring-1 ring-inset ring-mrg-500/45"
+                            : "border border-borda bg-nevoa text-cinza hover:text-grafite",
                         ].join(" ")}
                       >
                         <Icone className="size-3.5" />
@@ -247,7 +247,7 @@ export function DialogoNegocio({
             {erro && <p className="text-xs text-perigo">{erro}</p>}
           </div>
 
-          <div className="flex justify-end gap-2 border-t border-white/8 px-6 py-4">
+          <div className="flex justify-end gap-2 border-t border-borda px-6 py-4">
             <Botao type="button" variante="contorno" onClick={aoFechar}>
               Cancelar
             </Botao>
@@ -264,7 +264,7 @@ export function DialogoNegocio({
 function Secao({ rotulo, children }: { rotulo: string; children: React.ReactNode }) {
   return (
     <section>
-      <h3 className="mb-3 text-[11px] font-bold tracking-wider text-ink-500 uppercase">{rotulo}</h3>
+      <h3 className="mb-3 text-[11px] font-bold tracking-wider text-cinza-claro uppercase">{rotulo}</h3>
       {children}
     </section>
   );
@@ -296,7 +296,7 @@ function CampoMoeda({
   return (
     <Campo rotulo={rotulo} dica={dica}>
       <div className="relative">
-        <span className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-sm text-ink-400">
+        <span className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-sm text-cinza">
           R$
         </span>
         <Entrada

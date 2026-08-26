@@ -85,8 +85,8 @@ export function ListaClientes({ clientes }: { clientes: ClienteCarteira[] }) {
               className={[
                 "rounded-sm px-3 py-1.5 text-xs font-medium transition-colors foco-anel",
                 filtro === f.v
-                  ? "bg-mrg-500/15 text-mrg-200 ring-1 ring-inset ring-mrg-500/40"
-                  : "text-ink-400 hover:bg-white/5 hover:text-ink-200",
+                  ? "bg-mrg-500/15 text-mrg-700 ring-1 ring-inset ring-mrg-500/40"
+                  : "text-cinza hover:bg-nevoa hover:text-grafite",
               ].join(" ")}
             >
               {f.r}
@@ -95,17 +95,17 @@ export function ListaClientes({ clientes }: { clientes: ClienteCarteira[] }) {
         </div>
 
         <div className="relative min-w-48 flex-1 sm:max-w-64">
-          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink-500" />
+          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-cinza-claro" />
           <input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar cliente…"
-            className="h-9 w-full rounded-sm border border-white/10 bg-white/[0.03] pr-3 pl-9 text-sm text-ink-100 placeholder:text-ink-500 foco-anel"
+            className="h-9 w-full rounded-sm border border-borda bg-nevoa pr-3 pl-9 text-sm text-tinta placeholder:text-cinza-claro foco-anel"
           />
         </div>
 
         <div className="ml-auto flex items-center gap-1">
-          <span className="text-xs text-ink-500">Ordenar:</span>
+          <span className="text-xs text-cinza-claro">Ordenar:</span>
           {ORDENS.map((o) => (
             <button
               key={o.v}
@@ -113,7 +113,7 @@ export function ListaClientes({ clientes }: { clientes: ClienteCarteira[] }) {
               aria-pressed={ordem === o.v}
               className={[
                 "rounded-sm px-2.5 py-1.5 text-xs transition-colors foco-anel",
-                ordem === o.v ? "text-white" : "text-ink-500 hover:text-ink-300",
+                ordem === o.v ? "text-tinta" : "text-cinza-claro hover:text-grafite",
               ].join(" ")}
             >
               {o.r}
@@ -123,7 +123,7 @@ export function ListaClientes({ clientes }: { clientes: ClienteCarteira[] }) {
       </section>
 
       {visiveis.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-white/10 p-8 text-center text-sm text-ink-500">
+        <p className="rounded-lg border border-dashed border-borda p-8 text-center text-sm text-cinza-claro">
           Nenhum cliente neste recorte.
         </p>
       ) : (
@@ -133,57 +133,57 @@ export function ListaClientes({ clientes }: { clientes: ClienteCarteira[] }) {
               key={c.id}
               type="button"
               onClick={() => setAberto(c.id)}
-              className="cartao-vidro group w-full rounded-lg p-5 text-left transition-all hover:-translate-y-0.5 hover:border-mrg-500/30 foco-anel"
+              className="cartao group w-full rounded-lg p-5 text-left transition-all hover:-translate-y-0.5 hover:border-mrg-500/30 foco-anel"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-md bg-gradient-to-br from-mrg-500/30 to-mrg-800/30 font-display text-sm font-bold text-mrg-200 ring-1 ring-white/10">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-md bg-gradient-to-br from-mrg-500/30 to-mrg-800/30 font-display text-sm font-bold text-mrg-700 ring-1 ring-borda">
                     {iniciais(c.nome)}
                   </span>
                   <div className="min-w-0">
-                    <h3 className="truncate font-semibold text-white group-hover:text-mrg-200">
+                    <h3 className="truncate font-semibold text-tinta group-hover:text-mrg-700">
                       {c.nome}
                     </h3>
-                    <p className="truncate text-xs text-ink-400">{c.segmento ?? "Sem segmento"}</p>
+                    <p className="truncate text-xs text-cinza">{c.segmento ?? "Sem segmento"}</p>
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
                   <Etiqueta tom={TOM[c.status] ?? "neutro"}>
                     {ROTULO_STATUS[c.status] ?? c.status}
                   </Etiqueta>
-                  <ArrowUpRight className="size-4 text-ink-600 transition-colors group-hover:text-mrg-300" />
+                  <ArrowUpRight className="size-4 text-cinza-claro transition-colors group-hover:text-mrg-600" />
                 </div>
               </div>
 
-              <dl className="mt-5 grid grid-cols-3 gap-3 border-t border-white/8 pt-4 text-center">
+              <dl className="mt-5 grid grid-cols-3 gap-3 border-t border-borda pt-4 text-center">
                 <div>
-                  <dt className="text-[10px] tracking-wide text-ink-500 uppercase">Fee</dt>
-                  <dd className="mt-0.5 text-sm font-bold text-white">{brl(c.fee_mensal)}</dd>
+                  <dt className="text-[10px] tracking-wide text-cinza-claro uppercase">Fee</dt>
+                  <dd className="mt-0.5 text-sm font-bold text-tinta">{brl(c.fee_mensal)}</dd>
                 </div>
                 <div>
-                  <dt className="text-[10px] tracking-wide text-ink-500 uppercase">ROAS</dt>
-                  <dd className="mt-0.5 text-sm font-bold text-white">
+                  <dt className="text-[10px] tracking-wide text-cinza-claro uppercase">ROAS</dt>
+                  <dd className="mt-0.5 text-sm font-bold text-tinta">
                     {c.roas ? `${c.roas.toFixed(1)}x` : "—"}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-[10px] tracking-wide text-ink-500 uppercase">NPS</dt>
-                  <dd className="mt-0.5 text-sm font-bold text-white">{c.nps ?? "—"}</dd>
+                  <dt className="text-[10px] tracking-wide text-cinza-claro uppercase">NPS</dt>
+                  <dd className="mt-0.5 text-sm font-bold text-tinta">{c.nps ?? "—"}</dd>
                 </div>
               </dl>
 
               <div className="mt-4">
-                <div className="mb-1 flex justify-between text-[11px] text-ink-500">
+                <div className="mb-1 flex justify-between text-[11px] text-cinza-claro">
                   <span>Saúde da conta</span>
                   <span>{c.saude}/100</span>
                 </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                <div className="h-1.5 overflow-hidden rounded-full bg-nevoa-2">
                   <div className={`h-full ${corSaude(c.saude)}`} style={{ width: `${c.saude}%` }} />
                 </div>
               </div>
 
               {c.responsavel && (
-                <p className="mt-3 flex items-center gap-1.5 text-[11px] text-ink-500">
+                <p className="mt-3 flex items-center gap-1.5 text-[11px] text-cinza-claro">
                   <User className="size-3" />
                   {c.responsavel}
                 </p>

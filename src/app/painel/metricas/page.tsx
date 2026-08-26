@@ -44,8 +44,8 @@ export default function PaginaMetricas() {
         </section>
 
         <section className="grid gap-4 xl:grid-cols-2">
-          <div className="cartao-vidro rounded-lg p-5">
-            <h2 className="mb-4 font-display text-base font-bold text-white">Investimento × receita</h2>
+          <div className="cartao rounded-lg p-5">
+            <h2 className="mb-4 font-display text-base font-bold text-tinta">Investimento × receita</h2>
             <GraficoArea
               dados={DEMO_SERIE}
               series={[
@@ -55,8 +55,8 @@ export default function PaginaMetricas() {
               altura={260}
             />
           </div>
-          <div className="cartao-vidro rounded-lg p-5">
-            <h2 className="mb-4 font-display text-base font-bold text-white">Leads e cliques</h2>
+          <div className="cartao rounded-lg p-5">
+            <h2 className="mb-4 font-display text-base font-bold text-tinta">Leads e cliques</h2>
             <GraficoArea
               dados={DEMO_SERIE}
               series={[
@@ -70,7 +70,7 @@ export default function PaginaMetricas() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-display text-base font-bold text-white">Desempenho por conta</h2>
+          <h2 className="mb-3 font-display text-base font-bold text-tinta">Desempenho por conta</h2>
           <Tabela>
             <Cabecalhos colunas={["Cliente", "Plataforma", "Investimento", "Receita", "ROAS", "Status"]} />
             <tbody>
@@ -78,11 +78,11 @@ export default function PaginaMetricas() {
                 const inv = c.investimento_previsto * 0.86;
                 return (
                   <Linha key={c.id}>
-                    <Celula className="font-medium text-white">{c.nome}</Celula>
-                    <Celula className="text-ink-400">{i % 2 === 0 ? "Meta + Google" : "Meta Ads"}</Celula>
+                    <Celula className="font-medium text-tinta">{c.nome}</Celula>
+                    <Celula className="text-cinza">{i % 2 === 0 ? "Meta + Google" : "Meta Ads"}</Celula>
                     <Celula>{brl(inv)}</Celula>
                     <Celula>{brl(inv * c.roas)}</Celula>
-                    <Celula className="font-semibold text-white">{c.roas.toFixed(2)}x</Celula>
+                    <Celula className="font-semibold text-tinta">{c.roas.toFixed(2)}x</Celula>
                     <Celula>
                       <Etiqueta tom={c.roas >= 4 ? "sucesso" : c.roas >= 2.5 ? "alerta" : "perigo"}>
                         {c.roas >= 4 ? "acima da meta" : c.roas >= 2.5 ? "na meta" : "abaixo da meta"}

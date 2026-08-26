@@ -7,8 +7,8 @@ const estilos = cva(
   {
     variants: {
       tom: {
-        neutro: "bg-white/5 text-ink-200 ring-white/10",
-        azul: "bg-mrg-500/15 text-mrg-300 ring-mrg-500/30",
+        neutro: "bg-nevoa text-grafite ring-borda",
+        azul: "bg-mrg-500/15 text-mrg-600 ring-mrg-500/30",
         sucesso: "bg-sucesso/15 text-sucesso ring-sucesso/30",
         alerta: "bg-alerta/15 text-alerta ring-alerta/30",
         perigo: "bg-perigo/15 text-perigo ring-perigo/30",

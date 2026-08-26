@@ -36,7 +36,7 @@ export function FormularioCadastro() {
 
   if (pronto) {
     return (
-      <div className="mt-8 rounded-lg border border-sucesso/25 bg-sucesso/10 p-5 text-sm text-ink-100">
+      <div className="mt-8 rounded-lg border border-sucesso/25 bg-sucesso/10 p-5 text-sm text-tinta">
         Enviamos um link de confirmação para <strong>{email}</strong>. Abra o e-mail para ativar a conta.
       </div>
     );

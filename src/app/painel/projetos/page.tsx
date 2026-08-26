@@ -33,26 +33,26 @@ export default function PaginaProjetos() {
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {PROJETOS.map((p) => (
-            <article key={p.id} className="cartao-vidro rounded-lg p-5">
+            <article key={p.id} className="cartao rounded-lg p-5">
               <div className="flex items-start justify-between gap-3">
-                <h3 className="font-semibold text-white">{p.nome}</h3>
+                <h3 className="font-semibold text-tinta">{p.nome}</h3>
                 <Etiqueta tom={p.status === "ativo" ? "azul" : p.status === "concluido" ? "sucesso" : "alerta"}>
                   {p.status}
                 </Etiqueta>
               </div>
-              <p className="mt-1 text-xs text-ink-400">{p.cliente} · {p.responsavel}</p>
+              <p className="mt-1 text-xs text-cinza">{p.cliente} · {p.responsavel}</p>
 
               <div className="mt-5">
-                <div className="mb-1.5 flex justify-between text-[11px] text-ink-500">
+                <div className="mb-1.5 flex justify-between text-[11px] text-cinza-claro">
                   <span>Progresso</span>
                   <span>{p.progresso}%</span>
                 </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                <div className="h-1.5 overflow-hidden rounded-full bg-nevoa-2">
                   <div className="h-full bg-gradient-to-r from-mrg-600 to-mrg-400" style={{ width: `${p.progresso}%` }} />
                 </div>
               </div>
 
-              <p className="mt-4 text-xs text-ink-500">Prazo: {dataCompleta(p.prazo)}</p>
+              <p className="mt-4 text-xs text-cinza-claro">Prazo: {dataCompleta(p.prazo)}</p>
             </article>
           ))}
         </section>

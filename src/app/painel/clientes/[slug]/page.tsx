@@ -40,8 +40,8 @@ export default async function PaginaCliente({ params }: { params: Promise<{ slug
           <Kpi rotulo="Leads gerados" valor={numero(leads)} detalhe={`CPL ${brl(divisao(investimento, leads))}`} />
         </section>
 
-        <section className="cartao-vidro rounded-lg p-5">
-          <h2 className="mb-4 font-display text-base font-bold text-white">Desempenho diário</h2>
+        <section className="cartao rounded-lg p-5">
+          <h2 className="mb-4 font-display text-base font-bold text-tinta">Desempenho diário</h2>
           <GraficoArea
             dados={DEMO_SERIE}
             series={[
@@ -53,15 +53,15 @@ export default async function PaginaCliente({ params }: { params: Promise<{ slug
 
         <section className="grid gap-4 xl:grid-cols-2">
           <div>
-            <h2 className="mb-3 font-display text-base font-bold text-white">Tarefas do cliente</h2>
+            <h2 className="mb-3 font-display text-base font-bold text-tinta">Tarefas do cliente</h2>
             <Tabela>
               <Cabecalhos colunas={["Tarefa", "Responsável", "Prazo", "Status"]} />
               <tbody>
                 {DEMO_TAREFAS.slice(0, 4).map((t) => (
                   <Linha key={t.id}>
-                    <Celula className="max-w-56 truncate text-white">{t.titulo}</Celula>
-                    <Celula className="text-ink-400">{t.responsavel}</Celula>
-                    <Celula className="text-ink-400">{dataCompleta(t.vence_em)}</Celula>
+                    <Celula className="max-w-56 truncate text-tinta">{t.titulo}</Celula>
+                    <Celula className="text-cinza">{t.responsavel}</Celula>
+                    <Celula className="text-cinza">{dataCompleta(t.vence_em)}</Celula>
                     <Celula><Etiqueta tom={t.status === "concluida" ? "sucesso" : "azul"}>{t.status}</Etiqueta></Celula>
                   </Linha>
                 ))}
@@ -70,15 +70,15 @@ export default async function PaginaCliente({ params }: { params: Promise<{ slug
           </div>
 
           <div>
-            <h2 className="mb-3 font-display text-base font-bold text-white">Financeiro do cliente</h2>
+            <h2 className="mb-3 font-display text-base font-bold text-tinta">Financeiro do cliente</h2>
             <Tabela>
               <Cabecalhos colunas={["Descrição", "Vencimento", "Valor", "Status"]} />
               <tbody>
                 {DEMO_LANCAMENTOS.filter((l) => l.tipo === "receita").slice(0, 4).map((l) => (
                   <Linha key={l.id}>
-                    <Celula className="text-white">{l.descricao}</Celula>
-                    <Celula className="text-ink-400">{dataCompleta(l.vencimento)}</Celula>
-                    <Celula className="font-medium text-white">{brl(l.valor)}</Celula>
+                    <Celula className="text-tinta">{l.descricao}</Celula>
+                    <Celula className="text-cinza">{dataCompleta(l.vencimento)}</Celula>
+                    <Celula className="font-medium text-tinta">{brl(l.valor)}</Celula>
                     <Celula>
                       <Etiqueta tom={l.status === "pago" ? "sucesso" : l.status === "atrasado" ? "perigo" : "alerta"}>
                         {l.status}

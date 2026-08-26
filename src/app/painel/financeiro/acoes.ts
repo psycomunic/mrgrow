@@ -18,7 +18,7 @@ export type DadosLancamento = {
 };
 
 const TIPOS = ["receita", "despesa"];
-const STATUS = ["pendente", "pago", "atrasado", "cancelado"];
+const STATUS = ["pendente", "previsto", "pago", "atrasado", "cancelado"];
 
 function validar(d: DadosLancamento): string | null {
   if (!d.descricao.trim()) return "Informe a descrição.";

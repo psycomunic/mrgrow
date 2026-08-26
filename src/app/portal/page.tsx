@@ -14,8 +14,8 @@ export default function PaginaPortal() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-extrabold text-white">Sua conta nos últimos 30 dias</h1>
-        <p className="mt-1 text-sm text-ink-400">
+        <h1 className="font-display text-2xl font-extrabold text-tinta">Sua conta nos últimos 30 dias</h1>
+        <p className="mt-1 text-sm text-cinza">
           Dados sincronizados direto do Meta Ads, Google Ads e GA4 — atualizados várias vezes ao dia.
         </p>
       </div>
@@ -27,8 +27,8 @@ export default function PaginaPortal() {
         <Kpi rotulo="Leads / vendas" valor={`${numero(leads)} / ${numero(compras)}`} variacao={22.8} />
       </section>
 
-      <section className="cartao-vidro rounded-lg p-5">
-        <h2 className="mb-4 font-display text-base font-bold text-white">Evolução diária</h2>
+      <section className="cartao rounded-lg p-5">
+        <h2 className="mb-4 font-display text-base font-bold text-tinta">Evolução diária</h2>
         <GraficoArea
           dados={DEMO_SERIE}
           series={[
@@ -39,14 +39,14 @@ export default function PaginaPortal() {
       </section>
 
       <section>
-        <h2 className="mb-3 font-display text-base font-bold text-white">O que a MR Grow está fazendo agora</h2>
+        <h2 className="mb-3 font-display text-base font-bold text-tinta">O que a MR Grow está fazendo agora</h2>
         <Tabela>
           <Cabecalhos colunas={["Entrega", "Prazo", "Status"]} />
           <tbody>
             {DEMO_TAREFAS.slice(0, 5).map((t) => (
               <Linha key={t.id}>
-                <Celula className="text-white">{t.titulo}</Celula>
-                <Celula className="text-ink-400">{dataCompleta(t.vence_em)}</Celula>
+                <Celula className="text-tinta">{t.titulo}</Celula>
+                <Celula className="text-cinza">{dataCompleta(t.vence_em)}</Celula>
                 <Celula><Etiqueta tom={t.status === "concluida" ? "sucesso" : "azul"}>{t.status}</Etiqueta></Celula>
               </Linha>
             ))}

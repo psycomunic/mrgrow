@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
 /* ══════════════════════════════════════════════════════════════
-   MR GROW — Design tokens
-   Identidade: azul elétrico sobre preto profundo.
+   MR GROW — Design tokens do painel
+   Identidade: azul elétrico sobre papel quase branco.
+
+   A landing (`(site)/sitio.css`) é escura e tem folha própria:
+   nada aqui a alcança. Estes tokens valem para /painel, /portal
+   e /entrar.
    ══════════════════════════════════════════════════════════════ */
 
 @theme {
@@ -19,43 +23,58 @@
   --color-mrg-900: #12316d;
   --color-mrg-950: #0d1f45;
 
-  /* Pretos / neutros frios */
-  --color-ink-950: #04060b;
-  --color-ink-900: #070a11;
-  --color-ink-850: #0b0f17;
-  --color-ink-800: #10151f;
-  --color-ink-700: #171d29;
-  --color-ink-600: #232b3a;
-  --color-ink-500: #38425a;
-  --color-ink-400: #5b6780;
-  --color-ink-300: #8b96ad;
-  --color-ink-200: #b9c2d4;
-  --color-ink-100: #dfe4ee;
+  /* Superfícies, em três degraus: a página é lavanda, a concha que
+     abriga o app é quase branca e o cartão é branco puro. É o degrau
+     que dá profundidade, não a sombra. */
+  --color-papel: #e7e9f6;
+  --color-concha: #f7f8fc;
+  --color-carta: #ffffff;
+  --color-nevoa: #f3f4fa;
+  --color-nevoa-2: #eaecf6;
 
-  /* Semânticos */
-  --color-sucesso: #12b981;
-  --color-alerta: #f5a524;
-  --color-perigo: #f43f5e;
+  /* Chips pastel dos indicadores */
+  --color-chip-azul:   #eceffe;
+  --color-chip-menta:  #e2f6ef;
+  --color-chip-rosa:   #fdeaee;
+  --color-chip-pessego:#fff2e4;
+
+  /* Traços — quase invisíveis: quem separa é a superfície */
+  --color-borda: #e9ebf3;
+  --color-borda-fraca: #f1f2f8;
+  --color-borda-forte: #d6dae8;
+
+  /* Texto, do mais forte ao mais apagado */
+  --color-tinta: #0f1728;
+  --color-grafite: #475467;
+  --color-cinza: #667085;
+  --color-cinza-claro: #98a2b3;
+
+  /* Semânticos — escurecidos para ler sobre branco */
+  --color-sucesso: #067a55;
+  --color-alerta: #b54708;
+  --color-perigo: #d92d3f;
   --color-info: #1668f5;
 
   --font-sans: var(--fonte-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: var(--fonte-display), var(--fonte-sans), ui-sans-serif, system-ui, sans-serif;
 
-  --radius-xs: 6px;
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 30px;
 
-  --shadow-glow: 0 0 0 1px color-mix(in oklab, var(--color-mrg-500) 35%, transparent),
-                 0 18px 50px -18px color-mix(in oklab, var(--color-mrg-500) 65%, transparent);
-  --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.04) inset,
-                 0 24px 60px -32px rgb(0 0 0 / 0.9);
+  --shadow-glow: 0 0 0 1px color-mix(in oklab, var(--color-mrg-500) 30%, transparent),
+                 0 12px 28px -12px color-mix(in oklab, var(--color-mrg-500) 55%, transparent);
+  /* Sombra difusa e fria, tingida do azul do fundo. Sombra neutra e
+     dura sobre lavanda lê como sujeira. */
+  --shadow-card: 0 2px 4px -2px rgb(48 56 112 / .06),
+                 0 12px 32px -12px rgb(48 56 112 / .12);
+  --shadow-concha: 0 8px 40px -16px rgb(48 56 112 / .16);
 
   --animate-flutuar: flutuar 7s ease-in-out infinite;
   --animate-surgir: surgir .6s cubic-bezier(.22,1,.36,1) both;
 }
-
 
 @keyframes flutuar {
   0%, 100% { transform: translateY(0); }
@@ -69,11 +88,11 @@
 /* ── Base ───────────────────────────────────────────────────── */
 
 :root {
-  color-scheme: dark;
-  --fundo: var(--color-ink-950);
-  --texto: var(--color-ink-100);
-  --superficie: var(--color-ink-900);
-  --borda: color-mix(in oklab, var(--color-ink-100) 10%, transparent);
+  color-scheme: light;
+  --fundo: var(--color-papel);
+  --texto: var(--color-tinta);
+  --superficie: var(--color-carta);
+  --borda: var(--color-borda);
 }
 
 * { border-color: var(--borda); }
@@ -91,13 +110,13 @@ body {
 ::selection { background: var(--color-mrg-500); color: #fff; }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: var(--color-ink-950); }
+::-webkit-scrollbar-track { background: var(--color-papel); }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-ink-700);
+  background: var(--color-borda-forte);
   border-radius: 999px;
-  border: 2px solid var(--color-ink-950);
+  border: 2px solid var(--color-papel);
 }
-::-webkit-scrollbar-thumb:hover { background: var(--color-ink-600); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-cinza-claro); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -118,34 +137,41 @@ body {
 }
 
 @utility texto-gradiente {
-  background-image: linear-gradient(100deg, #ffffff 10%, var(--color-mrg-300) 55%, var(--color-mrg-500) 95%);
+  background-image: linear-gradient(100deg, var(--color-tinta) 10%, var(--color-mrg-700) 55%, var(--color-mrg-500) 95%);
   background-clip: text;
   color: transparent;
 }
 
-@utility cartao-vidro {
-  background: linear-gradient(180deg, rgb(255 255 255 / .045), rgb(255 255 255 / .015));
-  border: 1px solid rgb(255 255 255 / .08);
-  backdrop-filter: blur(14px);
+@utility cartao {
+  /* No tema claro o cartão sobe ficando branco sobre o fundo lavanda.
+     É o inverso do tema escuro, onde ele subia com um véu branco. */
+  background: var(--color-carta);
+  border: 1px solid var(--color-borda);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
 }
 
+@utility concha {
+  background: var(--color-concha);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-concha);
+}
+
 @utility malha-fundo {
-  /* Gradiente sutil e assimétrico — sem a repetição de grade de template SaaS */
   background-image:
-    radial-gradient(48rem 32rem at 30% -5%, color-mix(in oklab, var(--color-mrg-700) 22%, transparent), transparent 68%),
-    radial-gradient(28rem 20rem at 80% 15%, color-mix(in oklab, var(--color-mrg-900) 30%, transparent), transparent 60%);
+    radial-gradient(48rem 32rem at 30% -5%, color-mix(in oklab, var(--color-mrg-500) 10%, transparent), transparent 68%),
+    radial-gradient(28rem 20rem at 80% 15%, color-mix(in oklab, var(--color-mrg-400) 8%, transparent), transparent 60%);
 }
 
 @utility grade-fundo {
-  /* Mantida por compatibilidade, mas não usada — substituída por malha-fundo assimétrica */
+  /* Mantida por compatibilidade, mas não usada. */
   display: none;
 }
 
 @utility foco-anel {
   outline: none;
   &:focus-visible {
-    outline: 2px solid var(--color-mrg-400);
+    outline: 2px solid var(--color-mrg-500);
     outline-offset: 2px;
   }
 }

@@ -38,24 +38,24 @@ export default function PaginaTarefas() {
           {COLUNAS.map((coluna) => {
             const daColuna = DEMO_TAREFAS.filter((t) => t.status === coluna.chave);
             return (
-              <section key={coluna.chave} className="rounded-lg border border-white/8 bg-white/[0.02] p-3">
+              <section key={coluna.chave} className="rounded-lg border border-borda bg-nevoa p-3">
                 <div className="mb-3 flex items-center justify-between px-1">
-                  <h2 className="text-sm font-semibold text-white">{coluna.rotulo}</h2>
-                  <span className="rounded-full bg-white/8 px-1.5 text-[11px] text-ink-300">{daColuna.length}</span>
+                  <h2 className="text-sm font-semibold text-tinta">{coluna.rotulo}</h2>
+                  <span className="rounded-full bg-nevoa-2 px-1.5 text-[11px] text-grafite">{daColuna.length}</span>
                 </div>
                 <div className="space-y-2">
                   {daColuna.map((t) => (
-                    <article key={t.id} className="cartao-vidro rounded-md p-3.5">
-                      <p className="text-sm font-medium text-white">{t.titulo}</p>
-                      <p className="mt-1 text-xs text-ink-400">{t.cliente}</p>
+                    <article key={t.id} className="cartao rounded-md p-3.5">
+                      <p className="text-sm font-medium text-tinta">{t.titulo}</p>
+                      <p className="mt-1 text-xs text-cinza">{t.cliente}</p>
                       <div className="mt-3 flex items-center justify-between">
                         <Etiqueta tom={TOM_PRIORIDADE[t.prioridade]}>{t.prioridade}</Etiqueta>
-                        <span className="text-[11px] text-ink-500">{dataCompleta(t.vence_em)}</span>
+                        <span className="text-[11px] text-cinza-claro">{dataCompleta(t.vence_em)}</span>
                       </div>
                     </article>
                   ))}
                   {!daColuna.length && (
-                    <p className="rounded-md border border-dashed border-white/10 p-4 text-center text-xs text-ink-500">
+                    <p className="rounded-md border border-dashed border-borda p-4 text-center text-xs text-cinza-claro">
                       Nada por aqui
                     </p>
                   )}

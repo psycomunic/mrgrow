@@ -68,7 +68,7 @@ export function FichaCliente({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex justify-end bg-ink-950/70 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex justify-end bg-papel/70 backdrop-blur-sm"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) aoFechar();
       }}
@@ -77,25 +77,25 @@ export function FichaCliente({
         role="dialog"
         aria-modal="true"
         aria-label={cliente.nome}
-        className="flex h-full w-full max-w-xl flex-col border-l border-white/10 bg-ink-950 shadow-2xl"
+        className="flex h-full w-full max-w-xl flex-col border-l border-borda bg-papel shadow-2xl"
       >
-        <header className="border-b border-white/8 px-6 py-5">
+        <header className="border-b border-borda px-6 py-5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">
-              <span className="grid size-12 shrink-0 place-items-center rounded-md bg-gradient-to-br from-mrg-500/30 to-mrg-800/30 font-display text-base font-bold text-mrg-200 ring-1 ring-white/10">
+              <span className="grid size-12 shrink-0 place-items-center rounded-md bg-gradient-to-br from-mrg-500/30 to-mrg-800/30 font-display text-base font-bold text-mrg-700 ring-1 ring-borda">
                 {iniciais(cliente.nome)}
               </span>
               <div className="min-w-0">
-                <h2 className="truncate font-display text-2xl font-extrabold text-white">
+                <h2 className="truncate font-display text-2xl font-extrabold text-tinta">
                   {cliente.nome}
                 </h2>
-                <p className="mt-0.5 text-sm text-ink-400">{cliente.segmento ?? "Sem segmento"}</p>
+                <p className="mt-0.5 text-sm text-cinza">{cliente.segmento ?? "Sem segmento"}</p>
               </div>
             </div>
             <button
               onClick={aoFechar}
               aria-label="Fechar"
-              className="shrink-0 rounded-sm p-2 text-ink-400 transition-colors hover:bg-white/5 hover:text-white foco-anel"
+              className="shrink-0 rounded-sm p-2 text-cinza transition-colors hover:bg-nevoa hover:text-tinta foco-anel"
             >
               <X className="size-4" />
             </button>
@@ -119,23 +119,23 @@ export function FichaCliente({
           {/* Saúde primeiro: é o que decide se a conta precisa de atenção. */}
           <section>
             <div className="mb-2 flex items-baseline justify-between">
-              <h3 className="text-[11px] font-bold tracking-wider text-ink-500 uppercase">
+              <h3 className="text-[11px] font-bold tracking-wider text-cinza-claro uppercase">
                 Saúde da conta
               </h3>
-              <span className="text-sm text-ink-300">
-                <strong className="font-display text-lg font-extrabold text-white">
+              <span className="text-sm text-grafite">
+                <strong className="font-display text-lg font-extrabold text-tinta">
                   {cliente.saude}
                 </strong>
-                <span className="text-ink-500">/100</span>
+                <span className="text-cinza-claro">/100</span>
               </span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-white/10">
+            <div className="h-2 overflow-hidden rounded-full bg-nevoa-2">
               <div
                 className={`h-full ${corSaude(cliente.saude)}`}
                 style={{ width: `${cliente.saude}%` }}
               />
             </div>
-            <p className="mt-2 text-xs text-ink-400">{leituraSaude(cliente.saude)}</p>
+            <p className="mt-2 text-xs text-cinza">{leituraSaude(cliente.saude)}</p>
           </section>
 
           <section className="grid grid-cols-2 gap-3">
@@ -154,10 +154,10 @@ export function FichaCliente({
           </section>
 
           <section>
-            <h3 className="mb-3 text-[11px] font-bold tracking-wider text-ink-500 uppercase">
+            <h3 className="mb-3 text-[11px] font-bold tracking-wider text-cinza-claro uppercase">
               Contrato
             </h3>
-            <dl className="divide-y divide-white/8 rounded-lg border border-white/8">
+            <dl className="divide-y divide-borda rounded-lg border border-borda">
               <Linha
                 rotulo="Início"
                 valor={cliente.inicio_contrato ? dataCompleta(cliente.inicio_contrato) : "—"}
@@ -178,7 +178,7 @@ export function FichaCliente({
 
           {(cliente.site || cliente.instagram) && (
             <section>
-              <h3 className="mb-3 text-[11px] font-bold tracking-wider text-ink-500 uppercase">
+              <h3 className="mb-3 text-[11px] font-bold tracking-wider text-cinza-claro uppercase">
                 Links
               </h3>
               <div className="flex flex-wrap gap-2">
@@ -187,7 +187,7 @@ export function FichaCliente({
                     href={cliente.site}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-ink-200 transition-colors hover:bg-white/[0.06] foco-anel"
+                    className="inline-flex items-center gap-2 rounded-md border border-borda bg-nevoa px-3 py-2 text-sm text-grafite transition-colors hover:bg-nevoa-2 foco-anel"
                   >
                     <ExternalLink className="size-3.5" /> Site
                   </a>
@@ -197,7 +197,7 @@ export function FichaCliente({
                     href={`https://instagram.com/${cliente.instagram.replace("@", "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-ink-200 transition-colors hover:bg-white/[0.06] foco-anel"
+                    className="inline-flex items-center gap-2 rounded-md border border-borda bg-nevoa px-3 py-2 text-sm text-grafite transition-colors hover:bg-nevoa-2 foco-anel"
                   >
                     <Instagram className="size-3.5" /> {cliente.instagram}
                   </a>
@@ -207,7 +207,7 @@ export function FichaCliente({
           )}
         </div>
 
-        <footer className="flex flex-wrap items-center gap-2 border-t border-white/8 px-6 py-4">
+        <footer className="flex flex-wrap items-center gap-2 border-t border-borda px-6 py-4">
           <BotaoLink href={`/painel/clientes/${cliente.slug}`} tamanho="sm">
             Abrir ficha completa
             <ArrowUpRight className="size-4" />
@@ -245,14 +245,14 @@ function Bloco({
   destaque?: boolean;
 }) {
   return (
-    <div className="rounded-md border border-white/8 bg-white/[0.03] p-3.5">
-      <p className="text-[11px] tracking-wider text-ink-500 uppercase">{rotulo}</p>
+    <div className="rounded-md border border-borda bg-nevoa p-3.5">
+      <p className="text-[11px] tracking-wider text-cinza-claro uppercase">{rotulo}</p>
       <p
-        className={`mt-1.5 font-display font-extrabold text-white ${destaque ? "text-xl" : "text-base"}`}
+        className={`mt-1.5 font-display font-extrabold text-tinta ${destaque ? "text-xl" : "text-base"}`}
       >
         {valor}
       </p>
-      <p className="mt-0.5 text-[11px] text-ink-500">{nota}</p>
+      <p className="mt-0.5 text-[11px] text-cinza-claro">{nota}</p>
     </div>
   );
 }
@@ -268,11 +268,11 @@ function Linha({
 }) {
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-3">
-      <dt className="flex items-center gap-2 text-sm text-ink-400">
-        <Icone className="size-3.5 text-ink-500" />
+      <dt className="flex items-center gap-2 text-sm text-cinza">
+        <Icone className="size-3.5 text-cinza-claro" />
         {rotulo}
       </dt>
-      <dd className="text-sm font-medium text-white">{valor}</dd>
+      <dd className="text-sm font-medium text-tinta">{valor}</dd>
     </div>
   );
 }

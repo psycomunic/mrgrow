@@ -23,9 +23,9 @@ export default function PaginaConfiguracoes() {
       <Topo titulo="Configurações" descricao="Dados da agência, marca e credenciais das integrações." />
 
       <div className="grid gap-6 p-5 sm:p-8 xl:grid-cols-2">
-        <section className="cartao-vidro rounded-lg p-6">
-          <h2 className="font-display text-base font-bold text-white">Dados da agência</h2>
-          <p className="mt-1 text-sm text-ink-400">Aparecem em propostas, relatórios e no portal do cliente.</p>
+        <section className="cartao rounded-lg p-6">
+          <h2 className="font-display text-base font-bold text-tinta">Dados da agência</h2>
+          <p className="mt-1 text-sm text-cinza">Aparecem em propostas, relatórios e no portal do cliente.</p>
 
           <form className="mt-6 space-y-4">
             <Campo rotulo="Nome"><Entrada defaultValue="MR Grow" /></Campo>
@@ -39,29 +39,29 @@ export default function PaginaConfiguracoes() {
           </form>
         </section>
 
-        <section className="cartao-vidro rounded-lg p-6">
-          <h2 className="font-display text-base font-bold text-white">Credenciais e ambiente</h2>
-          <p className="mt-1 text-sm text-ink-400">
-            Por segurança, chaves ficam no arquivo <code className="text-ink-200">.env.local</code> (e nas
+        <section className="cartao rounded-lg p-6">
+          <h2 className="font-display text-base font-bold text-tinta">Credenciais e ambiente</h2>
+          <p className="mt-1 text-sm text-cinza">
+            Por segurança, chaves ficam no arquivo <code className="text-grafite">.env.local</code> (e nas
             variáveis de ambiente da Vercel) — nunca no banco.
           </p>
 
           <ul className="mt-6 space-y-2">
             {VARIAVEIS.map((v) => (
-              <li key={v.chave} className="rounded-md border border-white/8 bg-white/[0.02] p-3">
-                <p className="font-mono text-xs break-all text-mrg-300">{v.chave}</p>
-                <p className="mt-1 text-xs text-ink-400">{v.nota}</p>
+              <li key={v.chave} className="rounded-md border border-borda bg-nevoa p-3">
+                <p className="font-mono text-xs break-all text-mrg-600">{v.chave}</p>
+                <p className="mt-1 text-xs text-cinza">{v.nota}</p>
               </li>
             ))}
           </ul>
 
-          <div className="mt-6 rounded-md border border-mrg-500/25 bg-mrg-500/8 p-4 text-sm text-ink-200">
-            <p className="font-semibold text-white">Primeiros passos</p>
-            <ol className="mt-2 list-inside list-decimal space-y-1 text-ink-300">
+          <div className="mt-6 rounded-md border border-mrg-500/25 bg-mrg-500/8 p-4 text-sm text-grafite">
+            <p className="font-semibold text-tinta">Primeiros passos</p>
+            <ol className="mt-2 list-inside list-decimal space-y-1 text-grafite">
               <li>Crie o projeto no Supabase e copie URL e chaves.</li>
-              <li>Rode <code className="text-ink-100">npx supabase db push</code> para aplicar as migrations.</li>
-              <li>Crie seu usuário em <code className="text-ink-100">/cadastro</code>.</li>
-              <li>Insira seu vínculo em <code className="text-ink-100">membros_organizacao</code> como proprietário.</li>
+              <li>Rode <code className="text-tinta">npx supabase db push</code> para aplicar as migrations.</li>
+              <li>Crie seu usuário em <code className="text-tinta">/cadastro</code>.</li>
+              <li>Insira seu vínculo em <code className="text-tinta">membros_organizacao</code> como proprietário.</li>
               <li>Conecte Meta e Google na central de integrações.</li>
             </ol>
           </div>

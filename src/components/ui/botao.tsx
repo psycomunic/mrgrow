@@ -9,12 +9,13 @@ const estilos = cva(
     variants: {
       variante: {
         primario:
-          "bg-mrg-500 text-white shadow-[0_10px_30px_-12px_rgba(22,104,245,.9)] hover:bg-mrg-400 hover:shadow-[0_14px_38px_-12px_rgba(22,104,245,1)] active:translate-y-px",
-        secundario: "bg-white text-ink-950 hover:bg-ink-100",
-        contorno: "border border-white/15 bg-white/5 text-ink-100 hover:bg-white/10 hover:border-white/25",
-        fantasma: "text-ink-200 hover:bg-white/5 hover:text-white",
+          "bg-mrg-500 text-white shadow-[0_8px_20px_-8px_rgba(22,104,245,.55)] hover:bg-mrg-600 hover:shadow-[0_10px_26px_-8px_rgba(22,104,245,.7)] active:translate-y-px",
+        // Invertido: escuro sobre claro é o que sobressai neste tema.
+        secundario: "bg-tinta text-white hover:bg-grafite",
+        contorno: "border border-borda-forte bg-carta text-tinta hover:bg-nevoa",
+        fantasma: "text-grafite hover:bg-nevoa hover:text-tinta",
         perigo: "bg-perigo text-white hover:brightness-110",
-        sucesso: "bg-sucesso text-ink-950 hover:brightness-110",
+        sucesso: "bg-sucesso text-white hover:brightness-110",
       },
       tamanho: {
         sm: "h-9 rounded-sm px-3.5 text-sm",

@@ -12,11 +12,14 @@ export function GraficoArea({
   series,
   formatoY = "moeda",
   altura = 300,
+  rotuloX = dataCurta,
 }: {
   dados: Ponto[];
   series: Array<{ chave: string; rotulo: string; cor: string }>;
   formatoY?: "moeda" | "numero";
   altura?: number;
+  /** O eixo X nem sempre é data: o fluxo mensal passa rótulos de mês. */
+  rotuloX?: (v: string) => string;
 }) {
   const fmt = (v: number) => (formatoY === "moeda" ? brl(v) : compacto(v));
 
@@ -27,38 +30,40 @@ export function GraficoArea({
           <defs>
             {series.map((s) => (
               <linearGradient key={s.chave} id={`grad-${s.chave}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={s.cor} stopOpacity={0.45} />
+                <stop offset="0%" stopColor={s.cor} stopOpacity={0.22} />
                 <stop offset="100%" stopColor={s.cor} stopOpacity={0} />
               </linearGradient>
             ))}
           </defs>
-          <CartesianGrid stroke="rgba(255,255,255,.06)" vertical={false} />
+          <CartesianGrid stroke="#eceef5" strokeDasharray="4 4" vertical={false} />
           <XAxis
             dataKey="data"
-            tickFormatter={(v) => dataCurta(v as string)}
-            tick={{ fill: "#8b96ad", fontSize: 11 }}
+            tickFormatter={(v) => rotuloX(v as string)}
+            tick={{ fill: "#98a2b3", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             minTickGap={24}
           />
           <YAxis
             tickFormatter={(v) => compacto(v as number)}
-            tick={{ fill: "#8b96ad", fontSize: 11 }}
+            tick={{ fill: "#98a2b3", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             width={52}
           />
           <Tooltip
             contentStyle={{
-              background: "#0b0f17",
-              border: "1px solid rgba(255,255,255,.1)",
+              background: "#ffffff",
+              border: "1px solid #e9ebf3",
               borderRadius: 12,
+              boxShadow: "0 12px 32px -12px rgb(48 56 112 / .18)",
               fontSize: 12,
+              color: "#0f1728",
             }}
-            labelFormatter={(v) => dataCurta(v as string)}
+            labelFormatter={(v) => rotuloX(v as string)}
             formatter={(valor, nome) => [fmt(Number(valor)), nome as string]}
           />
-          <Legend wrapperStyle={{ fontSize: 12, color: "#b9c2d4" }} />
+          <Legend wrapperStyle={{ fontSize: 12, color: "#667085" }} iconType="circle" iconSize={8} />
           {series.map((s) => (
             <Area
               key={s.chave}
@@ -66,7 +71,7 @@ export function GraficoArea({
               dataKey={s.chave}
               name={s.rotulo}
               stroke={s.cor}
-              strokeWidth={2}
+              strokeWidth={2.5}
               fill={`url(#grad-${s.chave})`}
             />
           ))}
