@@ -1,4 +1,5 @@
 import * as React from "react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const base =
@@ -17,11 +18,26 @@ export const AreaTexto = React.forwardRef<
 ));
 AreaTexto.displayName = "AreaTexto";
 
+/**
+ * O `appearance-none` tira a seta nativa, então ela precisa ser desenhada.
+ * Sem isso o campo fica idêntico a um input de texto e ninguém percebe que
+ * pode abrir.
+ */
 export const Selecao = React.forwardRef<
   HTMLSelectElement,
   React.SelectHTMLAttributes<HTMLSelectElement>
 >(({ className, ...props }, ref) => (
-  <select ref={ref} className={cn(base, "appearance-none bg-ink-900 pr-9", className)} {...props} />
+  <span className="relative block">
+    <select
+      ref={ref}
+      className={cn(base, "appearance-none bg-ink-900 pr-9", className)}
+      {...props}
+    />
+    <ChevronDown
+      aria-hidden
+      className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-ink-400"
+    />
+  </span>
 ));
 Selecao.displayName = "Selecao";
 

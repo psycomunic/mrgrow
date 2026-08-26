@@ -3,15 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   Check,
-  Flame,
   MessageCircle,
   Phone,
   Mail,
   Users,
   StickyNote,
   Pencil,
-  Snowflake,
-  Thermometer,
   Trash2,
   X,
 } from "lucide-react";
@@ -22,18 +19,8 @@ import { brl, dataCompleta } from "@/lib/utils";
 import { listarAtividades, registrarAtividade, type Atividade } from "./acoes";
 import { useCrm } from "./contexto";
 import { DialogoNegocio } from "./dialogo";
+import { rotuloOrigem, temperatura } from "./rotulos";
 import type { NegocioQuadro } from "@/lib/crm";
-
-const ICONE_TEMP: Record<string, typeof Flame> = {
-  quente: Flame,
-  morno: Thermometer,
-  frio: Snowflake,
-};
-const TOM_TEMP: Record<string, "perigo" | "alerta" | "azul"> = {
-  quente: "perigo",
-  morno: "alerta",
-  frio: "azul",
-};
 
 const TIPOS = [
   { v: "nota", r: "Nota", Icone: StickyNote },
@@ -88,7 +75,7 @@ export function DetalheNegocio({
 
   const etapa = etapas.find((e) => e.id === negocio.etapa_id);
   const indiceAtual = etapas.findIndex((e) => e.id === negocio.etapa_id);
-  const IconeTemp = ICONE_TEMP[negocio.temperatura] ?? Thermometer;
+  const temp = temperatura(negocio.temperatura);
   const anual = negocio.valor_mensal * 12 + negocio.valor_unico;
 
   async function enviarAtividade(e: React.FormEvent) {
@@ -160,11 +147,11 @@ export function DetalheNegocio({
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-1.5">
-              <Etiqueta tom={TOM_TEMP[negocio.temperatura]}>
-                <IconeTemp className="mr-1 inline size-3" />
-                {negocio.temperatura}
+              <Etiqueta tom={temp.tom}>
+                <temp.Icone className="mr-1 inline size-3" />
+                {temp.r}
               </Etiqueta>
-              {negocio.origem && <Etiqueta>{negocio.origem}</Etiqueta>}
+              {negocio.origem && <Etiqueta>{rotuloOrigem(negocio.origem)}</Etiqueta>}
               {negocio.previsao && (
                 <Etiqueta>Previsão: {dataCompleta(negocio.previsao)}</Etiqueta>
               )}

@@ -1,23 +1,13 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Flame, Snowflake, Thermometer, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Etiqueta } from "@/components/ui/etiqueta";
 import { brl, dataCompleta } from "@/lib/utils";
 import { useCrm } from "./contexto";
 import { DialogoNegocio } from "./dialogo";
 import { DetalheNegocio } from "./detalhe";
-
-const ICONE_TEMP: Record<string, typeof Flame> = {
-  quente: Flame,
-  morno: Thermometer,
-  frio: Snowflake,
-};
-const TOM_TEMP: Record<string, "perigo" | "alerta" | "azul"> = {
-  quente: "perigo",
-  morno: "alerta",
-  frio: "azul",
-};
+import { rotuloOrigem, temperatura } from "./rotulos";
 
 /**
  * Quadro do funil com arrastar-e-soltar nativo (HTML5).
@@ -85,7 +75,7 @@ export function Kanban() {
 
                 <div className="flex-1 space-y-2">
                   {daEtapa.map((n) => {
-                    const IconeTemp = ICONE_TEMP[n.temperatura] ?? Thermometer;
+                    const temp = temperatura(n.temperatura);
                     return (
                       <button
                         type="button"
@@ -107,7 +97,7 @@ export function Kanban() {
                       >
                         <div className="flex items-start justify-between gap-2">
                           <h4 className="text-sm font-semibold text-white">{n.titulo}</h4>
-                          <IconeTemp className="size-3.5 shrink-0 text-ink-400" />
+                          <temp.Icone className="size-3.5 shrink-0 text-ink-400" />
                         </div>
                         {n.contato && <p className="mt-1 text-xs text-ink-400">{n.contato}</p>}
 
@@ -120,8 +110,8 @@ export function Kanban() {
                         )}
 
                         <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                          <Etiqueta tom={TOM_TEMP[n.temperatura]}>{n.temperatura}</Etiqueta>
-                          {n.origem && <Etiqueta>{n.origem}</Etiqueta>}
+                          <Etiqueta tom={temp.tom}>{temp.r}</Etiqueta>
+                          {n.origem && <Etiqueta>{rotuloOrigem(n.origem)}</Etiqueta>}
                         </div>
                         {n.previsao && (
                           <p className="mt-2.5 text-[11px] text-ink-500">
