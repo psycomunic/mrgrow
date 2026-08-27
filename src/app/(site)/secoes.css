@@ -2277,8 +2277,8 @@
      branco e denso como a tela do Instagram. A opacidade despencava de
      um valor ainda alto para zero em poucos pixels, e o olho lia isso
      como corte, não como dissolução. */
-  -webkit-mask-image: linear-gradient(to bottom, #000 42%, rgb(0 0 0 / 0.5) 74%, transparent 96%);
-  mask-image: linear-gradient(to bottom, #000 42%, rgb(0 0 0 / 0.5) 74%, transparent 96%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 40%, rgb(0 0 0 / 0.5) 70%, transparent 92%);
+  mask-image: linear-gradient(to bottom, #000 40%, rgb(0 0 0 / 0.5) 70%, transparent 92%);
 }
 
 @media (min-width: 62rem) {
@@ -2289,13 +2289,16 @@
        Ancorado, o quanto ele avança é exato e não depende da altura do
        texto ao lado. */
     position: absolute;
+    /* Só a cabeça do aparelho sai do painel. A base termina na borda de
+       baixo e a lateral encosta na direita sem passar, com `overflow`
+       aqui garantindo isso mesmo que o painel cresça de altura. */
     top: -5rem;
-    right: -3.5rem;
-    /* Maior que a coluna: a dissolução precisa de altura para acontecer
-       devagar, e é ela que dá ao aparelho o que atravessar. */
+    bottom: 0;
+    right: 0;
     width: 34rem;
     max-width: none;
     margin: 0;
+    overflow: hidden;
   }
 }
 
