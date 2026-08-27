@@ -6,16 +6,6 @@ import { MARCA } from "@/lib/marca";
 /** Só o arroba, para o botão. Derivado do link, para não viver em dois lugares. */
 const ARROBA = MARCA.instagramAgencia.replace(/\/+$/, "").split("/").pop() ?? "mrgrow.ag";
 
-/**
- * Números do perfil. Envelhecem junto com o mockup, que mostra os mesmos
- * valores na tela: quando um for atualizado, o outro tem que ir junto.
- */
-const NUMEROS = [
-  { v: "11,5 mil", r: "seguidores" },
-  { v: "238", r: "publicações" },
-  { v: "Toda semana", r: "conteúdo novo" },
-];
-
 export function InstagramConvite() {
   return (
     <Revelar como="section" id="instagram" className="insta">
@@ -28,14 +18,10 @@ export function InstagramConvite() {
             </span>
             <h2>O que não cabe no site, está lá</h2>
 
-            <dl className="insta__numeros">
-              {NUMEROS.map((n) => (
-                <div key={n.r}>
-                  <dt>{n.v}</dt>
-                  <dd>{n.r}</dd>
-                </div>
-              ))}
-            </dl>
+            <p className="insta__apoio">
+              Publicação nova toda semana: bastidor da operação, diagnóstico de conta e o método
+              aberto.
+            </p>
 
             <a
               href={MARCA.instagramAgencia}

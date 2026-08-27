@@ -2084,8 +2084,7 @@
 
    Painel, e não faixa aberta. Com pouco texto, a largura inteira da
    página deixava o bloco boiando num vazio que lia como inacabado.
-   Fechar num painel dá borda à composição, e os números do perfil dão
-   densidade sem trazer de volta o parágrafo que sobrava.
+   Fechar num painel dá borda à composição.
 
    O aparelho fura a moldura de propósito: é o que dá profundidade a um
    painel chapado. Por isso o painel não recorta, ao contrário do que
@@ -2167,30 +2166,13 @@
   max-width: 16ch;
 }
 
-/* ── Números do perfil ───────────────────────────────────────── */
-
-.insta__numeros {
-  margin: 1.75rem 0 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.25rem 2.5rem;
-}
-
-.insta__numeros dt {
-  font-family: var(--fonte-display), sans-serif;
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--osso);
-  line-height: 1.1;
-}
-
-.insta__numeros dd {
-  margin: 0.15rem 0 0;
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: color-mix(in oklab, var(--cinza) 85%, transparent);
+.insta__apoio {
+  margin-top: 1.35rem;
+  max-width: 34ch;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--cinza);
+  text-wrap: pretty;
 }
 
 .insta__bt {
@@ -2240,13 +2222,17 @@
 
 @media (min-width: 62rem) {
   .insta__mockup {
-    max-width: 30rem;
-    justify-self: end;
-    /* Sai pelo topo, pela direita e por baixo. No celular fica dentro:
-       lá, margem negativa à direita só criaria estouro horizontal. */
-    margin-top: -5rem;
-    margin-right: -3.5rem;
-    margin-bottom: -3rem;
+    /* Fora do fluxo, e não por margem negativa: encolher a caixa de
+       margem encolhia a linha do grid junto, a linha puxava o aparelho
+       de volta para dentro e a saída pelo topo se anulava sozinha.
+       Ancorado, o quanto ele avança é exato e não depende da altura do
+       texto ao lado. */
+    position: absolute;
+    top: -5rem;
+    right: -3.5rem;
+    width: 30rem;
+    max-width: none;
+    margin: 0;
   }
 }
 
