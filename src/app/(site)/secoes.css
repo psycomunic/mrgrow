@@ -2270,15 +2270,10 @@
      aparelho e desmontaria a profundidade. */
   position: relative;
   z-index: 1;
-  /* A foto já vem cortada na base dos aparelhos, e a linha reta lia como
-     falha de recorte. A dissolução resolve sem depender de outra foto.
-
-     Faixa longa de propósito: 72% a 100% era curto demais para conteúdo
-     branco e denso como a tela do Instagram. A opacidade despencava de
-     um valor ainda alto para zero em poucos pixels, e o olho lia isso
-     como corte, não como dissolução. */
-  -webkit-mask-image: linear-gradient(to bottom, #000 40%, rgb(0 0 0 / 0.5) 70%, transparent 92%);
-  mask-image: linear-gradient(to bottom, #000 40%, rgb(0 0 0 / 0.5) 70%, transparent 92%);
+  /* Sem dissolução: o aparelho aparece inteiro até a base. A foto já vem
+     cortada ali, mas assentada na borda do painel esse corte lê como
+     enquadramento da moldura, e não como falha de recorte, que era o
+     problema quando ele terminava solto no meio do fundo. */
 }
 
 @media (min-width: 62rem) {
@@ -2289,16 +2284,15 @@
        Ancorado, o quanto ele avança é exato e não depende da altura do
        texto ao lado. */
     position: absolute;
-    /* Só a cabeça do aparelho sai do painel. A base termina na borda de
-       baixo e a lateral encosta na direita sem passar, com `overflow`
-       aqui garantindo isso mesmo que o painel cresça de altura. */
-    top: -5rem;
-    bottom: 0;
+    /* Apoiado no pé do painel, e não preso pelo topo: assim a base fica
+       sempre rente à borda de baixo, e o quanto a cabeça sai por cima é
+       o que sobra da altura da imagem. Nada de `overflow`, que aqui só
+       serviria para cortar o que deve aparecer. */
     right: 0;
+    bottom: 0;
     width: 34rem;
     max-width: none;
     margin: 0;
-    overflow: hidden;
   }
 }
 
