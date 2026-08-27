@@ -2082,14 +2082,19 @@
 /* ══════════════════════════════════════════════════════════════
    Convite para o Instagram
 
-   Entra depois do "quem está por trás": seguir o perfil é o passo
-   natural de quem acabou de conhecer o Mateus e ainda não está
-   pronto para pedir diagnóstico. Fica antes do FAQ de propósito,
-   para não competir com o fecho, que é o ponto de conversão.
+   Faixa curta, de propósito: chapéu, uma linha e o botão. Pedir para
+   seguir não merece a mesma altura que uma seção de argumento, e a
+   versão anterior tinha parágrafo mais lista de quatro itens para
+   entregar um pedido de um clique.
+
+   Entra depois do "quem está por trás": seguir é o passo natural de
+   quem acabou de conhecer o Mateus e ainda não vai pedir diagnóstico.
+   Fica antes do FAQ para não competir com o fecho, que é o ponto de
+   conversão da página.
    ══════════════════════════════════════════════════════════════ */
 
 .insta {
-  padding-block: clamp(3.5rem, 7vw, 6rem);
+  padding-block: clamp(2.5rem, 5vw, 4rem);
   position: relative;
   isolation: isolate;
   scroll-margin-top: 4.5rem;
@@ -2101,25 +2106,26 @@
   position: absolute;
   z-index: -1;
   pointer-events: none;
-  inset: 8% -8% 12% 40%;
-  background: radial-gradient(40rem 26rem at 62% 45%, rgb(22 104 245 / 0.2), transparent 70%);
+  inset: 0 -8% 0 45%;
+  background: radial-gradient(34rem 20rem at 60% 50%, rgb(22 104 245 / 0.18), transparent 70%);
 }
 
 .insta__grade {
   display: grid;
-  gap: clamp(2.5rem, 5vw, 3.5rem);
+  gap: clamp(1.5rem, 4vw, 3rem);
   align-items: center;
 }
 
 @media (min-width: 62rem) {
   .insta__grade {
-    grid-template-columns: 1fr minmax(0, 30rem);
-    gap: 4rem;
+    grid-template-columns: 1fr minmax(0, 28rem);
+    gap: 3.5rem;
   }
 }
 
 .insta h2 {
   margin-top: 1.35rem;
+  margin-bottom: 2rem;
   font-family: var(--fonte-display), sans-serif;
   font-size: clamp(1.9rem, 4vw, 2.75rem);
   font-weight: 700;
@@ -2129,58 +2135,7 @@
   letter-spacing: -0.04em;
   text-transform: uppercase;
   text-wrap: balance;
-  max-width: 18ch;
-}
-
-.insta__texto {
-  margin-top: 1.25rem;
-  max-width: 44ch;
-  font-size: 1.0625rem;
-  line-height: 1.6;
-  color: var(--cinza);
-  text-wrap: pretty;
-}
-
-.insta__lista {
-  margin-top: 1.75rem;
-  display: grid;
-  gap: 0.7rem;
-  max-width: 46ch;
-}
-
-.insta__lista li {
-  position: relative;
-  padding-left: 1.5rem;
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  color: var(--osso);
-}
-
-/* Fio azul curto no lugar de marcador redondo: acompanha o traço do
-   chapéu e não vira bolinha de lista de template. */
-.insta__lista li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.62em;
-  width: 0.75rem;
-  height: 2px;
-  background: var(--azul);
-}
-
-.insta__acoes {
-  margin-top: 2rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.85rem 1.25rem;
-}
-
-.insta__acoes p {
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  color: var(--cinza);
-  max-width: 24ch;
+  max-width: 16ch;
 }
 
 .insta__bt {
@@ -2189,8 +2144,8 @@
   gap: 0.6rem;
   min-height: 3.25rem;
   padding-inline: 1.75rem;
-  /* Gradiente do próprio Instagram, o único lugar da página onde uma
-     cor de fora da marca se justifica: é o botão de ir para lá. */
+  /* Gradiente do próprio Instagram, a única cor de fora da marca na
+     página. Se justifica por ser o botão de ir para lá. */
   background: linear-gradient(100deg, #f9ce34 0%, #ee2a7b 48%, #6228d7 100%);
   color: #fff;
   font-family: var(--fonte-display), sans-serif;
@@ -2212,11 +2167,23 @@
 .insta__mockup {
   margin: 0;
   justify-self: center;
+  /* A foto já vem cortada na base dos aparelhos, e a linha reta lia como
+     falha de recorte. A máscara dissolve a base no fundo, o que também
+     deixa o mockup entrar pela borda da seção sem emenda visível. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 68%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 68%, transparent 100%);
 }
 
 .insta__mockup img {
   display: block;
   width: 100%;
   height: auto;
-  filter: drop-shadow(0 28px 60px rgb(0 0 0 / 0.55));
+  /* Sombra no elemento, e não na imagem: dentro da máscara ela seria
+     dissolvida junto e o aparelho perderia o descolamento do fundo. */
+}
+
+@media (max-width: 62rem) {
+  .insta__mockup {
+    max-width: 24rem;
+  }
 }
