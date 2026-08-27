@@ -44,7 +44,6 @@ export function Dores() {
       <div className="auditoria espaco">
         {AUDITORIA.map((d) => (
           <article className="item vidro" key={d.titulo}>
-            <span className="item__marca" aria-hidden />
             <h3 className="item__titulo">{d.titulo}</h3>
             <p className="item__texto">{d.texto}</p>
           </article>

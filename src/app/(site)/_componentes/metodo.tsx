@@ -68,13 +68,21 @@ export function Metodo() {
       />
 
       <div className="pilares espaco">
-        {PILARES.map((p) => (
+        {PILARES.map((p, i) => (
           <article className="pilar vidro" key={p.letra}>
             <div className="pilar__topo">
               <span className="pilar__letra" aria-hidden>
                 {p.letra}
               </span>
               <div>
+                {/* A grade 2x2 apaga a ordem, e estas sao etapas: a
+                    fundacao vem antes da aquisicao, que vem antes da
+                    otimizacao. O numero devolve a sequencia que o
+                    acronimo sozinho nao entrega quando os cartoes sao
+                    lidos em bloco. */}
+                <span className="pilar__passo">
+                  Etapa {String(i + 1).padStart(2, "0")} de 04
+                </span>
                 <h3>{p.titulo}</h3>
                 <p className="pilar__resumo">{p.resumo}</p>
               </div>

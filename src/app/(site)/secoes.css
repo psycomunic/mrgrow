@@ -248,26 +248,25 @@
 
 .item {
   padding: 1.6rem 1.5rem 1.75rem;
-  transition: border-color 0.25s, transform 0.25s;
+  /* A marca azul vai para a aresta em vez de flutuar no topo. O traço
+     solto não dizia nada e ainda abria um vão morto acima do título em
+     todos os seis cartões. Na aresta ele lê como item sinalizado, que é
+     o que estes são: achados de uma auditoria. */
+  border-left: 2px solid var(--azul);
+  transition: border-color 0.25s, transform 0.25s, background 0.25s;
 }
 
 .item:hover {
   transform: translateY(-3px);
   border-color: rgb(22 104 245 / 0.55);
-}
-
-.item__marca {
-  display: block;
-  width: 1.4rem;
-  height: 2px;
-  background: var(--azul);
+  border-left-color: var(--azul);
 }
 
 .item__titulo {
-  margin-top: 1.1rem;
   font-family: var(--fonte-display), sans-serif;
-  font-size: 1.0625rem;
+  font-size: 1.125rem;
   font-weight: 600;
+  line-height: 1.25;
   letter-spacing: -0.02em;
 }
 
@@ -316,26 +315,40 @@
 .pilar__topo {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.15rem;
 }
 
+/* A letra é o nome do método, não um enfeite: ganha o tamanho de um
+   elemento gráfico em vez de pastilha de ícone. */
 .pilar__letra {
   display: grid;
   place-items: center;
-  width: 2.85rem;
-  height: 2.85rem;
+  width: 3.75rem;
+  height: 3.75rem;
   flex-shrink: 0;
   background: var(--azul);
   color: #fff;
   font-family: var(--fonte-display), sans-serif;
-  font-size: 1.25rem;
+  font-size: 1.9rem;
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.pilar__passo {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--cinza) 80%, transparent);
 }
 
 .pilar h3 {
   font-family: var(--fonte-display), sans-serif;
-  font-size: 1.0625rem;
+  font-size: 1.125rem;
   font-weight: 600;
   letter-spacing: -0.02em;
 }
