@@ -3,27 +3,29 @@ import { Secao, CabecaSecao } from "./secao";
 /** Itens de uma auditoria, não etapas, por isso não são numerados. */
 const AUDITORIA = [
   {
+    titulo: "Posta toda semana e não vende",
+    texto:
+      "O engajamento até aparece. O faturamento não se mexe. Conteúdo sem intenção comercial entretém, não vende.",
+  },
+  {
+    titulo: "Conteúdo decidido na véspera",
+    texto:
+      "Sem cronograma, o tema nasce do improviso e a marca fala de coisa diferente toda semana. Ninguém entende o que você faz.",
+  },
+  {
     titulo: "Você investe e não sabe o que voltou",
     texto:
       "O relatório mostra alcance, curtida e “engajamento”. Nenhum deles paga o boleto do dia 10.",
   },
   {
-    titulo: "Rastreamento quebrado",
+    titulo: "Trava na hora de gravar",
     texto:
-      "Pixel mal configurado, eventos duplicados, iOS cortando dados. A plataforma otimiza no escuro.",
+      "Não é falta de câmera, é falta de roteiro. Sem saber o que falar, o vídeo não sai, e sem vídeo o alcance não vem.",
   },
   {
-    titulo: "Criativo sempre o mesmo",
-    texto: "Duas artes por mês não sustentam escala. Sem volume de teste, o CPA só sobe.",
-  },
-  {
-    titulo: "Resposta lenta ao lead",
+    titulo: "Marketing em três fornecedores",
     texto:
-      "Lead que espera uma hora vale muito menos. Sem processo, o comercial perde o que a mídia trouxe.",
-  },
-  {
-    titulo: "Página que não converte",
-    texto: "Tráfego bom em página ruim é dinheiro queimado. A conversão começa antes do clique.",
+      "Social media de um lado, gestor de tráfego do outro, designer num terceiro. Ninguém se fala e a conta sobra para você.",
   },
   {
     titulo: "Agência que some",
@@ -38,7 +40,7 @@ export function Dores() {
         chapeu="Diagnóstico"
         peso="grande"
         titulo="Se dois destes itens são a sua rotina, o problema não é a verba"
-        apoio="É a estrutura. E estrutura é o que a gente monta antes de subir qualquer campanha."
+        apoio="É a falta de estrutura. E estrutura é o que a gente monta antes de publicar qualquer post ou subir qualquer campanha."
       />
 
       <div className="auditoria espaco">

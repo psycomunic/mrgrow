@@ -4,36 +4,37 @@ import { Secao, CabecaSecao } from "./secao";
    não para ler. Cada lado cabe numa linha só. */
 const LINHAS = [
   {
-    criterio: "Rastreamento",
-    comum: "Pixel instalado e pronto",
-    nossa: "GA4, GTM, Pixel e CAPI auditados todo mês",
+    criterio: "Estratégia",
+    comum: "Post do que der na cabeça",
+    nossa: "Planejamento mensal com tema e objetivo",
   },
   {
-    criterio: "Criativos",
+    criterio: "Conteúdo",
     comum: "2 a 4 artes por mês",
-    nossa: "Testes semanais, com vencedor documentado",
+    nossa: "Cronograma de feed, reels e stories",
+  },
+  {
+    criterio: "Vídeo",
+    comum: "“Grava aí que a gente edita”",
+    nossa: "Roteiro pronto, captação e edição",
+  },
+  {
+    criterio: "Tráfego",
+    comum: "Impulsiona o post que foi bem",
+    nossa: "Campanha estruturada com meta de CPA",
   },
   {
     criterio: "Relatório",
     comum: "PDF no dia 5",
-    nossa: "Painel aberto, 24 horas por dia",
-  },
-  {
-    criterio: "Página",
-    comum: "“Manda o link que a gente anuncia”",
-    nossa: "Landing page própria e testada",
-  },
-  {
-    criterio: "Comercial",
-    comum: "Entrega o lead e some",
-    nossa: "CRM e acompanhamento até fechar",
+    nossa: "Relatório mensal e reunião estratégica",
   },
   {
     criterio: "Meta",
     comum: "Alcance e engajamento",
-    nossa: "CPA e ROAS sobre a sua margem",
+    nossa: "Demanda e faturamento",
   },
 ];
+
 
 export function Comparativo() {
   return (
@@ -41,7 +42,7 @@ export function Comparativo() {
       <CabecaSecao
         chapeu="A diferença"
         titulo="O mesmo serviço, cobrado de dois jeitos"
-        apoio="À esquerda, o que costuma vir na proposta. À direita, o nosso escopo."
+        apoio="À esquerda, o que costuma vir na proposta de agência. À direita, o nosso escopo."
       />
 
       <div className="contraste vidro espaco">

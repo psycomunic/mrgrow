@@ -18,10 +18,10 @@ import { MARCA } from "@/lib/marca";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "MR Grow · Tráfego pago e performance para negócios que querem escalar",
+    absolute: "MR Grow · Estratégia, conteúdo e tráfego para marcas que querem crescer",
   },
   description:
-    "Assessoria de marketing e performance. Tráfego, criativo, página e dados em uma operação só, com painel ao vivo para você acompanhar cada real investido.",
+    "Assessoria de marketing completa: planejamento estratégico, produção de conteúdo para redes sociais, roteiro e edição de vídeo e gestão de tráfego no Meta e no Google.",
   alternates: { canonical: "/" },
 };
 
@@ -41,11 +41,13 @@ const JSON_LD = {
       founder: { "@type": "Person", name: MARCA.fundador },
       sameAs: [MARCA.instagramAgencia, MARCA.instagramFundador],
       serviceType: [
+        "Assessoria de marketing",
+        "Planejamento estratégico de marketing",
+        "Produção de conteúdo para redes sociais",
+        "Produção de vídeo e edição",
         "Gestão de tráfego pago",
         "Meta Ads",
         "Google Ads",
-        "Landing pages de alta conversão",
-        "Marketing de performance",
       ],
     },
     {

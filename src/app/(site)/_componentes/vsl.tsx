@@ -69,9 +69,9 @@ export function Vsl() {
           </span>
           <h2>Veja a operação por dentro</h2>
           <p className="vsl__apoio">
-            Não é apresentação institucional genérica. Mostro o que entra na sua conta, em que
-            ordem, e o que você recebe toda semana. Se no fim não fizer sentido para o seu
-            momento, você economizou uma reunião.
+            Não é apresentação institucional genérica. Mostro como a estratégia, o conteúdo e a
+            mídia se encaixam, e o que você recebe todo mês. Se no fim não fizer sentido para o
+            seu momento, você economizou uma reunião.
           </p>
         </div>
 

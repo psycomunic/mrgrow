@@ -41,9 +41,9 @@ export function Sobre() {
 
           <div className="sobre__texto">
             <p>
-              Por isso a operação inteira é montada com dado aberto. Você tem acesso ao painel, aos
-              números da conta e ao plano de ação, sempre. Se o resultado não vem, a conversa é
-              sobre o que mudar, não sobre o que justificar.
+              Por isso a MR Grow assume a comunicação inteira: o que a marca diz, como diz e quanto
+              isso traz de volta. Estratégia, conteúdo e mídia na mesma mesa, porque separados em
+              três fornecedores eles se contradizem e a conta sobra para você.
             </p>
             <p>
               Trabalhamos com um número limitado de contas por mês. É o que garante que cada uma

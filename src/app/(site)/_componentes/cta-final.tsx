@@ -2,12 +2,13 @@ import { BorderBeamPanel } from "@/components/ui/border-beam-panel";
 import { FormularioDiagnostico } from "./formulario-diagnostico";
 
 const ENTREGAS = [
+  "Leitura da sua presença digital e do conteúdo dos últimos meses",
   "Auditoria da estrutura de campanhas ativa",
   "Checagem de rastreamento: Pixel, GA4 e conversões",
   "Análise da página de destino e do fluxo de atendimento",
-  "Estimativa de CPA e ROAS possíveis para o seu ticket",
   "Os três gargalos que mais custam dinheiro hoje",
 ];
+
 
 export function CtaFinal() {
   return (
@@ -20,8 +21,9 @@ export function CtaFinal() {
           </span>
           <h2>Descubra o que está travando o seu resultado</h2>
           <p className="fecho__texto">
-            Nenhuma apresentação genérica. Analisamos a sua conta de verdade e devolvemos um
-            parecer objetivo. Se não fizer sentido trabalharmos juntos, a gente diz.
+            Nenhuma apresentação genérica. Olhamos o seu perfil, o seu conteúdo e a sua conta de
+            anúncios de verdade, e devolvemos um parecer objetivo. Se não fizer sentido
+            trabalharmos juntos, a gente diz.
           </p>
 
           <ul className="entregas">

@@ -6,10 +6,10 @@ const COLUNAS = [
   {
     titulo: "Serviços",
     links: [
+      { r: "Planejamento estratégico", h: "#servicos" },
+      { r: "Conteúdo para redes sociais", h: "#servicos" },
+      { r: "Roteiro e vídeo", h: "#servicos" },
       { r: "Gestão de tráfego", h: "#servicos" },
-      { r: "Landing pages", h: "#servicos" },
-      { r: "Criativos", h: "#servicos" },
-      { r: "Rastreamento e dados", h: "#servicos" },
     ],
   },
   {

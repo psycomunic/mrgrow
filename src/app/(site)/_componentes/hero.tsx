@@ -31,18 +31,18 @@ export function Hero() {
           <div className="cartaz__texto">
             <span className="chapeu">
               <i />
-              Assessoria de performance
+              Estratégia, conteúdo e tráfego
             </span>
 
             <h1>
-              Seu anúncio não precisa de mais alcance.
+              Sua marca não precisa de mais post.
               <br />
-              Precisa de <em>mais vendas</em>
+              Precisa de <em>mais cliente</em>
             </h1>
 
             <p className="cartaz__linha">
-              Tráfego, criativo, página e rastreamento numa operação só, com painel aberto para
-              você conferir cada real investido e o que ele trouxe de volta.
+              Planejamento, conteúdo e tráfego numa assessoria só. A gente define o que a sua
+              marca vai dizer, produz, coloca para rodar e mostra o que voltou em cliente.
             </p>
 
             <div className="cartaz__acoes">

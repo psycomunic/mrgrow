@@ -1,49 +1,52 @@
-import { BarChart3, Blocks, Camera, LayoutTemplate } from "lucide-react";
+import { BarChart3, CalendarRange, Clapperboard, Images } from "lucide-react";
 import { Secao, CabecaSecao } from "./secao";
 import { GoogleAdsIcone, MetaIcone } from "./marcas";
 
+/* Os seis blocos espelham as entregas reais da assessoria: estratégia,
+   conteúdo, vídeo, as duas frentes de mídia e o acompanhamento. Tráfego
+   é uma das seis, não o serviço todo. */
 const SERVICOS = [
+  {
+    icone: CalendarRange,
+    titulo: "Planejamento estratégico mensal",
+    texto:
+      "Todo mês começa com direção definida: tema, objetivo e o que vai ao ar em cada semana. Sem post decidido na véspera.",
+    tags: ["Posicionamento", "Cronograma", "Reunião mensal"],
+  },
+  {
+    icone: Images,
+    titulo: "Conteúdo para redes sociais",
+    texto:
+      "Feed, reels e stories produzidos dentro do planejamento, com intenção comercial. Rede ativa não é a meta, é o meio.",
+    tags: ["Feed", "Reels", "Stories"],
+  },
+  {
+    icone: Clapperboard,
+    titulo: "Roteiro, captação e edição de vídeo",
+    texto:
+      "O vídeo que converte não nasce de inspiração, nasce de roteiro. A gente escreve, capta e edita, com legenda pronta para publicar.",
+    tags: ["Script", "Captação", "Legenda"],
+  },
   {
     icone: MetaIcone,
     titulo: "Gestão de tráfego no Meta Ads",
     texto:
-      "Estrutura por temperatura de público, teste contínuo de criativo e leitura diária da conta.",
+      "O mesmo conteúdo que sustenta a rede vira anúncio, com estrutura por temperatura de público e leitura constante da conta.",
     tags: ["Instagram", "Facebook", "Advantage+"],
   },
   {
     icone: GoogleAdsIcone,
     titulo: "Gestão de tráfego no Google Ads",
     texto:
-      "Search, Performance Max, YouTube e remarketing capturando quem já está pronto para comprar.",
+      "Search, Performance Max e remarketing capturando quem já está procurando o que você vende.",
     tags: ["Search", "PMax", "YouTube"],
   },
   {
-    icone: Camera,
-    titulo: "Criativos que vendem",
-    texto:
-      "Roteiro, edição e variação. Matriz de ângulos testada semana a semana, com vencedor documentado.",
-    tags: ["Reels", "Estático", "UGC"],
-  },
-  {
-    icone: LayoutTemplate,
-    titulo: "Landing pages de alta conversão",
-    texto:
-      "Página construída para converter: oferta clara, prova, velocidade e teste A/B contínuo.",
-    tags: ["Copy", "Design", "Teste A/B"],
-  },
-  {
-    icone: Blocks,
-    titulo: "Rastreamento e dados",
-    texto:
-      "GA4, GTM, Pixel e API de Conversões. A plataforma só otimiza bem quando enxerga direito.",
-    tags: ["GA4", "CAPI", "Server-side"],
-  },
-  {
     icone: BarChart3,
-    titulo: "Painel e relatórios ao vivo",
+    titulo: "Relatório e acompanhamento",
     texto:
-      "Você acompanha investimento, retorno e projeção sem esperar o relatório do fim do mês.",
-    tags: ["Tempo real", "CRM", "Metas"],
+      "Relatório mensal de resultados, reunião estratégica e grupo de WhatsApp aberto. Você não espera o fim do mês para saber como está.",
+    tags: ["Relatório", "Reunião", "WhatsApp"],
   },
 ];
 
@@ -53,7 +56,7 @@ export function Servicos() {
       <CabecaSecao
         chapeu="Escopo"
         titulo="Uma operação inteira, não um serviço solto"
-        apoio="Tráfego sozinho não resolve. A MR Grow cuida de todas as peças que decidem se o seu investimento vira venda."
+        apoio="Conteúdo sem tráfego não escala e tráfego sem conteúdo não sustenta. A MR Grow cuida das duas pontas e do que liga uma na outra."
       />
 
       <div className="servicos espaco">

@@ -5,23 +5,23 @@ const PILARES = [
   {
     letra: "G",
     titulo: "Ground · Fundação",
-    resumo: "Antes de gastar o primeiro real",
+    resumo: "Antes de publicar ou anunciar",
     itens: [
-      "Diagnóstico de conta, oferta e margem",
+      "Diagnóstico de marca, oferta e margem",
+      "Posicionamento: o que a marca diz e para quem",
       "Rastreamento completo: GA4, GTM, Pixel e API de Conversões",
-      "CPA e ROAS alvo definidos a partir da sua margem real",
-      "Página e fluxo de atendimento revisados",
+      "Planejamento estratégico do primeiro mês",
     ],
   },
   {
     letra: "R",
-    titulo: "Reach · Aquisição",
-    resumo: "Estrutura de campanha que escala",
+    titulo: "Reach · Alcance",
+    resumo: "Conteúdo e mídia na mesma direção",
     itens: [
-      "Arquitetura de campanhas por temperatura de público",
-      "Meta Ads e Google Ads trabalhando juntos, não competindo",
-      "Volume real de criativos em teste toda semana",
-      "Controle diário de orçamento e curva de aprendizagem",
+      "Cronograma mensal de feed, reels e stories",
+      "Scripts de vídeo escritos para gravar sem travar",
+      "Captação, edição e legenda dentro do planejamento",
+      "Campanhas no Meta e no Google a partir do que já performa",
     ],
   },
   {
@@ -29,24 +29,25 @@ const PILARES = [
     titulo: "Optimize · Otimização",
     resumo: "Decisão por dado, não por achismo",
     itens: [
-      "Rotina diária de leitura de conta",
-      "Matriz de criativos: ângulo × formato × oferta",
-      "Testes A/B de página com meta de conversão declarada",
-      "Corte rápido do que não performa, escala do que performa",
+      "Leitura de performance de conteúdo e de campanha juntas",
+      "Separar o que engaja do que realmente traz cliente",
+      "Mais volume no formato que responde, corte no que não responde",
+      "Ajuste de oferta e de página quando o gargalo está ali",
     ],
   },
   {
     letra: "W",
     titulo: "Win · Previsibilidade",
-    resumo: "Do lead ao caixa",
+    resumo: "Do conteúdo ao caixa",
     itens: [
-      "CRM com funil, follow-up e prazo de resposta",
-      "Painel aberto com investimento, retorno e projeção",
-      "Reunião de performance quinzenal com plano de ação",
-      "Metas mensais acordadas e acompanhadas",
+      "Relatório mensal de resultados, sem métrica de vaidade",
+      "Reunião estratégica com o plano do mês seguinte",
+      "Grupo de WhatsApp aberto para o dia a dia",
+      "Metas acordadas e acompanhadas mês a mês",
     ],
   },
 ];
+
 
 export function Metodo() {
   return (
@@ -54,7 +55,7 @@ export function Metodo() {
       <CabecaSecao
         chapeu="Método G.R.O.W"
         titulo="Quatro etapas para sair do imprevisível"
-        apoio="Nada de fórmula mágica. É processo: o mesmo que roda em todas as contas da MR Grow, com responsável, prazo e indicador em cada etapa."
+        apoio="Nada de fórmula mágica. É processo: o mesmo que roda em todas as contas da MR Grow, da definição do que a marca vai dizer até o resultado no caixa."
         antes={
           <Image
             src="/marca/grow-roda.webp"

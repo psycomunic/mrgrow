@@ -4,32 +4,33 @@ import { Secao, CabecaSecao } from "./secao";
 const PASSOS = [
   {
     t: "Diagnóstico gratuito",
-    d: "Você preenche o formulário, a gente analisa sua conta, sua página e seu funil. Você recebe um parecer com os três gargalos mais caros.",
+    d: "Você preenche o formulário e a gente analisa a sua presença digital, o conteúdo atual e a estrutura de campanhas. Você recebe um parecer com os três gargalos mais caros.",
     prazo: "24 horas",
   },
   {
     t: "Plano e proposta",
-    d: "Reunião de 40 minutos com o plano de mídia, meta de CPA e ROAS e escopo. Você sai sabendo o que será feito e quanto custa.",
+    d: "Reunião de 40 minutos com o plano de comunicação, o plano de mídia e o escopo. Você sai sabendo o que será feito, por quem e quanto custa.",
     prazo: "Dia 1",
   },
   {
-    t: "Setup e subida",
-    d: "Rastreamento, estrutura de campanha, criativos e página. Colocamos no ar após o aceite.",
+    t: "Setup e primeiro cronograma",
+    d: "Rastreamento configurado, posicionamento fechado e o cronograma do primeiro mês pronto, com os roteiros de vídeo já na sua mão.",
     prazo: "Até 7 dias",
   },
   {
-    t: "Operação e escala",
-    d: "Leitura diária, testes semanais, painel aberto e reunião quinzenal de performance com plano de ação.",
+    t: "Operação mensal",
+    d: "Conteúdo publicado no calendário, campanhas rodando e ajustadas, relatório no fim do mês e reunião estratégica para definir o mês seguinte.",
     prazo: "Contínuo",
   },
 ];
+
 
 export function Processo() {
   return (
     <Secao id="processo">
       <CabecaSecao
         chapeu="Como funciona"
-        titulo="Do primeiro contato ao primeiro resultado"
+        titulo="Do primeiro contato ao mês rodando"
         apoio="Sem mistério e sem processo interminável. Cada etapa tem entrega e prazo definidos."
       />
 

@@ -33,10 +33,10 @@ function enderecoDoSite() {
 
 export const MARCA = {
   nome: "MR Grow",
-  nomeCompleto: "MR Grow · Assessoria de Marketing e Performance",
+  nomeCompleto: "MR Grow · Assessoria de Marketing, Conteúdo e Performance",
   fundador: "Mateus Rodrigues",
   descricao:
-    "Assessoria de marketing e performance que transforma investimento em anúncios em faturamento previsível.",
+    "Assessoria de marketing que une estratégia, produção de conteúdo e tráfego pago para transformar a comunicação da sua marca em faturamento.",
   site: enderecoDoSite(),
   email: "contato@mrgrow.com.br",
   whatsapp: publica(process.env.NEXT_PUBLIC_WHATSAPP, "5500000000000"),
