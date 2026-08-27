@@ -1,7 +1,19 @@
 import Image from "next/image";
 
-/** Logos dos clientes em `public/clientes` (01–16), cinza sobre branco. */
+/**
+ * Logos dos clientes, em duas esteiras que correm em sentidos opostos.
+ *
+ * Os arquivos em `clientes/branco` são brancos sobre transparente. Os
+ * originais são marca escura sobre branco chapado, e a versão parada
+ * usava `filter: invert(1)` mais `mix-blend-mode: screen` para apagar
+ * esse fundo. Isso não sobrevive à animação: `transform` cria contexto
+ * de empilhamento, que isola a mesclagem, e os logos voltariam a
+ * aparecer como caixas escuras.
+ */
 const CLIENTES = Array.from({ length: 16 }, (_, i) => String(i + 1).padStart(2, "0"));
+
+/** Cada esteira leva metade, duplicada: é a cópia que fecha o laço. */
+const LINHAS = [CLIENTES.slice(0, 8), CLIENTES.slice(8)];
 
 const SEGMENTOS = [
   "E-commerce",
@@ -19,22 +31,31 @@ export function ProvaSocial() {
     <section className="mural">
       <div className="area">
         <p className="mural__rot">Marcas que já passaram pela nossa operação</p>
+      </div>
 
-        <ul className="mural__logos">
-          {CLIENTES.map((n) => (
-            <li key={n}>
-              <Image
-                src={`/clientes/${n}.webp`}
-                alt=""
-                aria-hidden
-                width={944}
-                height={432}
-                sizes="(max-width: 640px) 30vw, 130px"
-              />
-            </li>
-          ))}
-        </ul>
+      {/* Fora da `área`: a esteira corre de borda a borda, senão o corte
+          aconteceria no meio da tela e denunciaria o truque. */}
+      <div className="esteiras">
+        {LINHAS.map((linha, i) => (
+          <div className={`esteira${i === 1 ? " esteira--volta" : ""}`} key={i}>
+            <ul className="esteira__trilho" aria-hidden>
+              {[...linha, ...linha].map((n, j) => (
+                <li key={`${n}-${j}`}>
+                  <Image
+                    src={`/clientes/branco/${n}.webp`}
+                    alt=""
+                    width={472}
+                    height={216}
+                    sizes="120px"
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
 
+      <div className="area">
         <div className="alcance">
           <figure className="alcance__mapa">
             <Image

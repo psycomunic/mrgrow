@@ -9,7 +9,6 @@ import { Resultados } from "./_componentes/resultados";
 import { Portfolio } from "./_componentes/portfolio";
 import { Comparativo } from "./_componentes/comparativo";
 import { Processo } from "./_componentes/processo";
-import { Planos } from "./_componentes/planos";
 import { Sobre } from "./_componentes/sobre";
 import { InstagramConvite } from "./_componentes/instagram";
 import { Faq } from "./_componentes/faq";
@@ -78,7 +77,6 @@ export default function PaginaInicial() {
       <Portfolio />
       <Comparativo />
       <Processo />
-      <Planos />
       <Sobre />
       <InstagramConvite />
       <Faq />

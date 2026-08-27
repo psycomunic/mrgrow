@@ -19,7 +19,6 @@ const COLUNAS = [
       { r: "Resultados", h: "#resultados" },
       { r: "Trabalho", h: "#trabalho" },
       { r: "Sobre o fundador", h: "#sobre" },
-      { r: "Planos", h: "#planos" },
     ],
   },
   {

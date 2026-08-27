@@ -609,146 +609,6 @@
   text-transform: uppercase;
 }
 
-/* ── Planos ─────────────────────────────────────────────────── */
-
-.planos {
-  display: grid;
-  gap: 1rem;
-}
-
-@media (min-width: 60rem) {
-  .planos {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.plano {
-  display: flex;
-  flex-direction: column;
-  padding: 2rem 1.8rem 2.15rem;
-}
-
-/* O destaque é campo de cor sólido, coerente com a abertura. */
-/* Antes era campo de cor sólido; virou vidro para o feixe da borda ter
-   sobre o que correr. O azul segue no selo, nos fios e no botão. */
-.plano--destaque {
-  background: linear-gradient(160deg, rgb(22 104 245 / 0.16), rgb(22 104 245 / 0.05));
-  border-color: transparent;
-  backdrop-filter: blur(22px) saturate(150%);
-  box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 0.16),
-    0 30px 70px -34px rgb(22 104 245 / 0.55);
-}
-
-.plano--destaque .plano__para,
-.plano--destaque .plano__ciclo,
-.plano--destaque li {
-  color: rgb(255 255 255 / 0.78);
-}
-
-/* O painel do feixe embrulha o cartão: ele é que carrega a borda. */
-.plano-feixe {
-  display: flex;
-}
-
-.plano-feixe .plano {
-  width: 100%;
-}
-
-.plano__selo {
-  display: inline-block;
-  margin-bottom: 1rem;
-  padding: 0.3rem 0.7rem;
-  background: var(--azul);
-  color: #fff;
-  font-family: var(--fonte-display), sans-serif;
-  font-size: 0.625rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.plano h3 {
-  font-family: var(--fonte-display), sans-serif;
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  text-transform: uppercase;
-}
-
-.plano__para {
-  margin-top: 0.45rem;
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  color: var(--cinza);
-}
-
-.plano__valor {
-  margin-top: 1.6rem;
-  padding-top: 1.4rem;
-  border-top: 1px solid var(--vidro-borda);
-  display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
-}
-
-.plano--destaque .plano__valor {
-  border-top-color: rgb(255 255 255 / 0.28);
-}
-
-.plano__preco {
-  font-family: var(--fonte-display), sans-serif;
-  font-size: 2.1rem;
-  font-weight: 700;
-  letter-spacing: -0.05em;
-  line-height: 1;
-}
-
-.plano__preco--texto {
-  font-size: 1.4rem;
-  letter-spacing: -0.03em;
-}
-
-.plano__ciclo {
-  font-size: 0.875rem;
-  color: var(--cinza);
-}
-
-.plano ul {
-  margin-top: 1.5rem;
-  display: grid;
-  gap: 0.65rem;
-  flex: 1;
-}
-
-.plano li {
-  display: grid;
-  grid-template-columns: 1.3rem 1fr;
-  gap: 0.6rem;
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  color: var(--cinza);
-}
-
-.plano li::before {
-  content: "";
-  width: 0.8rem;
-  height: 2px;
-  margin-top: 0.68rem;
-  background: var(--azul);
-}
-
-.plano .acao {
-  margin-top: 1.75rem;
-  width: 100%;
-}
-
-.planos__nota {
-  margin-top: 1.5rem;
-  font-size: 0.875rem;
-  color: var(--cinza);
-}
-
 /* ── Sobre ──────────────────────────────────────────────────── */
 
 .sobre {
@@ -1680,10 +1540,10 @@
 }
 
 /* ── Mural: logos um pouco maiores e mais legíveis ──────────────
-   Mira a lista, não `.mural img`: o mapa também vive nesta seção e
-   herdava altura fixa, invert e mix-blend-mode. */
+   Mira a esteira, não `.mural img`: o mapa também vive nesta seção e
+   herdaria a altura fixa. */
 
-.mural__logos img {
+.esteira__trilho img {
   height: 2.75rem;
   opacity: 0.68;
 }
@@ -1777,7 +1637,6 @@
 
 /* ── Painéis com feixe: a moldura é do componente ───────────── */
 
-.sitio .plano-feixe,
 .sitio .prazo-feixe {
   position: relative;
 }
@@ -1806,21 +1665,24 @@
 
 /* ── Mural: disco azul no hover ─────────────────────────────────
    Os arquivos vêm em cinza puro, sem cor para restaurar. Em vez de
-   colorir a marca, o disco entra por trás: como o logo está em
-   `mix-blend-mode: screen`, o preto do arquivo vira azul dentro do
-   círculo e o desenho segue branco por cima.
+   colorir a marca, o disco entra por trás e o logo, que agora é branco
+   sobre transparente, fica por cima dele.
+
+   Antes isso dependia de `mix-blend-mode: screen`, que tingia de azul o
+   preto do arquivo. Com a esteira animada a mesclagem deixou de existir,
+   e o disco atrás do logo branco dá o mesmo resultado sem o truque.
 
    O `::before` é posicionado, então pintaria acima do <img>; por isso
    a imagem também recebe `position: relative` e, vindo depois na
    árvore, fica na frente. */
 
-.mural__logos li {
+.esteira__trilho li {
   position: relative;
   display: grid;
   place-items: center;
 }
 
-.mural__logos li::before {
+.esteira__trilho li::before {
   content: "";
   position: absolute;
   top: 50%;
@@ -1843,12 +1705,12 @@
     transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.mural__logos li:hover::before {
+.esteira__trilho li:hover::before {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
 }
 
-.mural__logos img {
+.esteira__trilho img {
   position: relative;
 }
 
