@@ -2082,10 +2082,10 @@
 /* ══════════════════════════════════════════════════════════════
    Convite para o Instagram
 
-   Faixa curta, de propósito: chapéu, uma linha e o botão. Pedir para
-   seguir não merece a mesma altura que uma seção de argumento, e a
-   versão anterior tinha parágrafo mais lista de quatro itens para
-   entregar um pedido de um clique.
+   Painel, e não faixa aberta. Com pouco texto, a largura inteira da
+   página deixava o bloco boiando num vazio que lia como inacabado.
+   Fechar num painel dá borda à composição, e os números do perfil dão
+   densidade sem trazer de volta o parágrafo que sobrava.
 
    Entra depois do "quem está por trás": seguir é o passo natural de
    quem acabou de conhecer o Mateus e ainda não vai pedir diagnóstico.
@@ -2098,7 +2098,6 @@
   position: relative;
   isolation: isolate;
   scroll-margin-top: 4.5rem;
-  overflow: hidden;
 }
 
 .insta::before {
@@ -2106,28 +2105,42 @@
   position: absolute;
   z-index: -1;
   pointer-events: none;
-  inset: 0 -8% 0 45%;
-  background: radial-gradient(34rem 20rem at 60% 50%, rgb(22 104 245 / 0.18), transparent 70%);
+  inset: 0 -6% 0 50%;
+  background: radial-gradient(32rem 18rem at 60% 50%, rgb(22 104 245 / 0.2), transparent 70%);
 }
 
-.insta__grade {
+.insta__painel {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.75rem, 4vw, 2.75rem);
   display: grid;
-  gap: clamp(1.5rem, 4vw, 3rem);
-  align-items: center;
+  gap: 1.5rem;
 }
 
 @media (min-width: 62rem) {
-  .insta__grade {
-    grid-template-columns: 1fr minmax(0, 28rem);
-    gap: 3.5rem;
+  .insta__painel {
+    grid-template-columns: 1fr minmax(0, 26rem);
+    align-items: center;
+    gap: 2rem;
+    /* Sem folga embaixo à direita: é por ali que o mockup transborda. */
+    padding: 2.75rem 0 0 3rem;
+  }
+}
+
+.insta__texto {
+  min-width: 0;
+}
+
+@media (min-width: 62rem) {
+  .insta__texto {
+    padding-block: 0.5rem 2.75rem;
   }
 }
 
 .insta h2 {
   margin-top: 1.35rem;
-  margin-bottom: 2rem;
   font-family: var(--fonte-display), sans-serif;
-  font-size: clamp(1.9rem, 4vw, 2.75rem);
+  font-size: clamp(1.75rem, 3.4vw, 2.5rem);
   font-weight: 700;
   /* Caixa alta acentuada precisa de mais entrelinha que os 0.95 do
      resto: com menos, o til e a cedilha batem na linha de cima. */
@@ -2138,7 +2151,34 @@
   max-width: 16ch;
 }
 
+/* ── Números do perfil ───────────────────────────────────────── */
+
+.insta__numeros {
+  margin: 1.75rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem 2.5rem;
+}
+
+.insta__numeros dt {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--osso);
+  line-height: 1.1;
+}
+
+.insta__numeros dd {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--cinza) 85%, transparent);
+}
+
 .insta__bt {
+  margin-top: 1.85rem;
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
@@ -2164,26 +2204,32 @@
   box-shadow: 0 22px 50px -18px rgb(238 42 123 / 1);
 }
 
+/* ── O mockup ────────────────────────────────────────────────── */
+
 .insta__mockup {
   margin: 0;
   justify-self: center;
+  align-self: end;
+  max-width: 24rem;
   /* A foto já vem cortada na base dos aparelhos, e a linha reta lia como
-     falha de recorte. A máscara dissolve a base no fundo, o que também
-     deixa o mockup entrar pela borda da seção sem emenda visível. */
-  -webkit-mask-image: linear-gradient(to bottom, #000 68%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 68%, transparent 100%);
+     falha de recorte. A dissolução resolve sem depender de outra foto, e
+     deixa o mockup sair pela borda do painel sem emenda. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
 }
+
+@media (min-width: 62rem) {
+  .insta__mockup {
+    max-width: none;
+  }
+}
+
+/* A base da imagem encosta na base do painel, e a máscara chega a zero
+   exatamente ali. Transbordar era pior: o painel cortava o aparelho com
+   metade da opacidade ainda, e o fio duro voltava na borda. */
 
 .insta__mockup img {
   display: block;
   width: 100%;
   height: auto;
-  /* Sombra no elemento, e não na imagem: dentro da máscara ela seria
-     dissolvida junto e o aparelho perderia o descolamento do fundo. */
-}
-
-@media (max-width: 62rem) {
-  .insta__mockup {
-    max-width: 24rem;
-  }
 }
