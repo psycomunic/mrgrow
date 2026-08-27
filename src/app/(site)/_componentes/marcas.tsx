@@ -8,8 +8,10 @@ import Image from "next/image";
  * palavra sairia ilegível, além de repetir o título, que já diz "Meta
  * Ads" e "Google Ads".
  *
- * O PNG da Meta vinha com fundo opaco, que dentro da pastilha viraria um
- * retângulo; a transparência foi reconstruída por distância de cor.
+ * O recorte da Meta sai do arquivo com transparência real, não do PNG de
+ * fundo opaco: reconstruir o alfa por distância de cor deixava cinco
+ * vezes mais pixel de borda mole e achatava o degradê da marca numa cor
+ * chapada.
  *
  * A assinatura repete a do lucide (`size`) para o cartão poder trocar um
  * ícone pelo outro sem saber a diferença. Uso nominativo: Meta e Google
@@ -31,7 +33,7 @@ export function MetaIcone({ size = 24, className }: Props) {
       src="/marca/meta.webp"
       alt="Meta"
       width={256}
-      height={172}
+      height={170}
       style={{ width: size * META, height: "auto" }}
       className={className}
     />
