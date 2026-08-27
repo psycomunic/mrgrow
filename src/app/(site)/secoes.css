@@ -2087,6 +2087,11 @@
    Fechar num painel dá borda à composição, e os números do perfil dão
    densidade sem trazer de volta o parágrafo que sobrava.
 
+   O aparelho fura a moldura de propósito: é o que dá profundidade a um
+   painel chapado. Por isso o painel não recorta, ao contrário do que
+   `overflow: hidden` faria, e a dissolução da base passa a acontecer
+   fora dele, no fundo da página.
+
    Entra depois do "quem está por trás": seguir é o passo natural de
    quem acabou de conhecer o Mateus e ainda não vai pedir diagnóstico.
    Fica antes do FAQ para não competir com o fecho, que é o ponto de
@@ -2094,7 +2099,9 @@
    ══════════════════════════════════════════════════════════════ */
 
 .insta {
-  padding-block: clamp(2.5rem, 5vw, 4rem);
+  /* Folga extra em cima: é por ali que o aparelho sai do painel, e sem
+     ela ele encostaria na seção anterior. */
+  padding-block: clamp(3.5rem, 6vw, 5.5rem) clamp(2.5rem, 5vw, 4rem);
   position: relative;
   isolation: isolate;
   scroll-margin-top: 4.5rem;
@@ -2111,7 +2118,13 @@
 
 .insta__painel {
   position: relative;
-  overflow: hidden;
+  /* Mais estreito que a página. Ocupando a largura inteira, sobrava vão
+     no meio para pouco conteúdo, e a saída fácil seria inflar a foto até
+     ela engolir o texto. Estreitar resolve os dois. */
+  max-width: 60rem;
+  margin-inline: auto;
+  /* Visível, não oculto: o aparelho precisa poder sair da caixa. */
+  overflow: visible;
   padding: clamp(1.75rem, 4vw, 2.75rem);
   display: grid;
   gap: 1.5rem;
@@ -2119,11 +2132,14 @@
 
 @media (min-width: 62rem) {
   .insta__painel {
-    grid-template-columns: 1fr minmax(0, 26rem);
+    /* Coluna do texto limitada, e não `1fr`: solta, ela esticava até o
+       meio do painel enquanto o conteúdo ficava estreito, e o vão que
+       sobrava era o que fazia a caixa parecer vazia. Presa em 26rem, o
+       aparelho comeca logo depois dela. */
+    grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
     align-items: center;
-    gap: 2rem;
-    /* Sem folga embaixo à direita: é por ali que o mockup transborda. */
-    padding: 2.75rem 0 0 3rem;
+    gap: 1.5rem;
+    padding: 2.75rem 3rem;
   }
 }
 
@@ -2209,8 +2225,12 @@
 .insta__mockup {
   margin: 0;
   justify-self: center;
-  align-self: end;
-  max-width: 24rem;
+  align-self: center;
+  max-width: 22rem;
+  /* Acima da borda do painel, senão o traço passaria por cima do
+     aparelho e desmontaria a profundidade. */
+  position: relative;
+  z-index: 1;
   /* A foto já vem cortada na base dos aparelhos, e a linha reta lia como
      falha de recorte. A dissolução resolve sem depender de outra foto, e
      deixa o mockup sair pela borda do painel sem emenda. */
@@ -2220,13 +2240,15 @@
 
 @media (min-width: 62rem) {
   .insta__mockup {
-    max-width: none;
+    max-width: 30rem;
+    justify-self: end;
+    /* Sai pelo topo, pela direita e por baixo. No celular fica dentro:
+       lá, margem negativa à direita só criaria estouro horizontal. */
+    margin-top: -5rem;
+    margin-right: -3.5rem;
+    margin-bottom: -3rem;
   }
 }
-
-/* A base da imagem encosta na base do painel, e a máscara chega a zero
-   exatamente ali. Transbordar era pior: o painel cortava o aparelho com
-   metade da opacidade ainda, e o fio duro voltava na borda. */
 
 .insta__mockup img {
   display: block;
