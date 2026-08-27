@@ -61,7 +61,7 @@ export function Metodo() {
             alt="Roda do método G.R.O.W: Ground, Reach, Optimize e Win"
             width={720}
             height={720}
-            sizes="140px"
+            sizes="(max-width: 40rem) 100vw, 140px"
             className="roda"
           />
         }

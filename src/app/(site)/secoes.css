@@ -287,6 +287,17 @@
   margin-bottom: 1.35rem;
 }
 
+/* No celular a roda deixa de ser selo e abre a seção: ela carrega as
+   quatro letras do método, que no tamanho de 80px ninguém lê. O `sizes`
+   do componente acompanha, senão o Next serviria o arquivo de 140px
+   esticado até 350 e a imagem sairia borrada. */
+@media (max-width: 40rem) {
+  .roda {
+    width: 100%;
+    margin-bottom: 1.75rem;
+  }
+}
+
 .pilares {
   display: grid;
   gap: 1rem;

@@ -1,16 +1,17 @@
-import { BarChart3, Blocks, Camera, LayoutTemplate, Radar, Target } from "lucide-react";
+import { BarChart3, Blocks, Camera, LayoutTemplate } from "lucide-react";
 import { Secao, CabecaSecao } from "./secao";
+import { GoogleAdsIcone, MetaIcone } from "./marcas";
 
 const SERVICOS = [
   {
-    icone: Target,
+    icone: MetaIcone,
     titulo: "Gestão de tráfego no Meta Ads",
     texto:
       "Estrutura por temperatura de público, teste contínuo de criativo e leitura diária da conta.",
     tags: ["Instagram", "Facebook", "Advantage+"],
   },
   {
-    icone: Radar,
+    icone: GoogleAdsIcone,
     titulo: "Gestão de tráfego no Google Ads",
     texto:
       "Search, Performance Max, YouTube e remarketing capturando quem já está pronto para comprar.",
