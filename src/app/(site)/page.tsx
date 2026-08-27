@@ -11,6 +11,7 @@ import { Comparativo } from "./_componentes/comparativo";
 import { Processo } from "./_componentes/processo";
 import { Planos } from "./_componentes/planos";
 import { Sobre } from "./_componentes/sobre";
+import { InstagramConvite } from "./_componentes/instagram";
 import { Faq } from "./_componentes/faq";
 import { PERGUNTAS } from "./_componentes/faq-dados";
 import { CtaFinal } from "./_componentes/cta-final";
@@ -79,6 +80,7 @@ export default function PaginaInicial() {
       <Processo />
       <Planos />
       <Sobre />
+      <InstagramConvite />
       <Faq />
       <CtaFinal />
     </>

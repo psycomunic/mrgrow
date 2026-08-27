@@ -2078,3 +2078,145 @@
   translate: 0 -2px;
   box-shadow: 0 22px 50px -18px rgb(22 104 245 / 1);
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Convite para o Instagram
+
+   Entra depois do "quem está por trás": seguir o perfil é o passo
+   natural de quem acabou de conhecer o Mateus e ainda não está
+   pronto para pedir diagnóstico. Fica antes do FAQ de propósito,
+   para não competir com o fecho, que é o ponto de conversão.
+   ══════════════════════════════════════════════════════════════ */
+
+.insta {
+  padding-block: clamp(3.5rem, 7vw, 6rem);
+  position: relative;
+  isolation: isolate;
+  scroll-margin-top: 4.5rem;
+  overflow: hidden;
+}
+
+.insta::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  inset: 8% -8% 12% 40%;
+  background: radial-gradient(40rem 26rem at 62% 45%, rgb(22 104 245 / 0.2), transparent 70%);
+}
+
+.insta__grade {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 3.5rem);
+  align-items: center;
+}
+
+@media (min-width: 62rem) {
+  .insta__grade {
+    grid-template-columns: 1fr minmax(0, 30rem);
+    gap: 4rem;
+  }
+}
+
+.insta h2 {
+  margin-top: 1.35rem;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: clamp(1.9rem, 4vw, 2.75rem);
+  font-weight: 700;
+  /* Caixa alta acentuada precisa de mais entrelinha que os 0.95 do
+     resto: com menos, o til e a cedilha batem na linha de cima. */
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  max-width: 18ch;
+}
+
+.insta__texto {
+  margin-top: 1.25rem;
+  max-width: 44ch;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--cinza);
+  text-wrap: pretty;
+}
+
+.insta__lista {
+  margin-top: 1.75rem;
+  display: grid;
+  gap: 0.7rem;
+  max-width: 46ch;
+}
+
+.insta__lista li {
+  position: relative;
+  padding-left: 1.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--osso);
+}
+
+/* Fio azul curto no lugar de marcador redondo: acompanha o traço do
+   chapéu e não vira bolinha de lista de template. */
+.insta__lista li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 0.75rem;
+  height: 2px;
+  background: var(--azul);
+}
+
+.insta__acoes {
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem 1.25rem;
+}
+
+.insta__acoes p {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--cinza);
+  max-width: 24ch;
+}
+
+.insta__bt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 3.25rem;
+  padding-inline: 1.75rem;
+  /* Gradiente do próprio Instagram, o único lugar da página onde uma
+     cor de fora da marca se justifica: é o botão de ir para lá. */
+  background: linear-gradient(100deg, #f9ce34 0%, #ee2a7b 48%, #6228d7 100%);
+  color: #fff;
+  font-family: var(--fonte-display), sans-serif;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: 0 16px 40px -18px rgb(238 42 123 / 0.85);
+  transition: translate 0.25s, box-shadow 0.25s, filter 0.25s;
+}
+
+.insta__bt:hover {
+  translate: 0 -2px;
+  filter: saturate(1.15);
+  box-shadow: 0 22px 50px -18px rgb(238 42 123 / 1);
+}
+
+.insta__mockup {
+  margin: 0;
+  justify-self: center;
+}
+
+.insta__mockup img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 28px 60px rgb(0 0 0 / 0.55));
+}
