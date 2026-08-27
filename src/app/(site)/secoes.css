@@ -2271,10 +2271,14 @@
   position: relative;
   z-index: 1;
   /* A foto já vem cortada na base dos aparelhos, e a linha reta lia como
-     falha de recorte. A dissolução resolve sem depender de outra foto, e
-     deixa o mockup sair pela borda do painel sem emenda. */
-  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+     falha de recorte. A dissolução resolve sem depender de outra foto.
+
+     Faixa longa de propósito: 72% a 100% era curto demais para conteúdo
+     branco e denso como a tela do Instagram. A opacidade despencava de
+     um valor ainda alto para zero em poucos pixels, e o olho lia isso
+     como corte, não como dissolução. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 42%, rgb(0 0 0 / 0.5) 74%, transparent 96%);
+  mask-image: linear-gradient(to bottom, #000 42%, rgb(0 0 0 / 0.5) 74%, transparent 96%);
 }
 
 @media (min-width: 62rem) {
@@ -2287,7 +2291,9 @@
     position: absolute;
     top: -5rem;
     right: -3.5rem;
-    width: 30rem;
+    /* Maior que a coluna: a dissolução precisa de altura para acontecer
+       devagar, e é ela que dá ao aparelho o que atravessar. */
+    width: 34rem;
     max-width: none;
     margin: 0;
   }
