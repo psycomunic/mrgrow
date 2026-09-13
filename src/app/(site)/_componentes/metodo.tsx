@@ -75,7 +75,7 @@ export function Metodo() {
             alt="Roda do método G.R.O.W: Goals, Results, Optimization e Winner Mind"
             width={720}
             height={720}
-            sizes="(max-width: 40rem) 100vw, 140px"
+            sizes="(max-width: 48rem) 100vw, 180px"
             className="roda"
           />
         }

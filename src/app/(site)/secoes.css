@@ -281,16 +281,49 @@
 
 .roda {
   display: block;
-  width: clamp(5rem, 11vw, 6.5rem);
+  width: clamp(7rem, 12vw, 10.5rem);
   height: auto;
-  margin-bottom: 1.35rem;
+  /* Halo seguindo o círculo, não uma caixa: o arquivo tem alfa de
+     verdade, então `drop-shadow` recorta pela silhueta. É o que faz a
+     roda ler como elemento gráfico e não como ícone solto. */
+  filter: drop-shadow(0 0 2.5rem rgb(22 104 245 / 0.45));
 }
 
-/* No celular a roda deixa de ser selo e abre a seção: ela carrega as
-   quatro letras do método, que no tamanho de 80px ninguém lê. O `sizes`
-   do componente acompanha, senão o Next serviria o arquivo de 140px
-   esticado até 350 e a imagem sairia borrada. */
-@media (max-width: 40rem) {
+/* No desktop a roda sai de cima do título e vai para o lado dele. Ela
+   carrega as quatro letras que dão nome ao método e merece o espaço que
+   sobrava à esquerda do cabeçalho. Escopo em `#metodo` de propósito:
+   `antes` é um encaixe genérico do cabeçalho e as outras seções não
+   devem herdar este arranjo. */
+@media (min-width: 48rem) {
+  #metodo .secao__cabeca > div:first-child {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "roda chapeu"
+      "roda titulo";
+    column-gap: clamp(1.5rem, 3vw, 2.5rem);
+    align-content: center;
+  }
+
+  #metodo .roda {
+    grid-area: roda;
+    align-self: center;
+  }
+
+  #metodo .secao__cabeca .chapeu {
+    grid-area: chapeu;
+    align-self: end;
+  }
+
+  #metodo .secao__cabeca h2 {
+    grid-area: titulo;
+    align-self: start;
+  }
+}
+
+/* Abaixo disso ela abre a seção em largura cheia: as quatro letras não
+   se leem em 100px, e no celular não há coluna ao lado para ocupar. */
+@media (max-width: 47.99rem) {
   .roda {
     width: 100%;
     margin-bottom: 1.75rem;
