@@ -134,7 +134,7 @@ export function Deck({ proposta }: { proposta: Proposta }) {
             <h2>Onde o seu investimento está perdendo dinheiro hoje</h2>
             <p className="texto">
               {proposta.introducao ??
-                "Sem rastreamento confiável e sem volume de teste, a plataforma otimiza no escuro e o custo por venda só sobe."}
+                "Conteúdo feito no improviso não constrói posicionamento, e anúncio que carrega uma marca desconhecida paga mais caro por cada venda. As duas pontas se sustentam."}
             </p>
           </div>
         </section>

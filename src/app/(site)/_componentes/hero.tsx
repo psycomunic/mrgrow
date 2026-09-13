@@ -2,11 +2,14 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { MARCA, linkWhatsApp } from "@/lib/marca";
 
+/* Números da proposta comercial da agência. O site trazia outros quatro,
+   e um deles contradizia o documento: falava em R$ 18M administrados
+   contra os R$ 9M que a proposta afirma para o cliente. */
 const NUMEROS = [
-  { v: "R$ 18M+", r: "gerenciados em mídia paga" },
-  { v: "4,7x", r: "ROAS médio das contas ativas" },
-  { v: "92%", r: "de retenção de clientes" },
-  { v: "48h", r: "para colocar a operação no ar" },
+  { v: "+583", r: "empresas posicionadas" },
+  { v: "+R$ 9M", r: "de verba administrada em anúncios" },
+  { v: "+2.326", r: "campanhas otimizadas" },
+  { v: "+10 anos", r: "de mercado" },
 ];
 
 export function Hero() {
