@@ -335,16 +335,6 @@
   line-height: 1;
 }
 
-.pilar__passo {
-  display: block;
-  margin-bottom: 0.35rem;
-  font-family: var(--fonte-display), sans-serif;
-  font-size: 0.625rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: color-mix(in oklab, var(--cinza) 80%, transparent);
-}
 
 .pilar h3 {
   font-family: var(--fonte-display), sans-serif;
@@ -363,6 +353,10 @@
   margin-top: 1.5rem;
   display: grid;
   gap: 0.7rem;
+  /* Os pilares têm de 4 a 7 itens e a grade iguala a altura dos cartões.
+     Sem prender no topo, as linhas esticam para preencher a sobra e os
+     pilares curtos ficam com os pontos espalhados. */
+  align-content: start;
 }
 
 .pilar li {
