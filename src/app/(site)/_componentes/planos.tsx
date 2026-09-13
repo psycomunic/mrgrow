@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { BorderBeamPanel } from "@/components/ui/border-beam-panel";
 import { Secao, CabecaSecao } from "./secao";
 
@@ -104,23 +104,33 @@ export function Planos() {
 
               <h3>{p.nome}</h3>
               <p className="plano__linha">{p.linha}</p>
-              <p className="plano__para">{p.para}</p>
 
               <p className="plano__valor">
                 <span className="plano__volume">{p.volume}</span>
                 <span className="plano__unidade">{p.unidade}</span>
               </p>
 
-              <ul>
-                {p.itens.map((i) => (
-                  <li key={i}>
-                    <span className="plano__tique" aria-hidden>
-                      <Check size={11} strokeWidth={3.5} />
-                    </span>
-                    {i}
-                  </li>
-                ))}
-              </ul>
+              <p className="plano__para">{p.para}</p>
+
+              {/* Gaveta: as entregas por inteiro custam 11 linhas por cartão
+                  e empurravam os três para fora da tela. `details` resolve
+                  sem JavaScript e já vem acessível pelo teclado. */}
+              <details className="plano__gaveta">
+                <summary>
+                  Ver as {p.itens.length} entregas
+                  <ChevronDown size={15} aria-hidden />
+                </summary>
+                <ul>
+                  {p.itens.map((i) => (
+                    <li key={i}>
+                      <span className="plano__tique" aria-hidden>
+                        <Check size={11} strokeWidth={3.5} />
+                      </span>
+                      {i}
+                    </li>
+                  ))}
+                </ul>
+              </details>
 
               <p className="plano__nota">{p.nota}</p>
 

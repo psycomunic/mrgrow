@@ -808,26 +808,15 @@
    dos cartões refrata; sem algo colorido atrás, vidro lê como caixa
    cinza. Fica atrás do cartão do meio, que é o recomendado. */
 #planos::before {
-  /* Esfera de verdade, com borda definida, e não um lavado espalhado:
-     é ela que os cartões refratam, e vidro sobre cor difusa continua
-     lendo como caixa cinza. */
-  inset: auto;
-  left: 50%;
-  top: 52%;
-  width: min(58rem, 118%);
-  aspect-ratio: 1;
-  translate: -50% 0;
-  border-radius: 50%;
+  /* Radial sobre um retângulo, e não um elemento circular recortado: o
+     círculo desenhava uma aresta dura atravessando a face dos cartões,
+     que lia como falha. Aqui o brilho é forte mas dissolve sem borda,
+     como na referência. */
+  inset: -12% -12% -8% -12%;
   background:
-    radial-gradient(
-      circle at 48% 40%,
-      rgb(96 176 255 / 0.7) 0%,
-      rgb(44 126 245 / 0.72) 22%,
-      rgb(20 74 200 / 0.7) 38%,
-      rgb(12 40 130 / 0.6) 54%,
-      rgb(8 20 66 / 0.42) 68%,
-      transparent 78%
-    );
+    radial-gradient(30rem 26rem at 51% 58%, rgb(96 176 255 / 0.4), transparent 66%),
+    radial-gradient(44rem 36rem at 50% 66%, rgb(30 116 245 / 0.42), transparent 68%),
+    radial-gradient(62rem 48rem at 46% 62%, rgb(12 36 108 / 0.5), transparent 74%);
 }
 
 /* A palavra fica entre o orbe e os cartões: o vidro precisa ter algo
@@ -923,10 +912,11 @@
 }
 
 .plano h3 {
-  font-family: var(--fonte-display), sans-serif;
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: -0.035em;
+  font-family: var(--fonte-cartaz), var(--fonte-display), sans-serif;
+  font-size: clamp(1.7rem, 2.6vw, 2.1rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
   text-transform: uppercase;
 }
 
@@ -979,11 +969,56 @@
   max-width: 16ch;
 }
 
+.plano__gaveta {
+  margin-top: 1.5rem;
+  flex: 1;
+  border-top: 1px solid rgb(255 255 255 / 0.14);
+}
+
+.plano--destaque .plano__gaveta {
+  border-top-color: rgb(255 255 255 / 0.26);
+}
+
+.plano__gaveta summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-block: 1rem;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--osso);
+  transition: color 0.2s;
+}
+
+/* O triângulo nativo do Safari não some com `list-style`. */
+.plano__gaveta summary::-webkit-details-marker {
+  display: none;
+}
+
+.plano__gaveta summary:hover {
+  color: #9cc4ff;
+}
+
+.plano__gaveta summary svg {
+  flex-shrink: 0;
+  color: #8dbdff;
+  transition: rotate 0.25s;
+}
+
+.plano__gaveta[open] summary svg {
+  rotate: 180deg;
+}
+
 .plano ul {
-  margin-top: 1.6rem;
+  margin-bottom: 0.5rem;
   display: grid;
   gap: 0.8rem;
-  flex: 1;
   align-content: start;
 }
 

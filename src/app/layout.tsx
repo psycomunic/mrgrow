@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Sora } from "next/font/google";
+import { Archivo_Black, Inter, Sora } from "next/font/google";
 import { Toaster } from "sonner";
 import { MARCA } from "@/lib/marca";
 import "./globals.css";
@@ -17,6 +17,16 @@ const sora = Sora({
   weight: ["600", "700", "800"],
   display: "swap",
   variable: "--fonte-display",
+});
+
+/* Só os nomes dos escopos usam esta. Um peso único e um punhado de
+   palavras, então o custo do arquivo é baixo e ela dá aos nomes o
+   destaque que a Sora, usada em tudo, não daria. */
+const archivo = Archivo_Black({
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  variable: "--fonte-cartaz",
 });
 
 export const metadata: Metadata = {
@@ -57,7 +67,7 @@ export const viewport: Viewport = {
 
 export default function LayoutRaiz({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${sora.variable}`} suppressHydrationWarning>
+    <html lang="pt-BR" className={`${inter.variable} ${sora.variable} ${archivo.variable}`} suppressHydrationWarning>
       <body className="antialiased">
         {children}
         <Toaster theme="dark" position="top-right" richColors closeButton />
