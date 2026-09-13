@@ -89,6 +89,13 @@ export function Planos() {
         apoio="Estratégia, conteúdo e tráfego para a sua marca sair do improviso e crescer com direção. O investimento sai no diagnóstico, junto do escopo fechado para o seu caso."
       />
 
+      {/* Palavra gigante atrás dos cartões, parcialmente coberta por eles.
+          É o que dá profundidade à cena: o vidro tem texto atrás para
+          distorcer, não só cor chapada. */}
+      <span className="planos__fundo" aria-hidden>
+        Crescimento
+      </span>
+
       <div className="planos espaco">
         {PLANOS.map((p) => {
           const cartao = (
