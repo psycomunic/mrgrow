@@ -6,7 +6,6 @@ import { Dores } from "./_componentes/dores";
 import { Metodo } from "./_componentes/metodo";
 import { Servicos } from "./_componentes/servicos";
 import { Resultados } from "./_componentes/resultados";
-import { Portfolio } from "./_componentes/portfolio";
 import { Comparativo } from "./_componentes/comparativo";
 import { Processo } from "./_componentes/processo";
 import { Planos } from "./_componentes/planos";
@@ -77,7 +76,6 @@ export default function PaginaInicial() {
       <Metodo />
       <Servicos />
       <Resultados />
-      <Portfolio />
       <Comparativo />
       <Processo />
       <Planos />

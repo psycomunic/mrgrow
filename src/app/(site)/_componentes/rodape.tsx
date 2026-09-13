@@ -18,7 +18,6 @@ const COLUNAS = [
       { r: "Método G.R.O.W", h: "#metodo" },
       { r: "Escopos", h: "#planos" },
       { r: "Resultados", h: "#resultados" },
-      { r: "Trabalho", h: "#trabalho" },
       { r: "Sobre o fundador", h: "#sobre" },
     ],
   },

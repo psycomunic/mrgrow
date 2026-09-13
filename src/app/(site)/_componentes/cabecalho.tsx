@@ -13,7 +13,6 @@ const LINKS = [
   { href: "#servicos", rotulo: "Serviços" },
   { href: "#resultados", rotulo: "Resultados" },
   { href: "#planos", rotulo: "Escopos" },
-  { href: "#trabalho", rotulo: "Trabalho" },
 ];
 
 export function Cabecalho() {
