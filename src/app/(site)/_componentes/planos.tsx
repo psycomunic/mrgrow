@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { BorderBeamPanel } from "@/components/ui/border-beam-panel";
 import { Secao, CabecaSecao } from "./secao";
 
@@ -105,7 +106,12 @@ export function Planos() {
 
               <ul>
                 {p.itens.map((i) => (
-                  <li key={i}>{i}</li>
+                  <li key={i}>
+                    <span className="plano__tique" aria-hidden>
+                      <Check size={11} strokeWidth={3.5} />
+                    </span>
+                    {i}
+                  </li>
                 ))}
               </ul>
 
@@ -125,7 +131,7 @@ export function Planos() {
           return p.destaque ? (
             <BorderBeamPanel
               key={p.nome}
-              radius={0}
+              radius={22}
               thickness={2}
               beams={1}
               idleSpeed={11}
