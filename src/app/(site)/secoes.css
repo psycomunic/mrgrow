@@ -761,6 +761,164 @@
   gap: 0.7rem;
 }
 
+/* ── Escopos (planos) ───────────────────────────────────────────
+   Sem preço: o lugar do valor é ocupado pelo volume mensal de
+   conteúdo, que é o eixo em que os escopos escalam de verdade. */
+
+.planos {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 60rem) {
+  .planos {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.plano {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.8rem 2.15rem;
+}
+
+/* Antes era campo de cor sólido; virou vidro para o feixe da borda ter
+   sobre o que correr. O azul segue no selo, nos fios e no botão. */
+.plano--destaque {
+  background: linear-gradient(160deg, rgb(22 104 245 / 0.16), rgb(22 104 245 / 0.05));
+  border-color: transparent;
+  backdrop-filter: blur(22px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.16),
+    0 30px 70px -34px rgb(22 104 245 / 0.55);
+}
+
+.plano--destaque .plano__para,
+.plano--destaque .plano__unidade,
+.plano--destaque .plano__nota,
+.plano--destaque li {
+  color: rgb(255 255 255 / 0.78);
+}
+
+/* O painel do feixe embrulha o cartão: ele é que carrega a borda. */
+.plano-feixe {
+  display: flex;
+}
+
+.plano-feixe .plano {
+  width: 100%;
+}
+
+.plano__selo {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: 0.3rem 0.7rem;
+  background: var(--azul);
+  color: #fff;
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.plano h3 {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+}
+
+.plano__para {
+  margin-top: 0.45rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--cinza);
+}
+
+.plano__valor {
+  margin-top: 1.6rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--vidro-borda);
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.plano--destaque .plano__valor {
+  border-top-color: rgb(255 255 255 / 0.28);
+}
+
+.plano__volume {
+  font-family: var(--fonte-display), sans-serif;
+  font-size: 2.1rem;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+.plano__unidade {
+  font-size: 0.875rem;
+  line-height: 1.3;
+  color: var(--cinza);
+  max-width: 7ch;
+}
+
+.plano ul {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 0.65rem;
+  /* Cresce para empurrar o botão até o pé do cartão, mas as linhas ficam
+     presas no topo: sem isto elas esticam para preencher a sobra, e os
+     escopos com menos itens ficam com os pontos espalhados. */
+  flex: 1;
+  align-content: start;
+}
+
+.plano li {
+  display: grid;
+  grid-template-columns: 1.3rem 1fr;
+  gap: 0.6rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--cinza);
+}
+
+.plano li::before {
+  content: "";
+  width: 0.8rem;
+  height: 2px;
+  margin-top: 0.68rem;
+  background: var(--azul);
+}
+
+/* A regra de captação muda em cada escopo e é a dúvida mais comum:
+   fica destacada do resto da lista, não escondida como mais um item. */
+.plano__nota {
+  margin-top: 1.4rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--vidro-borda);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--cinza) 88%, transparent);
+}
+
+.plano--destaque .plano__nota {
+  border-top-color: rgb(255 255 255 / 0.28);
+}
+
+.plano .acao {
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+.planos__nota {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--cinza);
+}
+
 /* ── FAQ ────────────────────────────────────────────────────── */
 
 .faq {
@@ -1637,6 +1795,7 @@
 
 /* ── Painéis com feixe: a moldura é do componente ───────────── */
 
+.sitio .plano-feixe,
 .sitio .prazo-feixe {
   position: relative;
 }
