@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo_Black, Inter, Sora } from "next/font/google";
+import { Inter, Sora, Space_Grotesk } from "next/font/google";
 import { Toaster } from "sonner";
 import { MARCA } from "@/lib/marca";
 import "./globals.css";
@@ -19,12 +19,12 @@ const sora = Sora({
   variable: "--fonte-display",
 });
 
-/* Só os nomes dos escopos usam esta. Um peso único e um punhado de
-   palavras, então o custo do arquivo é baixo e ela dá aos nomes o
-   destaque que a Sora, usada em tudo, não daria. */
-const archivo = Archivo_Black({
+/* Só a seção de escopos usa esta: nomes, números e a palavra de fundo.
+   Poucas palavras, então o arquivo é barato, e ela dá a esses elementos
+   um caráter que a Sora, usada em todos os títulos do site, não daria. */
+const grotesk = Space_Grotesk({
   subsets: ["latin"],
-  weight: "400",
+  weight: ["500", "700"],
   display: "swap",
   variable: "--fonte-cartaz",
 });
@@ -67,7 +67,7 @@ export const viewport: Viewport = {
 
 export default function LayoutRaiz({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${sora.variable} ${archivo.variable}`} suppressHydrationWarning>
+    <html lang="pt-BR" className={`${inter.variable} ${sora.variable} ${grotesk.variable}`} suppressHydrationWarning>
       <body className="antialiased">
         {children}
         <Toaster theme="dark" position="top-right" richColors closeButton />
