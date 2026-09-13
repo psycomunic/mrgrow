@@ -38,10 +38,10 @@ const PLANOS = [
   },
   {
     nome: "Grow Pro",
-    linha: "Conteúdo, tráfego e posicionamento",
+    linha: "Conteúdo de feed e reels, tráfego e posicionamento",
     para: "Para profissionalizar a presença digital e parar de depender de conteúdo feito no improviso.",
     volume: "12",
-    unidade: "posts por mês, feed e reels",
+    unidade: "posts por mês",
     destaque: true,
     itens: [
       "Planejamento estratégico mensal de marketing",
@@ -103,13 +103,17 @@ export function Planos() {
             <span className="plano__brilho" aria-hidden />
             <span className="plano__reflexo" aria-hidden />
 
-            {p.destaque && <span className="plano__selo">O mais recomendado</span>}
+            {p.destaque ? (
+              <span className="plano__selo">O mais recomendado</span>
+            ) : (
+              <span className="plano__marca" aria-hidden />
+            )}
 
             <h3 className="plano__nome">{p.nome}</h3>
             <p className="plano__linha">{p.linha}</p>
 
             <p className="plano__volume">
-              {p.volume}
+              <strong>{p.volume}</strong>
               <span>{p.unidade}</span>
             </p>
 
