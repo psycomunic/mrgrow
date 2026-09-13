@@ -789,112 +789,310 @@
 }
 
 /* ── Escopos (planos) ───────────────────────────────────────────
+   Portado do código de referência que o Mateus enviou. A cena é uma
+   esfera nascendo abaixo do rodapé da seção: é o limbo dela, e não um
+   degradê espalhado, que ilumina a base dos cartões e dá ao vidro o
+   que refratar.
+
    Único ponto da página em registro de vidro arredondado, e não no
-   cartaz chapado do resto. É onde a pessoa compara e decide: o vidro
-   sobre o orbe separa os três cartões do fundo e dá a eles o peso que
-   a decisão pede.
+   cartaz chapado do resto. É onde a pessoa compara e decide.
 
    Sem preço: o lugar do valor é ocupado pelo volume mensal de
    conteúdo, que é o eixo em que os escopos escalam de verdade. */
 
-/* Recorta na própria seção: a palavra de fundo é maior que a tela no
-   celular e o orbe transborda de propósito. Sem isto, os dois vazariam
-   para as seções vizinhas. */
 #planos {
+  padding-block: clamp(4.5rem, 8vw, 7rem) clamp(9rem, 16vw, 14rem);
   overflow: hidden;
 }
 
-/* O orbe no lugar da luz ambiente genérica da seção. É ele que o vidro
-   dos cartões refrata; sem algo colorido atrás, vidro lê como caixa
-   cinza. Fica atrás do cartão do meio, que é o recomendado. */
+/* A luz ambiente genérica da seção sai: quem ilumina aqui é a esfera.
+   O que sobra no pseudo-elemento é o grão, para o degradê não ficar
+   liso demais nem bandear. */
 #planos::before {
-  /* Radial sobre um retângulo, e não um elemento circular recortado: o
-     círculo desenhava uma aresta dura atravessando a face dos cartões,
-     que lia como falha. Aqui o brilho é forte mas dissolve sem borda,
-     como na referência. */
-  inset: -12% -12% -8% -12%;
-  background:
-    radial-gradient(30rem 26rem at 51% 58%, rgb(96 176 255 / 0.4), transparent 66%),
-    radial-gradient(44rem 36rem at 50% 66%, rgb(30 116 245 / 0.42), transparent 68%),
-    radial-gradient(62rem 48rem at 46% 62%, rgb(12 36 108 / 0.5), transparent 74%);
+  inset: 0;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* A palavra fica entre o orbe e os cartões: o vidro precisa ter algo
-   com forma atrás para distorcer, não apenas um degradê. */
-.planos__fundo {
+.orbe {
   position: absolute;
-  z-index: -1;
   left: 50%;
-  top: 8.5rem;
+  bottom: -66vw;
+  width: 88vw;
+  height: 88vw;
+  max-width: 1200px;
+  max-height: 1200px;
   translate: -50% 0;
-  font-family: var(--fonte-display), sans-serif;
-  font-size: clamp(4rem, 13vw, 11rem);
-  font-weight: 700;
-  letter-spacing: -0.05em;
-  line-height: 0.8;
-  text-transform: uppercase;
+  border-radius: 50%;
+  z-index: -2;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 44% 28%,
+    #d6e6ff 0%,
+    #7fb0ff 9%,
+    #2d76ff 22%,
+    #0c2f8f 42%,
+    #030a24 60%,
+    #000 72%
+  );
+  box-shadow:
+    0 0 120px 20px rgb(60 130 255 / 0.35),
+    0 0 300px 80px rgb(30 80 220 / 0.18);
+}
+
+/* Limbo: o fio de luz na aresta da esfera. */
+.orbe::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 1px rgb(160 200 255 / 0.35),
+    inset 0 30px 80px rgb(120 180 255 / 0.25);
+}
+
+.nevoa {
+  position: absolute;
+  right: -12vw;
+  top: 6%;
+  width: 60vw;
+  height: 60vw;
+  border-radius: 50%;
+  z-index: -2;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgb(70 140 255 / 0.4) 0%,
+    rgb(70 140 255 / 0.1) 35%,
+    transparent 65%
+  );
+  filter: blur(60px);
+}
+
+.planos__palavra {
+  position: absolute;
+  top: clamp(7rem, 13vw, 11rem);
+  left: 50%;
+  translate: -50% 0;
+  z-index: -1;
+  font-family: var(--fonte-cartaz), var(--fonte-display), sans-serif;
+  font-size: clamp(7.5rem, 22vw, 18.75rem);
+  font-weight: 400;
+  letter-spacing: -0.055em;
+  line-height: 1;
   white-space: nowrap;
-  color: rgb(255 255 255 / 0.09);
+  background: linear-gradient(180deg, #b9d4ff 0%, #3b82ff 40%, rgb(59 130 255 / 0.05) 95%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  filter: blur(9px);
   pointer-events: none;
   user-select: none;
 }
 
 .planos {
   display: grid;
-  gap: 1.25rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.85rem;
+  align-items: stretch;
 }
 
-@media (min-width: 60rem) {
+@media (max-width: 56rem) {
   .planos {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr;
+    max-width: 26rem;
+    margin-inline: auto;
   }
 }
 
+/* ── O cartão de vidro ──────────────────────────────────────── */
+
 .plano {
+  position: relative;
   display: flex;
   flex-direction: column;
-  padding: 2.15rem 1.9rem 2.25rem;
-  border-radius: 22px;
-  /* Translucidez de verdade: o orbe e a palavra atravessam o cartão.
-     Com véu mais opaco o vidro vira plástico e a cena perde a
-     profundidade que a referência tem. */
-  background:
-    linear-gradient(155deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0.02)),
-    linear-gradient(180deg, rgb(11 14 22 / 0.62), rgb(11 14 22 / 0.5));
-  border: 1px solid rgb(255 255 255 / 0.16);
-  backdrop-filter: blur(26px) saturate(155%);
-  -webkit-backdrop-filter: blur(26px) saturate(155%);
+  padding: 2.25rem 2rem 2rem;
+  border-radius: 30px;
+  transition:
+    transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.5s ease;
+  background: linear-gradient(
+    135deg,
+    rgb(255 255 255 / 0.14) 0%,
+    rgb(255 255 255 / 0.04) 40%,
+    rgb(255 255 255 / 0.02) 60%,
+    rgb(255 255 255 / 0.08) 100%
+  );
+  backdrop-filter: blur(26px) saturate(180%) brightness(1.05);
+  -webkit-backdrop-filter: blur(26px) saturate(180%) brightness(1.05);
+  /* As arestas internas dão espessura ao vidro; sem elas ele lê como
+     um retângulo translúcido chapado. */
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 0.22),
-    0 30px 70px -40px rgb(0 0 0 / 0.9);
+    inset 0 1.5px 0 rgb(255 255 255 / 0.55),
+    inset 0 -1px 0 rgb(255 255 255 / 0.12),
+    inset 1px 0 0 rgb(255 255 255 / 0.18),
+    inset -1px 0 0 rgb(255 255 255 / 0.08),
+    inset 0 0 40px rgb(255 255 255 / 0.04),
+    0 30px 60px -20px rgb(0 0 0 / 0.85),
+    0 12px 24px -8px rgb(0 0 0 / 0.6);
 }
 
-/* O recomendado tem o vidro mais carregado e um véu azul: é a diferença
-   de material que o destaca, não um campo de cor chapado. */
+/* Borda em degradê: a máscara recorta o miolo e sobra só o fio. */
+.plano::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    160deg,
+    rgb(255 255 255 / 0.75) 0%,
+    rgb(255 255 255 / 0.18) 30%,
+    rgb(255 255 255 / 0.05) 55%,
+    rgb(255 255 255 / 0.35) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.plano:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    inset 0 1.5px 0 rgb(255 255 255 / 0.8),
+    inset 0 -1px 0 rgb(255 255 255 / 0.15),
+    inset 1px 0 0 rgb(255 255 255 / 0.22),
+    inset -1px 0 0 rgb(255 255 255 / 0.1),
+    inset 0 0 50px rgb(255 255 255 / 0.06),
+    0 60px 100px -28px rgb(0 0 0 / 0.95),
+    0 24px 48px -12px rgb(0 0 0 / 0.7),
+    0 0 60px -10px rgb(90 150 255 / 0.25);
+}
+
+/* Brilho fixo no canto: vidro sempre tem luz presa nele. */
+.plano__brilho {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(118deg, rgb(255 255 255 / 0.16) 0%, rgb(255 255 255 / 0.05) 22%, transparent 40%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.08) 0%, transparent 35%);
+  opacity: 0.8;
+  transition: opacity 0.5s ease;
+}
+
+.plano:hover .plano__brilho {
+  opacity: 1;
+}
+
+/* Varredura diagonal ao passar o mouse. */
+.plano__reflexo {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.plano__reflexo::before {
+  content: "";
+  position: absolute;
+  top: -40%;
+  bottom: -40%;
+  left: -70%;
+  width: 60%;
+  transform: skewX(-22deg) translateX(0);
+  background: linear-gradient(
+    90deg,
+    rgb(255 255 255 / 0) 0%,
+    rgb(255 255 255 / 0.06) 30%,
+    rgb(255 255 255 / 0.28) 48%,
+    rgb(255 255 255 / 0.55) 50%,
+    rgb(255 255 255 / 0.28) 52%,
+    rgb(255 255 255 / 0.06) 70%,
+    rgb(255 255 255 / 0) 100%
+  );
+  filter: blur(2px);
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+
+.plano:hover .plano__reflexo::before {
+  animation: reflexo 1.1s cubic-bezier(0.25, 0.7, 0.25, 1) forwards;
+}
+
+@keyframes reflexo {
+  0% {
+    opacity: 0;
+    transform: skewX(-22deg) translateX(0);
+  }
+  10%,
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: skewX(-22deg) translateX(320%);
+  }
+}
+
+/* ── O recomendado ──────────────────────────────────────────── */
+
 .plano--destaque {
-  background:
-    linear-gradient(155deg, rgb(180 220 255 / 0.16), rgb(22 104 245 / 0.05)),
-    linear-gradient(180deg, rgb(9 16 34 / 0.52), rgb(9 16 34 / 0.42));
-  border-color: rgb(255 255 255 / 0.26);
+  background: linear-gradient(
+    150deg,
+    rgb(150 195 255 / 0.34) 0%,
+    rgb(80 140 255 / 0.16) 35%,
+    rgb(255 255 255 / 0.04) 62%,
+    rgb(120 170 255 / 0.16) 100%
+  );
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 0.3),
-    0 36px 80px -38px rgb(22 104 245 / 0.6);
+    inset 0 1.5px 0 rgb(255 255 255 / 0.85),
+    inset 0 -1px 0 rgb(180 210 255 / 0.3),
+    inset 1px 0 0 rgb(255 255 255 / 0.3),
+    inset -1px 0 0 rgb(255 255 255 / 0.12),
+    inset 0 0 60px rgb(120 170 255 / 0.12),
+    0 0 0 1px rgb(150 195 255 / 0.25),
+    0 0 80px rgb(60 130 255 / 0.35),
+    0 30px 60px -20px rgb(0 0 0 / 0.85);
 }
 
-.plano--destaque .plano__para,
-.plano--destaque .plano__unidade,
-.plano--destaque .plano__nota,
-.plano--destaque li {
-  color: rgb(255 255 255 / 0.82);
+.plano--destaque::before {
+  background: linear-gradient(
+    160deg,
+    #fff 0%,
+    rgb(190 215 255 / 0.5) 30%,
+    rgb(120 170 255 / 0.25) 60%,
+    rgb(255 255 255 / 0.6) 100%
+  );
 }
 
-/* O painel do feixe embrulha o cartão: ele é que carrega a borda. */
-.plano-feixe {
-  display: flex;
+.plano--destaque:hover {
+  box-shadow:
+    inset 0 1.5px 0 #fff,
+    inset 0 -1px 0 rgb(180 210 255 / 0.35),
+    inset 1px 0 0 rgb(255 255 255 / 0.35),
+    inset -1px 0 0 rgb(255 255 255 / 0.15),
+    inset 0 0 60px rgb(120 170 255 / 0.14),
+    0 0 0 1px rgb(150 195 255 / 0.35),
+    0 0 130px rgb(60 130 255 / 0.6),
+    0 60px 100px -28px rgb(0 0 0 / 0.95);
 }
 
-.plano-feixe .plano {
-  width: 100%;
+/* ── Conteúdo, acima do vidro ───────────────────────────────── */
+
+.plano > *:not(.plano__brilho):not(.plano__reflexo) {
+  position: relative;
+  z-index: 2;
 }
 
 .plano__selo {
@@ -902,72 +1100,62 @@
   margin-bottom: 1rem;
   padding: 0.35rem 0.8rem;
   border-radius: 999px;
-  background: var(--azul);
-  color: #fff;
+  background: rgb(255 255 255 / 0.16);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5);
   font-family: var(--fonte-display), sans-serif;
   font-size: 0.625rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+  color: #fff;
 }
 
-.plano h3 {
+.plano__nome {
   font-family: var(--fonte-cartaz), var(--fonte-display), sans-serif;
-  font-size: clamp(1.7rem, 2.6vw, 2.1rem);
+  font-size: 1.5rem;
   font-weight: 400;
   letter-spacing: -0.02em;
-  line-height: 1;
+  line-height: 1.1;
   text-transform: uppercase;
 }
 
 .plano__linha {
   margin-top: 0.5rem;
-  font-family: var(--fonte-display), sans-serif;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #8dbdff;
-}
-
-.plano--destaque .plano__linha {
-  color: #bcd9ff;
-}
-
-.plano__para {
-  margin-top: 0.7rem;
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  color: var(--cinza);
-}
-
-.plano__valor {
-  margin-top: 1.6rem;
-  padding-top: 1.4rem;
-  border-top: 1px solid rgb(255 255 255 / 0.14);
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-
-.plano--destaque .plano__valor {
-  border-top-color: rgb(255 255 255 / 0.26);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: rgb(255 255 255 / 0.6);
 }
 
 .plano__volume {
-  font-family: var(--fonte-display), sans-serif;
+  margin-top: 1.35rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
   font-size: 2.4rem;
-  font-weight: 700;
-  letter-spacing: -0.05em;
-  line-height: 1;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  text-shadow: 0 2px 20px rgb(0 0 0 / 0.4);
 }
 
-.plano__unidade {
-  font-size: 0.8125rem;
-  line-height: 1.3;
-  color: var(--cinza);
-  max-width: 16ch;
+.plano__volume span {
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: 0;
+  color: rgb(255 255 255 / 0.6);
+  max-width: 9ch;
+  text-shadow: none;
 }
+
+.plano__para {
+  margin-top: 0.85rem;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: rgb(255 255 255 / 0.6);
+}
+
+/* ── Gaveta das entregas ────────────────────────────────────── */
 
 .plano__gaveta {
   margin-top: 1.5rem;
@@ -975,24 +1163,17 @@
   border-top: 1px solid rgb(255 255 255 / 0.14);
 }
 
-.plano--destaque .plano__gaveta {
-  border-top-color: rgb(255 255 255 / 0.26);
-}
-
 .plano__gaveta summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding-block: 1rem;
+  padding-block: 0.9rem;
   cursor: pointer;
   list-style: none;
-  font-family: var(--fonte-display), sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--osso);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.92);
   transition: color 0.2s;
 }
 
@@ -1002,12 +1183,12 @@
 }
 
 .plano__gaveta summary:hover {
-  color: #9cc4ff;
+  color: #8fb8ff;
 }
 
 .plano__gaveta summary svg {
   flex-shrink: 0;
-  color: #8dbdff;
+  color: #8fb8ff;
   transition: rotate 0.25s;
 }
 
@@ -1015,74 +1196,105 @@
   rotate: 180deg;
 }
 
-.plano ul {
-  margin-bottom: 0.5rem;
-  display: grid;
-  gap: 0.8rem;
-  align-content: start;
+.plano__lista {
+  margin-bottom: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
-.plano li {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.7rem;
-  font-size: 0.9375rem;
+.plano__lista li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.78rem;
   line-height: 1.45;
-  color: var(--cinza);
+  color: rgb(255 255 255 / 0.92);
 }
 
-/* Tique em disco no lugar do fio azul do resto da página: aqui cada
-   linha é uma entrega conferida, não um marcador de lista. */
-.plano__tique {
+.tique {
+  flex: none;
   display: grid;
   place-items: center;
-  width: 1.25rem;
-  height: 1.25rem;
-  margin-top: 0.1rem;
-  border-radius: 999px;
-  background: #fff;
-  color: #0f1012;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(145deg, rgb(255 255 255 / 0.22), rgb(255 255 255 / 0.04));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    inset 0 -1px 0 rgb(0 0 0 / 0.3),
+    0 2px 6px rgb(0 0 0 / 0.4);
 }
 
-.plano--destaque .plano__tique {
-  background: #fff;
-}
+/* ── Rodapé do cartão ───────────────────────────────────────── */
 
-/* A regra de captação muda em cada escopo e é a dúvida mais comum:
-   fica destacada do resto da lista, não escondida como mais um item. */
 .plano__nota {
-  margin-top: 1.5rem;
-  padding-top: 1.1rem;
+  margin-top: 1.1rem;
+  padding-top: 1rem;
   border-top: 1px solid rgb(255 255 255 / 0.14);
-  font-size: 0.8125rem;
+  font-size: 0.72rem;
   line-height: 1.5;
-  color: color-mix(in oklab, var(--cinza) 88%, transparent);
+  color: rgb(255 255 255 / 0.55);
 }
 
-.plano--destaque .plano__nota {
-  border-top-color: rgb(255 255 255 / 0.26);
-}
-
-/* Pílula clara nos três, como na referência: o que distingue o
-   recomendado é o material do cartão, não o botão. */
-.plano .acao {
-  margin-top: 1.6rem;
-  width: 100%;
+.plano__bt {
+  align-self: center;
+  margin-top: 1.5rem;
+  padding: 0.75rem 2rem;
   border-radius: 999px;
-  border: 0;
-  background: #f4f6fb;
-  color: #0f1012;
+  background: linear-gradient(180deg, #fff 0%, #e6e6e6 100%);
+  color: #000;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 8px 20px -6px rgb(0 0 0 / 0.7),
+    0 0 0 1px rgb(255 255 255 / 0.15);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
 }
 
-.plano .acao:hover {
-  background: #fff;
+.plano__bt:hover {
   transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 14px 28px -8px rgb(0 0 0 / 0.8),
+    0 0 0 1px rgb(255 255 255 / 0.25);
+}
+
+.plano__bt:active {
+  transform: scale(0.97);
 }
 
 .planos__nota {
-  margin-top: 1.75rem;
+  margin-top: 2rem;
   font-size: 0.875rem;
-  color: var(--cinza);
+  color: rgb(255 255 255 / 0.55);
+}
+
+@media (max-width: 56rem) {
+  .orbe {
+    bottom: -86vw;
+    width: 140vw;
+    height: 140vw;
+  }
+
+  .nevoa {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plano {
+    transform: none !important;
+  }
+
+  .plano__reflexo::before {
+    animation: none !important;
+  }
 }
 
 /* ── FAQ ────────────────────────────────────────────────────── */

@@ -1,5 +1,4 @@
 import { Check, ChevronDown } from "lucide-react";
-import { BorderBeamPanel } from "@/components/ui/border-beam-panel";
 import { Secao, CabecaSecao } from "./secao";
 
 /**
@@ -20,7 +19,7 @@ const PLANOS = [
   {
     nome: "Grow Basic",
     linha: "Estratégia, conteúdo base e tráfego",
-    para: "Para organizar o marketing e sair do improviso, com estrutura interna para executar parte da produção",
+    para: "Para organizar o marketing e sair do improviso, com estrutura interna para executar parte da produção.",
     volume: "6 a 8",
     unidade: "artes por mês",
     itens: [
@@ -35,14 +34,14 @@ const PLANOS = [
       "1 reunião estratégica mensal",
       "Grupo de WhatsApp para acompanhamento",
     ],
-    nota: "Você grava os vídeos seguindo os roteiros aprovados e envia para a Grow editar e usar na estratégia.",
+    nota: "Você grava os vídeos seguindo os roteiros aprovados e envia para a Grow editar.",
   },
   {
     nome: "Grow Pro",
     linha: "Conteúdo, tráfego e posicionamento",
-    para: "Para profissionalizar a presença digital e parar de depender de conteúdo feito no improviso",
+    para: "Para profissionalizar a presença digital e parar de depender de conteúdo feito no improviso.",
     volume: "12",
-    unidade: "posts por mês, entre feed e reels",
+    unidade: "posts por mês, feed e reels",
     destaque: true,
     itens: [
       "Planejamento estratégico mensal de marketing",
@@ -59,10 +58,10 @@ const PLANOS = [
   },
   {
     nome: "Grow Premium",
-    linha: "Conteúdo, tráfego multicanal e posicionamento avançado",
-    para: "Para acelerar a geração de demanda com mais volume, mais acompanhamento e mais fontes de tráfego",
+    linha: "Conteúdo, tráfego multicanal e posicionamento",
+    para: "Para acelerar a geração de demanda com mais volume, acompanhamento e fontes de tráfego.",
     volume: "20",
-    unidade: "conteúdos por mês, cerca de 5 por semana",
+    unidade: "conteúdos por mês",
     itens: [
       "Planejamento estratégico mensal de marketing",
       "Cronograma mensal de conteúdo e roteiro de stories",
@@ -83,87 +82,66 @@ const PLANOS = [
 export function Planos() {
   return (
     <Secao id="planos">
+      {/* Cena de fundo. A esfera nasce abaixo do rodapé da seção e sobe:
+          é o limbo dela que ilumina a base dos cartões. A névoa quebra a
+          simetria à direita e o grão tira o aspecto liso do degradê. */}
+      <div className="orbe" aria-hidden />
+      <div className="nevoa" aria-hidden />
+      <div className="planos__palavra" aria-hidden>
+        Escopos
+      </div>
+
       <CabecaSecao
         chapeu="Escopos"
         titulo="Escolha o nível de crescimento"
         apoio="Estratégia, conteúdo e tráfego para a sua marca sair do improviso e crescer com direção. O investimento sai no diagnóstico, junto do escopo fechado para o seu caso."
       />
 
-      {/* Palavra gigante atrás dos cartões, parcialmente coberta por eles.
-          É o que dá profundidade à cena: o vidro tem texto atrás para
-          distorcer, não só cor chapada. */}
-      <span className="planos__fundo" aria-hidden>
-        Crescimento
-      </span>
-
       <div className="planos espaco">
-        {PLANOS.map((p) => {
-          const cartao = (
-            <div className={p.destaque ? "plano plano--destaque" : "plano vidro"}>
-              {p.destaque && <span className="plano__selo">O mais recomendado</span>}
+        {PLANOS.map((p) => (
+          <article className={p.destaque ? "plano plano--destaque" : "plano"} key={p.nome}>
+            <span className="plano__brilho" aria-hidden />
+            <span className="plano__reflexo" aria-hidden />
 
-              <h3>{p.nome}</h3>
-              <p className="plano__linha">{p.linha}</p>
+            {p.destaque && <span className="plano__selo">O mais recomendado</span>}
 
-              <p className="plano__valor">
-                <span className="plano__volume">{p.volume}</span>
-                <span className="plano__unidade">{p.unidade}</span>
-              </p>
+            <h3 className="plano__nome">{p.nome}</h3>
+            <p className="plano__linha">{p.linha}</p>
 
-              <p className="plano__para">{p.para}</p>
+            <p className="plano__volume">
+              {p.volume}
+              <span>{p.unidade}</span>
+            </p>
 
-              {/* Gaveta: as entregas por inteiro custam 11 linhas por cartão
-                  e empurravam os três para fora da tela. `details` resolve
-                  sem JavaScript e já vem acessível pelo teclado. */}
-              <details className="plano__gaveta">
-                <summary>
-                  Ver as {p.itens.length} entregas
-                  <ChevronDown size={15} aria-hidden />
-                </summary>
-                <ul>
-                  {p.itens.map((i) => (
-                    <li key={i}>
-                      <span className="plano__tique" aria-hidden>
-                        <Check size={11} strokeWidth={3.5} />
-                      </span>
-                      {i}
-                    </li>
-                  ))}
-                </ul>
-              </details>
+            <p className="plano__para">{p.para}</p>
 
-              <p className="plano__nota">{p.nota}</p>
+            {/* Gaveta: as entregas por inteiro custam até 11 linhas por
+                cartão e empurrariam os três para fora da tela. `details`
+                resolve sem JavaScript e já vem navegável pelo teclado. */}
+            <details className="plano__gaveta">
+              <summary>
+                Ver as {p.itens.length} entregas
+                <ChevronDown size={15} aria-hidden />
+              </summary>
+              <ul className="plano__lista">
+                {p.itens.map((i) => (
+                  <li key={i}>
+                    <span className="tique" aria-hidden>
+                      <Check size={11} strokeWidth={3} />
+                    </span>
+                    {i}
+                  </li>
+                ))}
+              </ul>
+            </details>
 
-              <a
-                href="#diagnostico"
-                className={p.destaque ? "acao acao--azul" : "acao acao--linha"}
-              >
-                Quero este escopo
-              </a>
-            </div>
-          );
+            <p className="plano__nota">{p.nota}</p>
 
-          // Só o escopo recomendado ganha o feixe, é ele que a página quer que
-          // você escolha. Nos outros, a moldura seria ruído.
-          return p.destaque ? (
-            <BorderBeamPanel
-              key={p.nome}
-              radius={22}
-              thickness={2}
-              beams={1}
-              idleSpeed={11}
-              hoverSpeed={34}
-              colors={["#7fb2ff"]}
-              className="plano-feixe !border-transparent !bg-transparent !p-0"
-            >
-              {cartao}
-            </BorderBeamPanel>
-          ) : (
-            <div key={p.nome} style={{ display: "flex" }}>
-              {cartao}
-            </div>
-          );
-        })}
+            <a href="#diagnostico" className="plano__bt">
+              Quero este escopo
+            </a>
+          </article>
+        ))}
       </div>
 
       <p className="planos__nota">
