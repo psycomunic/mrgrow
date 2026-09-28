@@ -35,6 +35,7 @@ export default async function LayoutPainel({ children }: { children: React.React
           papel={sessao.papel}
           nome={sessao.nome}
           organizacao={sessao.organizacaoNome}
+          avatarUrl={sessao.avatarUrl}
         />
 
         {/* A concha separa o app do fundo lavanda. No celular ela sangra

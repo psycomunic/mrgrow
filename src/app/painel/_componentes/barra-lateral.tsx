@@ -14,8 +14,10 @@ export function BarraLateral({
   papel,
   nome,
   organizacao,
+  avatarUrl,
 }: {
   papel: Papel;
+  avatarUrl?: string | null;
   nome: string | null;
   organizacao: string;
 }) {
@@ -125,13 +127,29 @@ export function BarraLateral({
         ))}
 
         <div className="flex items-center gap-3 rounded-lg bg-nevoa px-2.5 py-2">
-          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-mrg-500 text-xs font-bold text-white">
-            {iniciais(nome)}
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-tinta">{nome ?? "Usuário"}</p>
-            <p className="text-[11px] text-cinza-claro">{ROTULO_PAPEL[papel]}</p>
-          </div>
+          {/* O cartão leva ao perfil: é onde a pessoa espera clicar para
+              trocar a própria foto, o nome e a senha. */}
+          <Link
+            href="/painel/perfil"
+            onClick={() => setAberto(false)}
+            className="foco-anel flex min-w-0 flex-1 items-center gap-3 rounded-sm"
+            title="Abrir meu perfil"
+          >
+            <span className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-mrg-500 text-xs font-bold text-white">
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatarUrl} alt="" className="size-full object-cover" />
+              ) : (
+                iniciais(nome)
+              )}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-medium text-tinta">
+                {nome ?? "Usuário"}
+              </span>
+              <span className="block text-[11px] text-cinza-claro">{ROTULO_PAPEL[papel]}</span>
+            </span>
+          </Link>
           <form action="/api/auth/sair" method="post">
             <button
               type="submit"
