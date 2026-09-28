@@ -122,15 +122,19 @@ async function vinculosValidos(
   d: Pick<DadosTarefa, "cliente_id" | "projeto_id" | "responsavel_id">,
   organizacaoId: string,
 ): Promise<string | null> {
-  if (!(await fkDaOrganizacao(db, "clientes", d.cliente_id, organizacaoId))) {
-    return "Cliente não encontrado.";
-  }
-  if (!(await fkDaOrganizacao(db, "projetos", d.projeto_id, organizacaoId))) {
-    return "Projeto não encontrado.";
-  }
-  if (!(await ehDaEquipe(db, d.responsavel_id, organizacaoId))) {
-    return "Essa pessoa não está na equipe.";
-  }
+  /* As três são independentes, então vão juntas: em série somavam três
+     idas ao banco antes de qualquer gravação, e o usuário esperava as
+     três só para descobrir se podia salvar. As que recebem `null`
+     devolvem `true` sem consultar nada. */
+  const [cliente, projeto, pessoa] = await Promise.all([
+    fkDaOrganizacao(db, "clientes", d.cliente_id, organizacaoId),
+    fkDaOrganizacao(db, "projetos", d.projeto_id, organizacaoId),
+    ehDaEquipe(db, d.responsavel_id, organizacaoId),
+  ]);
+
+  if (!cliente) return "Cliente não encontrado.";
+  if (!projeto) return "Projeto não encontrado.";
+  if (!pessoa) return "Essa pessoa não está na equipe.";
   return null;
 }
 
