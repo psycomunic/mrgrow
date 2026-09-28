@@ -3,17 +3,20 @@ import { cn, numero } from "@/lib/utils";
 
 /** Tons pastel dos chips: cada indicador ganha uma cor própria e constante. */
 const CHIP = {
-  azul: "bg-chip-azul text-mrg-600",
+  azul: "bg-chip-azul text-acento",
   menta: "bg-chip-menta text-sucesso",
   rosa: "bg-chip-rosa text-perigo",
   pessego: "bg-chip-pessego text-alerta",
 } as const;
 
+/* Mesma família dos chips, na versão que lê sobre a superfície escura. Os
+   valores de antes vinham do tema claro: o menta #067a55 sobre o quase preto
+   virava um traço cinza-escuro, invisível ao lado do número. */
 const TRACO = {
-  azul: "#1668f5",
-  menta: "#067a55",
-  rosa: "#d92d3f",
-  pessego: "#b54708",
+  azul: "#5798ff",
+  menta: "#2fd39b",
+  rosa: "#ff6b7d",
+  pessego: "#f5a524",
 } as const;
 
 export type TomKpi = keyof typeof CHIP;

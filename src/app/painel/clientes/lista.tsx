@@ -87,7 +87,7 @@ export function ListaClientes({ clientes }: { clientes: ClienteCarteira[] }) {
               className={[
                 "rounded-sm px-3 py-1.5 text-xs font-medium transition-colors foco-anel",
                 filtro === f.v
-                  ? "bg-mrg-500/15 text-mrg-700 ring-1 ring-inset ring-mrg-500/40"
+                  ? "bg-mrg-500/15 text-acento-forte ring-1 ring-inset ring-mrg-500/40"
                   : "text-cinza hover:bg-nevoa hover:text-grafite",
               ].join(" ")}
             >
@@ -139,11 +139,11 @@ export function ListaClientes({ clientes }: { clientes: ClienteCarteira[] }) {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-md bg-gradient-to-br from-mrg-500/30 to-mrg-800/30 font-display text-sm font-bold text-mrg-700 ring-1 ring-borda">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-md bg-gradient-to-br from-mrg-500/30 to-mrg-800/30 font-display text-sm font-bold text-acento-forte ring-1 ring-borda">
                     {iniciais(c.nome)}
                   </span>
                   <div className="min-w-0">
-                    <h3 className="truncate font-semibold text-tinta group-hover:text-mrg-700">
+                    <h3 className="truncate font-semibold text-tinta group-hover:text-acento-forte">
                       {c.nome}
                     </h3>
                     <p className="truncate text-xs text-cinza">{c.segmento ?? "Sem segmento"}</p>
@@ -153,7 +153,7 @@ export function ListaClientes({ clientes }: { clientes: ClienteCarteira[] }) {
                   <Etiqueta tom={TOM[c.status] ?? "neutro"}>
                     {ROTULO_STATUS[c.status] ?? c.status}
                   </Etiqueta>
-                  <ArrowUpRight className="size-4 text-cinza-claro transition-colors group-hover:text-mrg-600" />
+                  <ArrowUpRight className="size-4 text-cinza-claro transition-colors group-hover:text-acento" />
                 </div>
               </div>
 

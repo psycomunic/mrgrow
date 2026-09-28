@@ -98,3 +98,11 @@ export async function carregarProjetos(): Promise<Portfolio> {
     return VAZIO;
   }
 }
+
+/** Projetos que ainda recebem tarefa — encerrado e cancelado ficam fora. */
+export async function listarProjetosParaSelecao(): Promise<{ id: string; nome: string }[]> {
+  const { projetos } = await carregarProjetos();
+  return projetos
+    .filter((p) => p.status !== "concluido" && p.status !== "cancelado")
+    .map((p) => ({ id: p.id, nome: p.nome }));
+}

@@ -48,7 +48,7 @@ function Cartao({ automacao: a }: { automacao: Automacao }) {
             className={[
               "grid size-9 shrink-0 place-items-center rounded-md ring-1 ring-inset transition-colors",
               a.ativa
-                ? "bg-mrg-500/12 text-mrg-600 ring-mrg-500/25"
+                ? "bg-mrg-500/12 text-acento ring-mrg-500/25"
                 : "bg-nevoa text-cinza-claro ring-borda",
             ].join(" ")}
           >

@@ -256,7 +256,7 @@ export function Construtor({
               <button
                 type="button"
                 onClick={() => setRascunhos((l) => [...l, rascunhoVazio("criar_tarefa")])}
-                className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-dashed border-borda-forte px-3.5 py-2.5 text-xs font-medium text-grafite transition-colors hover:border-mrg-500/50 hover:text-mrg-600 foco-anel"
+                className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-dashed border-borda-forte px-3.5 py-2.5 text-xs font-medium text-grafite transition-colors hover:border-mrg-500/50 hover:text-acento foco-anel"
               >
                 <Plus className="size-3.5" />
                 Adicionar ação
@@ -308,7 +308,7 @@ function CartaoAcao({
   return (
     <article className="rounded-md border border-borda bg-nevoa p-3.5">
       <div className="flex items-center gap-2">
-        <span className="grid size-6 shrink-0 place-items-center rounded-full bg-mrg-500/15 text-[11px] font-bold text-mrg-600">
+        <span className="grid size-6 shrink-0 place-items-center rounded-full bg-mrg-500/15 text-[11px] font-bold text-acento">
           {posicao}
         </span>
         <Selecao

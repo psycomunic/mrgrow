@@ -139,15 +139,18 @@ export const DEMO_NEGOCIOS = [
 /* ── Operação ───────────────────────────────────────────────────── */
 
 export const DEMO_TAREFAS = [
-  { id: "t1", titulo: "Subir 6 criativos novos do lançamento", status: "fazendo", prioridade: "alta", responsavel: "Mateus", cliente: "Vitrine Prime", vence_em: emDias(0) },
-  { id: "t2", titulo: "Corrigir rastreamento do GA4 (evento de compra duplicado)", status: "fazendo", prioridade: "urgente", responsavel: "Equipe", cliente: "Clínica Aurora", vence_em: emDias(-1) },
-  { id: "t3", titulo: "Reestruturar campanhas de Search por intenção", status: "backlog", prioridade: "alta", responsavel: "Mateus", cliente: "Construtora Vértice", vence_em: emDias(3) },
-  { id: "t4", titulo: "Onboarding: liberar acesso ao Business Manager", status: "fazendo", prioridade: "alta", responsavel: "Equipe", cliente: "EducaMais", vence_em: emDias(1) },
-  { id: "t5", titulo: "Teste A/B da nova landing (headline e prova social)", status: "backlog", prioridade: "media", responsavel: "Equipe", cliente: "Sabor & Cia", vence_em: emDias(7) },
-  { id: "t6", titulo: "Relatório quinzenal para aprovação", status: "revisao", prioridade: "media", responsavel: "Mateus", cliente: "Construtora Vértice", vence_em: emDias(2) },
-  { id: "t7", titulo: "Revisar público de remarketing de 7 dias", status: "revisao", prioridade: "baixa", responsavel: "Equipe", cliente: "Academia Pulse", vence_em: emDias(5) },
-  { id: "t8", titulo: "Reativar campanhas pausadas e refazer orçamento", status: "concluida", prioridade: "baixa", responsavel: "Mateus", cliente: "AutoNorte Seminovos", vence_em: emDias(-6) },
-  { id: "t9", titulo: "Ajustar lances do Performance Max", status: "concluida", prioridade: "media", responsavel: "Equipe", cliente: "Odonto Sorriso", vence_em: emDias(-3) },
+  { id: "t1", titulo: "Subir 6 criativos novos do lançamento", status: "fazendo", prioridade: "alta", responsavel: "Analista de Criativos", responsavel_id: "u3", cliente: "Vitrine Prime", vence_em: emDias(0), etiquetas: ["criativo", "lançamento"], estimativa_horas: 6, horas_gastas: 4 },
+  { id: "t2", titulo: "Corrigir rastreamento do GA4 (evento de compra duplicado)", status: "fazendo", prioridade: "urgente", responsavel: "Gestor de Tráfego", responsavel_id: "u2", cliente: "Clínica Aurora", vence_em: emDias(-1), etiquetas: ["tracking", "urgente"], estimativa_horas: 3, horas_gastas: 3.5 },
+  { id: "t3", titulo: "Reestruturar campanhas de Search por intenção", status: "backlog", prioridade: "alta", responsavel: "Gestor de Tráfego", responsavel_id: "u2", cliente: "Construtora Vértice", vence_em: emDias(3), etiquetas: ["tráfego"], estimativa_horas: 8, horas_gastas: 0 },
+  { id: "t4", titulo: "Onboarding: liberar acesso ao Business Manager", status: "fazendo", prioridade: "alta", responsavel: "Mateus Rodrigues", responsavel_id: "demo", cliente: "EducaMais", vence_em: emDias(1), etiquetas: ["onboarding"], estimativa_horas: 1, horas_gastas: 0.5 },
+  { id: "t5", titulo: "Teste A/B da nova landing (headline e prova social)", status: "backlog", prioridade: "media", responsavel: "Analista de Criativos", responsavel_id: "u3", cliente: "Sabor & Cia", vence_em: emDias(7), etiquetas: ["cro", "landing"], estimativa_horas: 5, horas_gastas: 0 },
+  { id: "t6", titulo: "Relatório quinzenal para aprovação", status: "revisao", prioridade: "media", responsavel: "Mateus Rodrigues", responsavel_id: "demo", cliente: "Construtora Vértice", vence_em: emDias(2), etiquetas: ["relatório"], estimativa_horas: 2, horas_gastas: 2, recorrente: true, recorrencia: "quinzenal" },
+  { id: "t7", titulo: "Revisar público de remarketing de 7 dias", status: "revisao", prioridade: "baixa", responsavel: "Gestor de Tráfego", responsavel_id: "u2", cliente: "Academia Pulse", vence_em: emDias(5), etiquetas: ["tráfego"], estimativa_horas: 1, horas_gastas: 1 },
+  { id: "t8", titulo: "Reativar campanhas pausadas e refazer orçamento", status: "concluida", prioridade: "baixa", responsavel: "Gestor de Tráfego", responsavel_id: "u2", cliente: "AutoNorte Seminovos", vence_em: emDias(-6), etiquetas: ["tráfego"], estimativa_horas: 2, horas_gastas: 1.5 },
+  { id: "t9", titulo: "Ajustar lances do Performance Max", status: "concluida", prioridade: "media", responsavel: "Mateus Rodrigues", responsavel_id: "demo", cliente: "Odonto Sorriso", vence_em: emDias(-3), etiquetas: ["google ads"], estimativa_horas: 2, horas_gastas: 2 },
+  { id: "t10", titulo: "Gravar 4 reels com o cliente na loja", status: "backlog", prioridade: "alta", responsavel: "Editor de Vídeo", responsavel_id: "u6", cliente: "Vitrine Prime", vence_em: emDias(9), etiquetas: ["conteúdo", "captação"], estimativa_horas: 6, horas_gastas: 0 },
+  { id: "t11", titulo: "Fechar as faturas do mês e enviar as cobranças", status: "backlog", prioridade: "urgente", responsavel: "Financeiro", responsavel_id: "u4", cliente: null, vence_em: emDias(-2), etiquetas: ["financeiro"], estimativa_horas: 3, horas_gastas: 0, recorrente: true, recorrencia: "mensal" },
+  { id: "t12", titulo: "Escrever roteiro de stories da semana", status: "fazendo", prioridade: "media", responsavel: "Analista de Criativos", responsavel_id: "u3", cliente: "Clínica Aurora", vence_em: emDias(2), etiquetas: ["conteúdo"], estimativa_horas: 2, horas_gastas: 1, recorrente: true, recorrencia: "semanal" },
 ];
 
 export const DEMO_PROJETOS = [

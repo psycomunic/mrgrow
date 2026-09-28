@@ -83,7 +83,7 @@ export function FichaCliente({
         <header className="border-b border-borda px-6 py-5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">
-              <span className="grid size-12 shrink-0 place-items-center rounded-md bg-gradient-to-br from-mrg-500/30 to-mrg-800/30 font-display text-base font-bold text-mrg-700 ring-1 ring-borda">
+              <span className="grid size-12 shrink-0 place-items-center rounded-md bg-gradient-to-br from-mrg-500/30 to-mrg-800/30 font-display text-base font-bold text-acento-forte ring-1 ring-borda">
                 {iniciais(cliente.nome)}
               </span>
               <div className="min-w-0">

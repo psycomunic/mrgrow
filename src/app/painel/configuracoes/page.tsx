@@ -48,7 +48,7 @@ export default async function PaginaConfiguracoes() {
           <ul className="mt-6 space-y-2">
             {VARIAVEIS.map((v) => (
               <li key={v.chave} className="rounded-md border border-borda bg-nevoa p-3">
-                <p className="font-mono text-xs break-all text-mrg-600">{v.chave}</p>
+                <p className="font-mono text-xs break-all text-acento">{v.chave}</p>
                 <p className="mt-1 text-xs text-cinza">{v.nota}</p>
               </li>
             ))}

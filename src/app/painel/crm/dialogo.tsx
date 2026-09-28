@@ -222,7 +222,7 @@ export function DialogoNegocio({
                         className={[
                           "inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-2.5 py-2.5 text-xs transition-colors foco-anel",
                           dados.temperatura === v
-                            ? "bg-mrg-500/15 text-mrg-700 ring-1 ring-inset ring-mrg-500/45"
+                            ? "bg-mrg-500/15 text-acento-forte ring-1 ring-inset ring-mrg-500/45"
                             : "border border-borda bg-nevoa text-cinza hover:text-grafite",
                         ].join(" ")}
                       >

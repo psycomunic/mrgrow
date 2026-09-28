@@ -146,3 +146,21 @@ export async function carregarEquipe(): Promise<Equipe> {
     return VAZIO;
   }
 }
+
+/**
+ * Quem pode receber uma tarefa.
+ *
+ * O id devolvido é o `usuarioId`, e não o id do vínculo: é ele que
+ * `tarefas.responsavel_id` referencia (`perfis(id)`). Quem tem papel
+ * `cliente` fica de fora — cliente enxerga o painel, mas não executa a
+ * operação da agência. Inativo também sai: atribuir trabalho a quem já
+ * não está na equipe só esconde a tarefa de quem poderia tocá-la.
+ */
+export async function listarEquipeParaSelecao(): Promise<
+  { id: string; nome: string; papel: Papel }[]
+> {
+  const { membros } = await carregarEquipe();
+  return membros
+    .filter((m) => m.ativo && m.papel !== "cliente")
+    .map((m) => ({ id: m.usuarioId, nome: m.nome, papel: m.papel }));
+}

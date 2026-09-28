@@ -56,6 +56,13 @@
   --color-perigo: #ff6b7d;
   --color-info: #5798ff;
 
+  /* Azul de destaque do painel. A escala `mrg` foi desenhada para tinta
+     sobre branco: o 600 é escuro e, sobre a superfície quase preta, um
+     link nele fica quase invisível. O painel usa estes dois no lugar —
+     mesma cor da marca, subida de luminosidade para o fundo escuro. */
+  --color-acento: #5798ff;
+  --color-acento-forte: #8dbdff;
+
   /* Uma família só no painel, variando o peso: é o que as referências
      de dashboard fazem. A Sora segue disponível para a landing. */
   --font-sans: var(--fonte-painel), var(--fonte-sans), ui-sans-serif, system-ui, sans-serif;

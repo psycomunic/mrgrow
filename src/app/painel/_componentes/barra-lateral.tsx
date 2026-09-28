@@ -75,7 +75,7 @@ export function BarraLateral({
                       className={cn(
                         "relative flex items-center gap-3 rounded-sm px-3 py-2 text-sm transition-colors foco-anel",
                         ativo(item.href)
-                          ? "bg-mrg-50 font-semibold text-mrg-700"
+                          ? "bg-mrg-50 font-semibold text-acento-forte"
                           : "font-medium text-grafite hover:bg-nevoa hover:text-tinta",
                       )}
                     >
@@ -89,7 +89,7 @@ export function BarraLateral({
                         nome={item.icone}
                         className={cn(
                           "size-4 shrink-0",
-                          ativo(item.href) ? "text-mrg-600" : "text-cinza-claro",
+                          ativo(item.href) ? "text-acento" : "text-cinza-claro",
                         )}
                       />
                       {item.rotulo}
@@ -112,13 +112,13 @@ export function BarraLateral({
             className={cn(
               "mb-1 flex items-center gap-3 rounded-sm px-3 py-2 text-sm transition-colors foco-anel",
               ativo(item.href)
-                ? "bg-mrg-50 font-semibold text-mrg-700"
+                ? "bg-mrg-50 font-semibold text-acento-forte"
                 : "font-medium text-grafite hover:bg-nevoa hover:text-tinta",
             )}
           >
             <Icone
               nome={item.icone}
-              className={cn("size-4 shrink-0", ativo(item.href) ? "text-mrg-600" : "text-cinza-claro")}
+              className={cn("size-4 shrink-0", ativo(item.href) ? "text-acento" : "text-cinza-claro")}
             />
             {item.rotulo}
           </Link>

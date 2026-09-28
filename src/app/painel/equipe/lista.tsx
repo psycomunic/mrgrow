@@ -53,7 +53,7 @@ export function Membros() {
               <Linha key={m.id}>
                 <Celula>
                   <div className="flex items-center gap-3">
-                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-mrg-500/20 text-[11px] font-bold text-mrg-600">
+                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-mrg-500/20 text-[11px] font-bold text-acento">
                       {iniciais(m.nome)}
                     </span>
                     <span className={`font-medium ${m.ativo ? "text-tinta" : "text-cinza"}`}>

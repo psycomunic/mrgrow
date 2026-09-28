@@ -74,7 +74,7 @@ export default function PaginaIntegracoes() {
 
         <div className="cartao flex flex-col gap-4 rounded-lg p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-            <Plug className="mt-0.5 size-5 text-mrg-600" />
+            <Plug className="mt-0.5 size-5 text-acento" />
             <div>
               <h2 className="font-display text-base font-bold text-tinta">Como funciona</h2>
               <p className="mt-1 max-w-2xl text-sm text-grafite">

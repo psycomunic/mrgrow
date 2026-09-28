@@ -104,7 +104,7 @@ export function Lista() {
                       type="button"
                       onClick={() => setEditando(p)}
                       aria-label={`Editar ${p.nome}`}
-                      className="rounded-sm p-1.5 text-cinza transition-colors hover:bg-nevoa hover:text-mrg-600 foco-anel"
+                      className="rounded-sm p-1.5 text-cinza transition-colors hover:bg-nevoa hover:text-acento foco-anel"
                     >
                       <Pencil className="size-3.5" />
                     </button>

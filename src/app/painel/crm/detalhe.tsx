@@ -221,7 +221,7 @@ export function DetalheNegocio({
                       className={[
                         "inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 text-xs transition-colors foco-anel",
                         tipo === v
-                          ? "bg-mrg-500/15 text-mrg-600 ring-1 ring-inset ring-mrg-500/40"
+                          ? "bg-mrg-500/15 text-acento ring-1 ring-inset ring-mrg-500/40"
                           : "text-cinza hover:bg-nevoa hover:text-grafite",
                       ].join(" ")}
                     >
@@ -258,7 +258,7 @@ export function DetalheNegocio({
                   const meta = TIPOS.find((t) => t.v === a.tipo) ?? TIPOS[0];
                   return (
                     <li key={a.id} className="flex gap-3">
-                      <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-mrg-500/12 text-mrg-600 ring-1 ring-inset ring-mrg-500/25">
+                      <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-mrg-500/12 text-acento ring-1 ring-inset ring-mrg-500/25">
                         <meta.Icone className="size-3.5" />
                       </span>
                       <div className="min-w-0 flex-1">

@@ -124,7 +124,7 @@ export function Kanban() {
 
                   <button
                     onClick={() => setCriandoEm(etapa.id)}
-                    className="flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-borda py-2.5 text-xs text-cinza-claro transition-colors hover:border-mrg-500/40 hover:text-mrg-600 foco-anel"
+                    className="flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-borda py-2.5 text-xs text-cinza-claro transition-colors hover:border-mrg-500/40 hover:text-acento foco-anel"
                   >
                     <Plus className="size-3.5" /> Adicionar
                   </button>

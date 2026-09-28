@@ -54,7 +54,7 @@ export default async function PaginaEquipe() {
                           className="rounded bg-nevoa px-2 py-0.5 text-[11px] text-grafite ring-1 ring-inset ring-borda"
                         >
                           {RECURSO.rotulo(recurso)}
-                          <span className="ml-1 text-mrg-600">
+                          <span className="ml-1 text-acento">
                             {nivelDeAcesso(acoes).toLowerCase()}
                           </span>
                         </span>

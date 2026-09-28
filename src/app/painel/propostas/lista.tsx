@@ -100,10 +100,10 @@ export function ListaPropostas({ propostas: iniciais }: { propostas: Proposta[] 
       {/* O link é o entregável: fica visível até ser copiado. */}
       {linkNovo && (
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-mrg-500/40 bg-mrg-500/10 p-4">
-          <Check className="size-5 shrink-0 text-mrg-600" />
+          <Check className="size-5 shrink-0 text-acento" />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-tinta">Proposta criada. O link é este:</p>
-            <p className="mt-0.5 truncate font-mono text-xs text-mrg-700">{endereco(linkNovo)}</p>
+            <p className="mt-0.5 truncate font-mono text-xs text-acento-forte">{endereco(linkNovo)}</p>
           </div>
           <Botao tamanho="sm" variante="contorno" onClick={() => copiar(linkNovo)}>
             <Copy className="size-4" /> Copiar
