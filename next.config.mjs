@@ -1,6 +1,18 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/**
+ * Config em JavaScript, e não em TypeScript, de propósito.
+ *
+ * O servidor da Hostinger tem glibc antiga, então o SWC nativo não
+ * carrega ali (`GLIBC_2.29 not found`) e o build cai no SWC em WASM.
+ * Nesse caminho ele não consegue transpilar um `next.config.ts`, e o
+ * build morre antes de começar. Config em JS não precisa de
+ * transpilação e passa nos dois ambientes.
+ *
+ * O tipo vem por JSDoc, então o editor e o `tsc` seguem conferindo o
+ * objeto como antes.
+ *
+ * @type {import("next").NextConfig}
+ */
+const nextConfig = {
   reactStrictMode: true,
   /* Necessário para hospedagem Node própria, como a da Hostinger: o
      build passa a emitir `.next/standalone/server.js`, que roda sem o
