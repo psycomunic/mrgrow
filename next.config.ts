@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  /* Necessário para hospedagem Node própria, como a da Hostinger: o
+     build passa a emitir `.next/standalone/server.js`, que roda sem o
+     `node_modules` inteiro ao lado. A Vercel ignora esta opção, então
+     não atrapalha o deploy de lá. */
+  output: "standalone",
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**.supabase.co" },
