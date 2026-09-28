@@ -22,7 +22,7 @@ export default async function LayoutPortal({ children }: { children: React.React
   const sessao = await exigirSessao();
 
   return (
-    <div className="min-h-dvh bg-papel">
+    <div className="tema-painel min-h-dvh bg-papel">
       <header className="border-b border-borda bg-carta">
         <div className="container-mrg flex h-16 items-center justify-between">
           {/* A arte do logotipo é clara, feita para o fundo escuro da landing:

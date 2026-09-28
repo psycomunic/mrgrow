@@ -28,11 +28,13 @@ export const metadata: Metadata = {
    cliente que reabre o link tem de ver o dado de agora, não o do cache. */
 export const dynamic = "force-dynamic";
 
+/* Nomes da paleta, e não valores: o tom de cada um é escolhido pelo tema
+   dentro do gráfico. */
 const CORES = {
-  investimento: "#5798ff",
-  receita: "#12b981",
-  leads: "#1668f5",
-  compras: "#f5a524",
+  investimento: "azul",
+  receita: "menta",
+  leads: "ciano",
+  compras: "laranja",
 } as const;
 
 const SERIES_DINHEIRO = [
@@ -77,7 +79,7 @@ export default async function PaginaRelatorio({
   const titulo = relatorio.cliente_nome ?? relatorio.nome;
 
   return (
-    <div className="min-h-screen bg-papel">
+    <div className="tema-painel min-h-screen bg-papel">
       <header className="border-b border-borda bg-carta">
         <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-10">
           <div className="flex items-center justify-between gap-4">

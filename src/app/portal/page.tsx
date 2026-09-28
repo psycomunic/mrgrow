@@ -6,8 +6,8 @@ import { comparar, tracado } from "@/lib/metricas";
 import { brl, multiplo, numero } from "@/lib/utils";
 
 const SERIES: SerieGrafico[] = [
-  { chave: "investimento", rotulo: "Investimento", cor: "#5798ff" },
-  { chave: "receita", rotulo: "Retorno atribuído", cor: "#0f9d76", eixo: "direita" },
+  { chave: "investimento", rotulo: "Investimento", cor: "azul" },
+  { chave: "receita", rotulo: "Retorno atribuído", cor: "menta", eixo: "direita" },
 ];
 
 export default async function PaginaPortal() {

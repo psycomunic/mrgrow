@@ -241,8 +241,8 @@ export function Lancamentos({
           <GraficoArea
             dados={fluxo}
             series={[
-              { chave: "receitas", rotulo: "Receitas", cor: "#067a55" },
-              { chave: "despesas", rotulo: "Despesas", cor: "#d92d3f" },
+              { chave: "receitas", rotulo: "Receitas", cor: "menta" },
+              { chave: "despesas", rotulo: "Despesas", cor: "vermelho" },
             ]}
             altura={248}
             rotuloX={(v) => v}

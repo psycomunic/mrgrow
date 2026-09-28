@@ -20,8 +20,8 @@ import { hoje } from "@/lib/tempo";
 import { brl, dataCompleta, multiplo, numero } from "@/lib/utils";
 
 const SERIES: SerieGrafico[] = [
-  { chave: "investimento", rotulo: "Investimento", cor: "#5798ff" },
-  { chave: "receita", rotulo: "Receita atribuída", cor: "#0f9d76", eixo: "direita" },
+  { chave: "investimento", rotulo: "Investimento", cor: "azul" },
+  { chave: "receita", rotulo: "Receita atribuída", cor: "menta", eixo: "direita" },
 ];
 
 export async function generateMetadata({

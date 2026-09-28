@@ -64,7 +64,7 @@ export function Rosca({
               cy={tamanho / 2}
               r={r}
               fill="none"
-              stroke="var(--color-nevoa-2)"
+              style={{ stroke: "var(--color-nevoa-2)" }}
               strokeWidth={espessura}
             />
             {arcos.map((a) => (
@@ -74,7 +74,7 @@ export function Rosca({
                 cy={tamanho / 2}
                 r={r}
                 fill="none"
-                stroke={a.cor}
+                style={{ stroke: a.cor }}
                 strokeWidth={espessura}
                 strokeLinecap="round"
                 strokeDasharray={`${a.desenhado} ${a.resto}`}
@@ -151,7 +151,7 @@ export function Anel({
             cy={tamanho / 2}
             r={r}
             fill="none"
-            stroke={trilha}
+            style={{ stroke: trilha }}
             strokeWidth={espessura}
           />
           <circle
@@ -159,7 +159,7 @@ export function Anel({
             cy={tamanho / 2}
             r={r}
             fill="none"
-            stroke={cor}
+            style={{ stroke: cor }}
             strokeWidth={espessura}
             strokeLinecap="round"
             strokeDasharray={`${cheio * C} ${C}`}

@@ -1,6 +1,7 @@
 import { Bell } from "lucide-react";
 import { BotaoLink } from "@/components/ui/botao";
 import { Busca } from "./busca";
+import { BotaoTema } from "@/components/painel/tema";
 
 export function Topo({
   titulo,
@@ -41,6 +42,7 @@ export function Topo({
 
           <div className="flex items-center gap-2">
             <Busca />
+            <BotaoTema />
             <BotaoLink
               href="/painel/notificacoes"
               variante="contorno"

@@ -9,14 +9,15 @@ const CHIP = {
   pessego: "bg-chip-pessego text-alerta",
 } as const;
 
-/* Mesma família dos chips, na versão que lê sobre a superfície escura. Os
-   valores de antes vinham do tema claro: o menta #067a55 sobre o quase preto
-   virava um traço cinza-escuro, invisível ao lado do número. */
+/* Cor do traço de tendência, por tom. São classes, e não valores: a cor
+   precisa mudar com o tema, e `stroke="var(--x)"` não resolve em atributo
+   de SVG — só em declaração CSS. A classe pinta o `color` do desenho e o
+   traço herda por `currentColor`. */
 const TRACO = {
-  azul: "#5798ff",
-  menta: "#2fd39b",
-  rosa: "#ff6b7d",
-  pessego: "#f5a524",
+  azul: "text-acento",
+  menta: "text-sucesso",
+  rosa: "text-perigo",
+  pessego: "text-alerta",
 } as const;
 
 export type TomKpi = keyof typeof CHIP;
@@ -109,7 +110,7 @@ export function Kpi({
             {detalhe && <span className="truncate text-[11px] text-cinza-claro">{detalhe}</span>}
           </div>
 
-          {temTraco && <Faisca pontos={serie!} cor={TRACO[tom]} id={`${tom}-${rotulo}`} />}
+          {temTraco && <Faisca pontos={serie!} classe={TRACO[tom]} id={`${tom}-${rotulo}`} />}
         </div>
       )}
     </div>
@@ -120,7 +121,7 @@ export function Kpi({
  * Traço de tendência em SVG puro. Não usa Recharts de propósito: são quatro ou
  * mais por tela e a biblioteca custaria mais que o desenho.
  */
-function Faisca({ pontos, cor, id }: { pontos: number[]; cor: string; id: string }) {
+function Faisca({ pontos, classe, id }: { pontos: number[]; classe: string; id: string }) {
   const L = 72;
   const A = 26;
   const min = Math.min(...pontos);
@@ -148,17 +149,17 @@ function Faisca({ pontos, cor, id }: { pontos: number[]; cor: string; id: string
       width={L}
       height={A}
       viewBox={`0 0 ${L} ${A}`}
-      className="shrink-0 self-end"
+      className={cn("shrink-0 self-end", classe)}
       aria-hidden
     >
       <defs>
         <linearGradient id={grad} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={cor} stopOpacity={0.2} />
-          <stop offset="100%" stopColor={cor} stopOpacity={0} />
+          <stop offset="0%" stopColor="currentColor" stopOpacity={0.2} />
+          <stop offset="100%" stopColor="currentColor" stopOpacity={0} />
         </linearGradient>
       </defs>
       <path d={`${d}L${L},${A}L0,${A}Z`} fill={`url(#${grad})`} />
-      <path d={d} fill="none" stroke={cor} strokeWidth={1.75} strokeLinecap="round" />
+      <path d={d} fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" />
     </svg>
   );
 }

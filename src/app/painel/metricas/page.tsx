@@ -14,13 +14,13 @@ import { brl, multiplo, numero, percentual } from "@/lib/utils";
 export const metadata: Metadata = { title: "Métricas" };
 
 const DINHEIRO: SerieGrafico[] = [
-  { chave: "investimento", rotulo: "Investimento", cor: "#5798ff" },
-  { chave: "receita", rotulo: "Receita", cor: "#0f9d76", eixo: "direita" },
+  { chave: "investimento", rotulo: "Investimento", cor: "azul" },
+  { chave: "receita", rotulo: "Receita", cor: "menta", eixo: "direita" },
 ];
 
 const VOLUME: SerieGrafico[] = [
-  { chave: "leads", rotulo: "Leads", cor: "#1668f5" },
-  { chave: "compras", rotulo: "Compras", cor: "#b54708" },
+  { chave: "leads", rotulo: "Leads", cor: "azul" },
+  { chave: "compras", rotulo: "Compras", cor: "laranja" },
 ];
 
 /** Meta de ROAS da agência. Abaixo disso a conta entra na fila de revisão. */

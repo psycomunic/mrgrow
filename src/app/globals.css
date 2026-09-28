@@ -63,6 +63,21 @@
   --color-acento: #5798ff;
   --color-acento-forte: #8dbdff;
 
+  /* Paleta dos gráficos. Vive em token porque muda com o tema: a mesma
+     linha precisa de tom claro sobre preto e de tom escuro sobre branco.
+     Onde é atributo de SVG (`stroke="..."`) o `var()` não resolve, então
+     quem usa aplica por `style` ou por `currentColor`. */
+  --color-grafico-1: #5798ff;
+  --color-grafico-2: #2fd39b;
+  --color-grafico-3: #8dbdff;
+  --color-grafico-4: #f5a524;
+  --color-grafico-5: #ff6b7d;
+  --color-grafico-6: #a78bfa;
+
+  /* Cromo do gráfico: grade, marcas dos eixos e caixa da dica. */
+  --color-grade: #232833;
+  --color-dica-fundo: #14171e;
+
   /* Uma família só no painel, variando o peso: é o que as referências
      de dashboard fazem. A Sora segue disponível para a landing. */
   --font-sans: var(--fonte-painel), var(--fonte-sans), ui-sans-serif, system-ui, sans-serif;
@@ -93,6 +108,67 @@
 @keyframes surgir {
   from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: none; }
+}
+
+/* ── Tema claro ─────────────────────────────────────────────────
+   Escopado em `.tema-painel`, e não no `:root`: a landing é escura por
+   projeto e tem folha própria, mas divide o `body` com o painel. Preso
+   ao `html`, alternar o tema clarearia o fundo da landing junto.
+
+   O atributo fica no `html` mesmo assim, posto por um script antes da
+   primeira pintura — é o que evita o painel piscar escuro ao abrir.
+   ──────────────────────────────────────────────────────────────── */
+
+[data-tema="claro"] .tema-painel {
+  color-scheme: light;
+
+  /* Mesma ideia de três degraus do escuro, ao contrário: a página é o
+     cinza mais baixo e o cartão é o branco puro, que é o que faz o
+     cartão flutuar sobre a página sem precisar de borda forte. */
+  --color-papel: #f4f6f9;
+  --color-concha: #ffffff;
+  --color-carta: #ffffff;
+  --color-nevoa: #f7f9fc;
+  --color-nevoa-2: #eaeef4;
+
+  --color-chip-azul:   #e7f0fe;
+  --color-chip-menta:  #e2f6ee;
+  --color-chip-rosa:   #fdeaec;
+  --color-chip-pessego:#fdf1e3;
+
+  --color-borda: #e3e8ef;
+  --color-borda-fraca: #eff2f7;
+  --color-borda-forte: #ccd5e1;
+
+  --color-tinta: #0e1726;
+  --color-grafite: #3c4a5e;
+  --color-cinza: #64748b;
+  --color-cinza-claro: #94a3b8;
+
+  /* Escurecidos: os tons do escuro foram clareados para ler sobre preto
+     e, sobre branco, ficam fracos demais. */
+  --color-sucesso: #067a55;
+  --color-alerta: #b45309;
+  --color-perigo: #d92d3f;
+  --color-info: #1668f5;
+
+  --color-acento: #0b4fd1;
+  --color-acento-forte: #0b3fa6;
+
+  --color-grafico-1: #1668f5;
+  --color-grafico-2: #067a55;
+  --color-grafico-3: #7c3aed;
+  --color-grafico-4: #b45309;
+  --color-grafico-5: #d92d3f;
+  --color-grafico-6: #0891b2;
+
+  --color-grade: #e6eaf0;
+  --color-dica-fundo: #ffffff;
+
+  /* Sombra de verdade no lugar do fio de luz: sobre branco, o `inset`
+     claro do tema escuro não aparece, e quem dá relevo é a sombra. */
+  --shadow-card: 0 1px 2px 0 rgb(16 24 40 / .05), 0 1px 3px 0 rgb(16 24 40 / .07);
+  --shadow-concha: 0 1px 3px 0 rgb(16 24 40 / .06), 0 16px 40px -24px rgb(16 24 40 / .2);
 }
 
 /* ── Base ───────────────────────────────────────────────────── */

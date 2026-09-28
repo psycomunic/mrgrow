@@ -28,7 +28,9 @@ export default async function LayoutPainel({ children }: { children: React.React
         organizacao: sessao.organizacaoNome,
       }}
     >
-      <div className="min-h-dvh bg-papel">
+      {/* `tema-painel` é o escopo do tema claro: a landing divide o
+          `body` com o painel e precisa continuar escura. */}
+      <div className="tema-painel min-h-dvh bg-papel">
         <BarraLateral
           papel={sessao.papel}
           nome={sessao.nome}

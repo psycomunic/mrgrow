@@ -3,6 +3,7 @@ import { Inter, Plus_Jakarta_Sans, Sora, Space_Grotesk } from "next/font/google"
 import { Toaster } from "sonner";
 import { MARCA } from "@/lib/marca";
 import "./globals.css";
+import { SCRIPT_TEMA } from "@/components/painel/tema";
 
 // Fontes auto-hospedadas: sem requisição bloqueante ao Google e sem salto de layout.
 const inter = Inter({
@@ -78,6 +79,11 @@ export const viewport: Viewport = {
 export default function LayoutRaiz({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={`${inter.variable} ${sora.variable} ${grotesk.variable} ${jakarta.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Antes de qualquer pintura: sem isto o painel piscaria escuro
+            a cada carregamento de quem escolheu o tema claro. */}
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />
+      </head>
       <body className="antialiased">
         {children}
         <Toaster theme="dark" position="top-right" richColors closeButton />

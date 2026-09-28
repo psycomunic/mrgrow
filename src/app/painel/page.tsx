@@ -34,8 +34,8 @@ import { competencia, hoje } from "@/lib/tempo";
 import { brl, cn, dataCurta, divisao, multiplo, numero, percentual } from "@/lib/utils";
 
 const SERIES: SerieGrafico[] = [
-  { chave: "investimento", rotulo: "Investimento", cor: "#5798ff" },
-  { chave: "receita", rotulo: "Receita atribuída", cor: "#2fd39b" },
+  { chave: "investimento", rotulo: "Investimento", cor: "azul" },
+  { chave: "receita", rotulo: "Receita atribuída", cor: "menta" },
 ];
 
 /**
@@ -51,10 +51,18 @@ const PERIODOS = [
   { dias: 45, rotulo: "45 dias" },
 ] as const;
 
-/* Paleta da rosca. As etapas do funil guardam a cor delas, mas aquela escala
-   desce até #12316d — azul quase preto, que sobre a superfície escura do
-   painel desaparece. Aqui a ordem da etapa escolhe um tom que enxerga. */
-const TONS_ROSCA = ["#8dbdff", "#5798ff", "#1668f5", "#2fd39b", "#f5a524", "#ff6b7d"];
+/* Paleta da rosca. As etapas do funil guardam a cor delas, mas aquela
+   escala desce até #12316d — azul quase preto, que sobre a superfície
+   escura do painel desaparece, e no claro fica indistinguível do vizinho.
+   Aqui a ordem da etapa escolhe um token, que muda junto com o tema. */
+const TONS_ROSCA = [
+  "var(--color-grafico-1)",
+  "var(--color-grafico-2)",
+  "var(--color-grafico-3)",
+  "var(--color-grafico-4)",
+  "var(--color-grafico-5)",
+  "var(--color-grafico-6)",
+];
 
 export default async function PaginaVisao({
   searchParams,
