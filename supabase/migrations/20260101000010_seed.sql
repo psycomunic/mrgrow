@@ -4,31 +4,35 @@
 -- ════════════════════════════════════════════════════════════════
 
 do $$
+/* As variáveis levam prefixo `v_` porque `funil_id` é também o nome de uma
+   coluna de `etapas_funil`. Sem o prefixo, `x.funil_id = funil_id` é
+   ambíguo — o Postgres não sabe se o lado direito é a variável ou a
+   coluna — e a migration morre com 42702. */
 declare
-  org_id uuid;
-  funil_id uuid;
+  v_org uuid;
+  v_funil uuid;
 begin
   insert into public.organizacoes (nome, slug, plano, cor_primaria)
   values ('MR Grow', 'mr-grow', 'interno', '#1668f5')
   on conflict (slug) do update set nome = excluded.nome
-  returning id into org_id;
+  returning id into v_org;
 
-  if org_id is null then
-    select id into org_id from public.organizacoes where slug = 'mr-grow';
+  if v_org is null then
+    select id into v_org from public.organizacoes where slug = 'mr-grow';
   end if;
 
   -- ── Funil comercial padrão ────────────────────────────────────
   insert into public.funis (organizacao_id, nome, descricao, padrao, ordem)
-  select org_id, 'Comercial', 'Funil principal de novos clientes', true, 0
-  where not exists (select 1 from public.funis where organizacao_id = org_id and nome = 'Comercial')
-  returning id into funil_id;
+  select v_org, 'Comercial', 'Funil principal de novos clientes', true, 0
+  where not exists (select 1 from public.funis where organizacao_id = v_org and nome = 'Comercial')
+  returning id into v_funil;
 
-  if funil_id is null then
-    select id into funil_id from public.funis where organizacao_id = org_id and nome = 'Comercial';
+  if v_funil is null then
+    select id into v_funil from public.funis where organizacao_id = v_org and nome = 'Comercial';
   end if;
 
   insert into public.etapas_funil (organizacao_id, funil_id, nome, ordem, probabilidade, tipo, cor)
-  select org_id, funil_id, e.nome, e.ordem, e.prob, e.tipo, e.cor
+  select v_org, v_funil, e.nome, e.ordem, e.prob, e.tipo, e.cor
   from (values
     ('Lead recebido', 0, 10, 'aberta', '#5798ff'),
     ('Qualificação', 1, 25, 'aberta', '#1668f5'),
@@ -39,12 +43,12 @@ begin
     ('Perdido', 6, 0, 'perdido', '#f43f5e')
   ) as e(nome, ordem, prob, tipo, cor)
   where not exists (
-    select 1 from public.etapas_funil x where x.funil_id = funil_id and x.nome = e.nome
+    select 1 from public.etapas_funil x where x.funil_id = v_funil and x.nome = e.nome
   );
 
   -- ── Catálogo de serviços ──────────────────────────────────────
   insert into public.servicos (organizacao_id, nome, descricao, preco_padrao, recorrente)
-  select org_id, s.nome, s.descricao, s.preco, s.rec
+  select v_org, s.nome, s.descricao, s.preco, s.rec
   from (values
     ('Gestão de Tráfego Meta Ads', 'Estruturação, veiculação e otimização diária de campanhas no Meta Ads.', 2500, true),
     ('Gestão de Tráfego Google Ads', 'Search, Performance Max, YouTube e remarketing.', 2500, true),
@@ -54,11 +58,11 @@ begin
     ('Setup de Rastreamento', 'GA4, GTM, Pixel, API de Conversões e eventos de servidor.', 2400, false),
     ('Consultoria Estratégica', 'Diagnóstico, plano de mídia e acompanhamento mensal.', 3500, true)
   ) as s(nome, descricao, preco, rec)
-  where not exists (select 1 from public.servicos x where x.organizacao_id = org_id and x.nome = s.nome);
+  where not exists (select 1 from public.servicos x where x.organizacao_id = v_org and x.nome = s.nome);
 
   -- ── Categorias financeiras ────────────────────────────────────
   insert into public.categorias_financeiras (organizacao_id, nome, tipo, cor)
-  select org_id, c.nome, c.tipo::tipo_lancamento, c.cor
+  select v_org, c.nome, c.tipo::tipo_lancamento, c.cor
   from (values
     ('Fee de gestão', 'receita', '#12b981'),
     ('Projetos pontuais', 'receita', '#1668f5'),
@@ -71,12 +75,12 @@ begin
   ) as c(nome, tipo, cor)
   where not exists (
     select 1 from public.categorias_financeiras x
-    where x.organizacao_id = org_id and x.nome = c.nome and x.tipo = c.tipo::tipo_lancamento
+    where x.organizacao_id = v_org and x.nome = c.nome and x.tipo = c.tipo::tipo_lancamento
   );
 
   -- ── Automações prontas ────────────────────────────────────────
   insert into public.automacoes (organizacao_id, nome, descricao, gatilho, condicoes, acoes)
-  select org_id, a.nome, a.descricao, a.gatilho::gatilho_automacao, a.cond::jsonb, a.acoes::jsonb
+  select v_org, a.nome, a.descricao, a.gatilho::gatilho_automacao, a.cond::jsonb, a.acoes::jsonb
   from (values
     ('Lead novo → responsável no WhatsApp',
      'Assim que um lead entra pela landing page, avisa o comercial e cria a tarefa de contato em 15 minutos.',
@@ -107,5 +111,5 @@ begin
      'contrato_vencendo', '{"dias_antes":30}',
      '[{"tipo":"criar_tarefa","titulo":"Conversa de renovação","prioridade":"alta"},{"tipo":"notificar","para":"responsavel"}]')
   ) as a(nome, descricao, gatilho, cond, acoes)
-  where not exists (select 1 from public.automacoes x where x.organizacao_id = org_id and x.nome = a.nome);
+  where not exists (select 1 from public.automacoes x where x.organizacao_id = v_org and x.nome = a.nome);
 end $$;

@@ -15,6 +15,8 @@ export type OpcaoCliente = { id: string; nome: string };
  * passado" não cabem nessa conta, então trazem o próprio cálculo.
  */
 const ATALHOS: { id: string; rotulo: string; calcular: () => { de: string; ate: string } }[] = [
+  /* `recuar(1)` fecha o intervalo no próprio dia: início e fim em hoje. */
+  { id: "1", rotulo: "Hoje", calcular: () => recuar(1) },
   { id: "7", rotulo: "7 dias", calcular: () => recuar(7) },
   { id: "14", rotulo: "14 dias", calcular: () => recuar(14) },
   { id: "30", rotulo: "30 dias", calcular: () => recuar(30) },
