@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
 
-const SITE = "https://darksalmon-badger-833323.hostingersite.com";
+const SITE = "https://painel.mrgrowagencia.com.br";
 const LOGO = `${SITE}/marca/mr-grow-logo-email.png`;
 
 const AZUL = "#1668f5";
