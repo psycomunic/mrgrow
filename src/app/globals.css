@@ -2,7 +2,7 @@
 
 /* ══════════════════════════════════════════════════════════════
    MR GROW — Design tokens do painel
-   Identidade: azul elétrico sobre papel quase branco.
+   Identidade: azul elétrico sobre preto.
 
    A landing (`(site)/sitio.css`) é escura e tem folha própria:
    nada aqui a alcança. Estes tokens valem para /painel, /portal
@@ -23,54 +23,57 @@
   --color-mrg-900: #12316d;
   --color-mrg-950: #0d1f45;
 
-  /* Superfícies, em três degraus: a página é lavanda, a concha que
-     abriga o app é quase branca e o cartão é branco puro. É o degrau
-     que dá profundidade, não a sombra. */
-  --color-papel: #e7e9f6;
-  --color-concha: #f7f8fc;
-  --color-carta: #ffffff;
-  --color-nevoa: #f3f4fa;
-  --color-nevoa-2: #eaecf6;
+  /* Superfícies, em três degraus: a página é quase preta, a concha que
+     abriga o app sobe um tom e o cartão sobe outro. É o degrau que dá
+     profundidade, não a sombra — sombra sobre preto não aparece. */
+  --color-papel: #07080b;
+  --color-concha: #0c0e13;
+  --color-carta: #14171e;
+  --color-nevoa: #1b1f28;
+  --color-nevoa-2: #242935;
 
-  /* Chips pastel dos indicadores */
-  --color-chip-azul:   #eceffe;
-  --color-chip-menta:  #e2f6ef;
-  --color-chip-rosa:   #fdeaee;
-  --color-chip-pessego:#fff2e4;
+  /* Chips dos indicadores: mesma família de cor, rebaixada para o
+     escuro. Pastel sobre preto some. */
+  --color-chip-azul:   #16243f;
+  --color-chip-menta:  #10281f;
+  --color-chip-rosa:   #2c1620;
+  --color-chip-pessego:#2b1d10;
 
-  /* Traços — quase invisíveis: quem separa é a superfície */
-  --color-borda: #e9ebf3;
-  --color-borda-fraca: #f1f2f8;
-  --color-borda-forte: #d6dae8;
+  /* Traços: quem separa é a superfície, o traço só define a aresta */
+  --color-borda: #232833;
+  --color-borda-fraca: #1a1e26;
+  --color-borda-forte: #333a48;
 
   /* Texto, do mais forte ao mais apagado */
-  --color-tinta: #0f1728;
-  --color-grafite: #475467;
-  --color-cinza: #667085;
-  --color-cinza-claro: #98a2b3;
+  --color-tinta: #f4f6fa;
+  --color-grafite: #b3bccb;
+  --color-cinza: #8b94a5;
+  --color-cinza-claro: #646d7e;
 
-  /* Semânticos — escurecidos para ler sobre branco */
-  --color-sucesso: #067a55;
-  --color-alerta: #b54708;
-  --color-perigo: #d92d3f;
-  --color-info: #1668f5;
+  /* Semânticos — clareados para ler sobre preto */
+  --color-sucesso: #2fd39b;
+  --color-alerta: #f5a524;
+  --color-perigo: #ff6b7d;
+  --color-info: #5798ff;
 
-  --font-sans: var(--fonte-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: var(--fonte-display), var(--fonte-sans), ui-sans-serif, system-ui, sans-serif;
+  /* Uma família só no painel, variando o peso: é o que as referências
+     de dashboard fazem. A Sora segue disponível para a landing. */
+  --font-sans: var(--fonte-painel), var(--fonte-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--fonte-painel), var(--fonte-sans), ui-sans-serif, system-ui, sans-serif;
 
-  --radius-xs: 8px;
-  --radius-sm: 12px;
-  --radius-md: 16px;
-  --radius-lg: 22px;
-  --radius-xl: 30px;
+  --radius-xs: 10px;
+  --radius-sm: 14px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
 
   --shadow-glow: 0 0 0 1px color-mix(in oklab, var(--color-mrg-500) 30%, transparent),
                  0 12px 28px -12px color-mix(in oklab, var(--color-mrg-500) 55%, transparent);
-  /* Sombra difusa e fria, tingida do azul do fundo. Sombra neutra e
-     dura sobre lavanda lê como sujeira. */
-  --shadow-card: 0 2px 4px -2px rgb(48 56 112 / .06),
-                 0 12px 32px -12px rgb(48 56 112 / .12);
-  --shadow-concha: 0 8px 40px -16px rgb(48 56 112 / .16);
+  /* Sobre preto a sombra quase não aparece: o que dá relevo é o fio de
+     luz na aresta de cima, como nas referências. */
+  --shadow-card: inset 0 1px 0 0 rgb(255 255 255 / .05),
+                 0 12px 32px -12px rgb(0 0 0 / .7);
+  --shadow-concha: 0 10px 44px -18px rgb(0 0 0 / .8);
 
   --animate-flutuar: flutuar 7s ease-in-out infinite;
   --animate-surgir: surgir .6s cubic-bezier(.22,1,.36,1) both;
@@ -88,7 +91,7 @@
 /* ── Base ───────────────────────────────────────────────────── */
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
   --fundo: var(--color-papel);
   --texto: var(--color-tinta);
   --superficie: var(--color-carta);
@@ -112,11 +115,11 @@ body {
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: var(--color-papel); }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-borda-forte);
+  background: var(--color-nevoa-2);
   border-radius: 999px;
   border: 2px solid var(--color-papel);
 }
-::-webkit-scrollbar-thumb:hover { background: var(--color-cinza-claro); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-borda-forte); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -137,14 +140,14 @@ body {
 }
 
 @utility texto-gradiente {
-  background-image: linear-gradient(100deg, var(--color-tinta) 10%, var(--color-mrg-700) 55%, var(--color-mrg-500) 95%);
+  background-image: linear-gradient(100deg, #ffffff 10%, var(--color-mrg-300) 55%, var(--color-mrg-500) 95%);
   background-clip: text;
   color: transparent;
 }
 
 @utility cartao {
-  /* No tema claro o cartão sobe ficando branco sobre o fundo lavanda.
-     É o inverso do tema escuro, onde ele subia com um véu branco. */
+  /* O cartão sobe um degrau de superfície sobre a concha, e o fio de
+     luz da `--shadow-card` marca a aresta de cima. */
   background: var(--color-carta);
   border: 1px solid var(--color-borda);
   border-radius: var(--radius-lg);
@@ -159,8 +162,8 @@ body {
 
 @utility malha-fundo {
   background-image:
-    radial-gradient(48rem 32rem at 30% -5%, color-mix(in oklab, var(--color-mrg-500) 10%, transparent), transparent 68%),
-    radial-gradient(28rem 20rem at 80% 15%, color-mix(in oklab, var(--color-mrg-400) 8%, transparent), transparent 60%);
+    radial-gradient(48rem 32rem at 30% -5%, color-mix(in oklab, var(--color-mrg-600) 30%, transparent), transparent 68%),
+    radial-gradient(28rem 20rem at 80% 15%, color-mix(in oklab, var(--color-mrg-800) 35%, transparent), transparent 60%);
 }
 
 @utility grade-fundo {

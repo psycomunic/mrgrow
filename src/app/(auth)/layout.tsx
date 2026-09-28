@@ -7,7 +7,7 @@ export default function LayoutAuth({ children }: { children: React.ReactNode }) 
       <div aria-hidden className="malha-fundo pointer-events-none absolute inset-0 -z-10" />
 
       <div className="flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16">
-        <Link href="/" className="mb-8 inline-flex w-fit items-center rounded-sm bg-white px-3 py-2 shadow-card foco-anel">
+        <Link href="/" className="mb-8 inline-flex w-fit items-center rounded-sm bg-nevoa px-3 py-2 shadow-card foco-anel">
           <Logo altura={2.5} />
         </Link>
         {/* O formulário mora num cartão branco pelo mesmo motivo do painel:

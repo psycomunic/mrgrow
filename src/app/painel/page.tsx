@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Plug } from "lucide-react";
+import { ArrowRight, CircleDollarSign, Megaphone, Plug, Target, TrendingUp } from "lucide-react";
 import { Topo } from "./_componentes/topo";
 import { Kpi } from "@/components/painel/kpi";
 import { GraficoArea, LegendaGrafico, type SerieGrafico } from "@/components/painel/grafico-area";
@@ -97,6 +97,8 @@ export default async function PaginaVisao() {
           <Kpi
             rotulo="Receita recorrente (MRR)"
             valor={brl(mrr)}
+            tom="menta"
+            icone={<CircleDollarSign />}
             detalhe={
               ativos.length
                 ? `${numero(ativos.length)} ativos · ticket ${brl(divisao(mrr, ativos.length))}`
@@ -107,6 +109,7 @@ export default async function PaginaVisao() {
           <Kpi
             rotulo="Investimento gerido"
             valor={brl(c.atual.investimento)}
+            icone={<Megaphone />}
             variacao={c.delta("investimento")}
             detalhe="últimos 30 dias"
             serie={tracado(c.serie, "investimento")}
@@ -116,11 +119,14 @@ export default async function PaginaVisao() {
             valor={brl(c.atual.receita)}
             variacao={c.delta("receita")}
             tom="menta"
+            icone={<TrendingUp />}
             serie={tracado(c.serie, "receita")}
           />
           <Kpi
             rotulo="ROAS médio"
             valor={multiplo(c.atual.roas)}
+            tom="pessego"
+            icone={<Target />}
             variacao={c.delta("roas")}
             detalhe="receita ÷ investimento"
             dica="Consolidado de todas as contas conectadas."

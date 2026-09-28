@@ -72,11 +72,11 @@ export function GraficoArea({
             ))}
           </defs>
 
-          <CartesianGrid stroke="#eceef5" strokeDasharray="3 5" vertical={false} />
+          <CartesianGrid stroke="#232833" strokeDasharray="3 5" vertical={false} />
           <XAxis
             dataKey="data"
             tickFormatter={(v) => rotuloX(v as string)}
-            tick={{ fill: "#98a2b3", fontSize: 11 }}
+            tick={{ fill: "#646d7e", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             minTickGap={32}
@@ -85,7 +85,7 @@ export function GraficoArea({
           <YAxis
             yAxisId="esquerda"
             tickFormatter={(v) => compacto(v as number)}
-            tick={{ fill: "#98a2b3", fontSize: 11 }}
+            tick={{ fill: "#646d7e", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             width={46}
@@ -95,7 +95,7 @@ export function GraficoArea({
               yAxisId="direita"
               orientation="right"
               tickFormatter={(v) => compacto(v as number)}
-              tick={{ fill: "#98a2b3", fontSize: 11 }}
+              tick={{ fill: "#646d7e", fontSize: 11 }}
               axisLine={false}
               tickLine={false}
               width={46}
@@ -105,17 +105,17 @@ export function GraficoArea({
             /* Fundo opaco: com o cartão translúcido, a linha do gráfico
                atravessava o texto do próprio tooltip. */
             contentStyle={{
-              background: "#ffffff",
-              border: "1px solid #e9ebf3",
+              background: "#14171e",
+              border: "1px solid #333a48",
               borderRadius: 12,
               boxShadow: "0 16px 40px -16px rgb(48 56 112 / .24)",
               fontSize: 12,
               padding: "10px 12px",
-              color: "#0f1728",
+              color: "#f4f6fa",
             }}
             itemStyle={{ padding: "2px 0" }}
-            labelStyle={{ fontWeight: 600, marginBottom: 4, color: "#0f1728" }}
-            cursor={{ stroke: "#d6dae8", strokeWidth: 1 }}
+            labelStyle={{ fontWeight: 600, marginBottom: 4, color: "#f4f6fa" }}
+            cursor={{ stroke: "#333a48", strokeWidth: 1 }}
             labelFormatter={(v) => rotuloX(v as string)}
             formatter={(valor, nome) => [fmt(Number(valor)), nome as string]}
           />
