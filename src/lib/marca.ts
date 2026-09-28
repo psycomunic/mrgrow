@@ -28,7 +28,7 @@ function enderecoDoSite() {
   const naVercel = process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL?.trim();
   if (naVercel) return `https://${naVercel}`;
 
-  return "https://mrgrow.com.br";
+  return "https://mrgrowagencia.com.br";
 }
 
 export const MARCA = {
@@ -38,8 +38,8 @@ export const MARCA = {
   descricao:
     "Assessoria de marketing que une estratégia, produção de conteúdo e tráfego pago para transformar a comunicação da sua marca em faturamento.",
   site: enderecoDoSite(),
-  email: "contato@mrgrow.com.br",
-  whatsapp: publica(process.env.NEXT_PUBLIC_WHATSAPP, "5500000000000"),
+  email: "contato@mrgrowagencia.com.br",
+  whatsapp: publica(process.env.NEXT_PUBLIC_WHATSAPP, "5521973743550"),
   instagramAgencia: publica(
     process.env.NEXT_PUBLIC_INSTAGRAM,
     "https://www.instagram.com/mrgrow.ag/",
