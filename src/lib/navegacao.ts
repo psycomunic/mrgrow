@@ -26,6 +26,7 @@ export const MENU: ItemMenu[] = [
   { href: "/painel/clientes", rotulo: "Clientes", icone: "Building2", recurso: "clientes", grupo: "Comercial" },
   { href: "/painel/propostas", rotulo: "Propostas", icone: "FileText", recurso: "propostas", grupo: "Comercial" },
 
+  { href: "/painel/recebimentos", rotulo: "Recebimentos", icone: "CircleDollarSign", recurso: "financeiro", grupo: "Gestão" },
   { href: "/painel/financeiro", rotulo: "Financeiro", icone: "Wallet", recurso: "financeiro", grupo: "Gestão" },
   { href: "/painel/integracoes", rotulo: "Integrações", icone: "Plug", recurso: "integracoes", grupo: "Gestão" },
   { href: "/painel/automacoes", rotulo: "Automações", icone: "Zap", recurso: "automacoes", grupo: "Gestão" },
