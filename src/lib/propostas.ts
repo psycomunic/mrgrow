@@ -31,6 +31,7 @@ export type Proposta = {
   total: number;
   validade: string | null;
   criado_em: string;
+  organizacao_id: string;
 };
 
 export type Lista = { propostas: Proposta[]; demo: boolean };
@@ -82,6 +83,7 @@ function demo(): Lista {
       valor_mensal: p.mensal,
       valor_setup: p.setup,
       meses_contrato: PRAZO_PADRAO,
+      organizacao_id: "demo",
       total: p.mensal + p.setup,
       validade: p.validade,
       criado_em: new Date().toISOString(),
@@ -92,6 +94,7 @@ function demo(): Lista {
 
 type Linha = {
   id: string;
+  organizacao_id: string;
   numero: string;
   titulo: string;
   status: string;
@@ -139,11 +142,12 @@ function daLinha(p: Linha): Proposta {
     total: mensal + v.setup,
     validade: p.validade,
     criado_em: p.criado_em,
+    organizacao_id: p.organizacao_id,
   };
 }
 
 const CAMPOS =
-  "id, numero, titulo, status, token_publico, cliente_nome, cliente_logo_url, introducao, escopo, condicoes, total, validade, criado_em";
+  "id, organizacao_id, numero, titulo, status, token_publico, cliente_nome, cliente_logo_url, introducao, escopo, condicoes, total, validade, criado_em";
 
 export async function carregarPropostas(): Promise<Lista> {
   if (modoDemonstracao()) return demo();
@@ -214,6 +218,69 @@ export async function carregarPorToken(token: string): Promise<Proposta | null> 
     return proposta;
   } catch (e) {
     registrarFalha("carregarPorToken", e);
+    return null;
+  }
+}
+
+/** Identidade da agência para a proposta aberta por link. */
+export type MarcaAgencia = {
+  nome: string;
+  logo_url: string | null;
+  cor: string;
+  whatsapp: string;
+  email: string;
+  site: string;
+  documento: string | null;
+};
+
+/**
+ * A marca de quem assina, carregada sem sessão.
+ *
+ * `carregarAgencia()` não serve aqui: ela lê a organização da sessão, e
+ * quem abre uma proposta por link não tem nenhuma. A autorização é a
+ * mesma da proposta — o token já provou que a pessoa pode ver este
+ * documento, e daí sai a organização. Só campos que a proposta exibe.
+ */
+export async function carregarMarcaPublica(organizacaoId: string): Promise<MarcaAgencia | null> {
+  if (modoDemonstracao() || organizacaoId === "demo") return null;
+
+  try {
+    const db = criarClienteAdmin();
+    const { data, error } = await db
+      .from("organizacoes")
+      .select("nome, documento, cor_primaria, logo_url, configuracoes")
+      .eq("id", organizacaoId)
+      .maybeSingle();
+
+    if (error || !data) {
+      if (error) registrarFalha("carregarMarcaPublica", error);
+      return null;
+    }
+
+    const l = data as unknown as {
+      nome: string;
+      documento: string | null;
+      cor_primaria: string | null;
+      logo_url: string | null;
+      configuracoes: Record<string, unknown> | null;
+    };
+    const extras = l.configuracoes ?? {};
+    const texto = (chave: string) =>
+      typeof extras[chave] === "string" ? (extras[chave] as string) : "";
+
+    return {
+      nome: l.nome,
+      logo_url: l.logo_url,
+      /* A cor entra em `style`; sem conferir o formato, o que estiver
+         gravado vira valor de CSS na página aberta pelo cliente. */
+      cor: /^#[0-9a-f]{6}$/i.test(l.cor_primaria ?? "") ? (l.cor_primaria as string) : "#1668f5",
+      whatsapp: texto("whatsapp"),
+      email: texto("email_contato"),
+      site: texto("site"),
+      documento: l.documento,
+    };
+  } catch (e) {
+    registrarFalha("carregarMarcaPublica", e);
     return null;
   }
 }
