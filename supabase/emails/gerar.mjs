@@ -50,7 +50,13 @@ function moldura({ titulo, texto, botao, url, rodape, alerta, codigo }) {
 
   <tr>
     <td align="center" style="background:${ESCURO};padding:28px 24px;">
-      <img src="${LOGO}" alt="MR Grow" width="128" style="display:block;border:0;width:128px;height:auto;">
+      <!-- O estilo no <img> é herdado pelo texto alternativo quando a
+           imagem não carrega. Muito cliente de e-mail bloqueia imagem
+           remota por padrão, e sem isto o cabeçalho vira um ícone
+           quebrado; com isto, vira "MR Grow" em branco sobre o escuro,
+           que é uma falha que não parece falha. -->
+      <img src="${LOGO}" alt="MR Grow" width="128" height="66"
+           style="display:block;border:0;width:128px;height:auto;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:22px;font-weight:800;color:#ffffff;line-height:66px;text-decoration:none;">
     </td>
   </tr>
 
