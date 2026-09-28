@@ -11,9 +11,26 @@ export type DadosLancamento = {
   tipo: string;
   status: string;
   valor: number;
+  valor_pago: number;
   vencimento: string;
+  competencia: string;
+  pago_em: string | null;
+  forma_pagamento: string;
+  categoria_id: string | null;
   cliente_id: string | null;
+  /** Caminho do comprovante no Storage — o arquivo já subiu antes daqui. */
+  comprovante: string | null;
   observacoes: string;
+};
+
+export const FORMAS = ["pix", "boleto", "cartao", "transferencia", "dinheiro"] as const;
+
+export const ROTULO_FORMA: Record<string, string> = {
+  pix: "PIX",
+  boleto: "Boleto",
+  cartao: "Cartão",
+  transferencia: "Transferência",
+  dinheiro: "Dinheiro",
 };
 
 const TIPOS = ["receita", "despesa"];
@@ -28,23 +45,46 @@ function validar(d: DadosLancamento): string | null {
   if (d.valor > 100_000_000) return "Valor fora da faixa.";
   if (!/^\d{4}-\d{2}-\d{2}$/.test(d.vencimento)) return "Informe o vencimento.";
   if (Number.isNaN(new Date(d.vencimento).getTime())) return "Data de vencimento inválida.";
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d.competencia)) return "Informe a competência.";
+  if (d.pago_em && !/^\d{4}-\d{2}-\d{2}$/.test(d.pago_em)) return "Data de pagamento inválida.";
+
+  if (!Number.isFinite(d.valor_pago) || d.valor_pago < 0) return "Valor pago inválido.";
+  if (d.valor_pago > d.valor) return "O valor pago não pode passar do valor do lançamento.";
+
+  if (d.forma_pagamento && !FORMAS.includes(d.forma_pagamento as (typeof FORMAS)[number])) {
+    return "Forma de pagamento inválida.";
+  }
+
+  /* Marcar como pago sem dizer quando deixa o fluxo de caixa sem data
+     para alocar o dinheiro — o lançamento sumiria do mês. */
+  if (d.status === "pago" && !d.pago_em) return "Informe a data em que foi pago.";
+
   if (d.observacoes.length > 2000) return "As observações ficaram longas demais.";
   return null;
 }
 
 function paraBanco(d: DadosLancamento) {
+  const pago = d.status === "pago";
   return {
     descricao: d.descricao.trim(),
     tipo: d.tipo,
     status: d.status,
     valor: d.valor,
     vencimento: d.vencimento,
-    competencia: d.vencimento,
+    /* Competência é separada do vencimento porque são perguntas
+       diferentes: a competência diz a que mês o valor pertence, o
+       vencimento diz quando o dinheiro entra. Um fee de setembro pago em
+       outubro conta no resultado de setembro e no caixa de outubro. */
+    competencia: d.competencia,
+    categoria_id: d.categoria_id || null,
     cliente_id: d.cliente_id || null,
+    forma_pagamento: d.forma_pagamento || null,
+    documento_url: d.comprovante || null,
     observacoes: d.observacoes.trim() || null,
-    // Quem já nasce pago tem a data preenchida; o resto fica em aberto.
-    pago_em: d.status === "pago" ? d.vencimento : null,
-    valor_pago: d.status === "pago" ? d.valor : 0,
+    pago_em: pago ? d.pago_em : null,
+    /* Pago sem valor informado quita o total — é o caso comum. Valor
+       menor fica como está, para registrar pagamento parcial. */
+    valor_pago: pago ? d.valor_pago || d.valor : 0,
   };
 }
 

@@ -11,15 +11,16 @@ const CHAVE = "mrg-tema";
 /**
  * Script que roda antes da primeira pintura.
  *
- * Sem ele o servidor sempre entregaria o tema escuro e o claro só entraria
- * depois da hidratação — o painel piscaria preto a cada carregamento. Como
- * é a leitura de uma chave e a escrita de um atributo, cabe embutido.
+ * A preferência mora em `sessionStorage`, e não em `localStorage`, porque
+ * o painel deve sempre abrir no escuro: a sessão guarda a troca enquanto a
+ * aba está aberta e esquece quando ela fecha. Com `localStorage`, quem
+ * experimentasse o claro uma vez veria claro para sempre.
  *
- * O `try` existe porque `localStorage` lança em janela anônima com dados de
- * site bloqueados, e um erro aqui derrubaria a página inteira antes de
+ * O `try` existe porque o armazenamento lança em janela anônima com dados
+ * de site bloqueados, e um erro aqui derrubaria a página inteira antes de
  * qualquer coisa aparecer.
  */
-export const SCRIPT_TEMA = `try{var t=localStorage.getItem(${JSON.stringify(CHAVE)});document.documentElement.dataset.tema=t==="claro"?"claro":"escuro"}catch(e){document.documentElement.dataset.tema="escuro"}`;
+export const SCRIPT_TEMA = `try{var t=sessionStorage.getItem(${JSON.stringify(CHAVE)});document.documentElement.dataset.tema=t==="claro"?"claro":"escuro"}catch(e){document.documentElement.dataset.tema="escuro"}`;
 
 /* O tema mora no DOM, não em estado do React: o script acima já o
    escreveu antes de qualquer componente existir. `useSyncExternalStore`
@@ -49,10 +50,10 @@ export function useTema() {
   const definir = useCallback((novo: Tema) => {
     document.documentElement.dataset.tema = novo;
     try {
-      localStorage.setItem(CHAVE, novo);
+      sessionStorage.setItem(CHAVE, novo);
     } catch {
-      /* Sem armazenamento o tema vale só para esta aba, e tudo bem: o que
-         não pode é a troca falhar por causa disso. */
+      /* Sem armazenamento a troca vale só até recarregar, e tudo bem: o
+         que não pode é ela falhar por causa disso. */
     }
     for (const avisar of ouvintes) avisar();
   }, []);

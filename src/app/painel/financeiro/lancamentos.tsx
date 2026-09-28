@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 import { Botao } from "@/components/ui/botao";
 import { Sobreposicao } from "@/components/ui/sobreposicao";
+import { EnvioArquivo, type ArquivoAnexado } from "@/components/painel/envio-arquivo";
 import { Campo, Entrada, AreaTexto, Selecao } from "@/components/ui/campo";
 import { Etiqueta } from "@/components/ui/etiqueta";
 import { Kpi } from "@/components/painel/kpi";
@@ -16,6 +17,8 @@ import { brl, dataCompleta, numero } from "@/lib/utils";
 import { STATUS_LANCAMENTO } from "@/lib/rotulos";
 import { hoje } from "@/lib/tempo";
 import {
+  FORMAS,
+  ROTULO_FORMA,
   criarLancamento,
   atualizarLancamento,
   excluirLancamento,
@@ -58,8 +61,16 @@ function vazio(): DadosLancamento {
     tipo: "receita",
     status: "pendente",
     valor: 0,
+    valor_pago: 0,
     vencimento: hoje(),
+    /* Competência começa no primeiro dia do mês do vencimento: é o caso
+       comum, e quem precisa de outro mês troca em um clique. */
+    competencia: hoje().slice(0, 8) + "01",
+    pago_em: null,
+    forma_pagamento: "",
+    categoria_id: null,
     cliente_id: null,
+    comprovante: null,
     observacoes: "",
   };
 }
@@ -70,8 +81,14 @@ function doLancamento(l: Lancamento): DadosLancamento {
     tipo: l.tipo,
     status: l.status,
     valor: l.valor,
+    valor_pago: l.valor_pago,
     vencimento: l.vencimento,
+    competencia: l.competencia,
+    pago_em: l.pago_em,
+    forma_pagamento: l.forma_pagamento ?? "",
+    categoria_id: l.categoria_id,
     cliente_id: l.cliente_id,
+    comprovante: l.comprovante,
     observacoes: l.observacoes ?? "",
   };
 }
@@ -82,12 +99,16 @@ function mesDe(iso: string) {
   return m ? `${m[1]}-${m[2]}` : "";
 }
 
+export type Categoria = { id: string; nome: string; tipo: string };
+
 export function Lancamentos({
   lancamentos: iniciais,
   clientes,
+  categorias,
 }: {
   lancamentos: Lancamento[];
   clientes: { id: string; nome: string }[];
+  categorias: Categoria[];
 }) {
   const [lancamentos, setLancamentos] = useState(iniciais);
   const [doServidor, setDoServidor] = useState(iniciais);
@@ -400,6 +421,7 @@ export function Lancamentos({
       {criando && (
         <Dialogo
           clientes={clientes}
+          categorias={categorias}
           aoFechar={() => setCriando(false)}
           aoSalvar={(l) => setLancamentos((x) => [l, ...x])}
         />
@@ -407,6 +429,7 @@ export function Lancamentos({
       {editando && (
         <Dialogo
           clientes={clientes}
+          categorias={categorias}
           lancamento={editando}
           aoFechar={() => setEditando(null)}
           aoSalvar={(l) => setLancamentos((x) => x.map((i) => (i.id === l.id ? l : i)))}
@@ -442,17 +465,34 @@ function Acao({
 
 function Dialogo({
   clientes,
+  categorias,
   lancamento,
   aoFechar,
   aoSalvar,
 }: {
   clientes: { id: string; nome: string }[];
+  categorias: Categoria[];
   lancamento?: Lancamento;
   aoFechar: () => void;
   aoSalvar: (l: Lancamento) => void;
 }) {
   const [d, setD] = useState<DadosLancamento>(() =>
     lancamento ? doLancamento(lancamento) : vazio(),
+  );
+  /* O anexo é estado à parte do formulário: o arquivo já subiu, e o que
+     entra em `d.comprovante` é só o caminho. Guardar o objeto aqui é o
+     que permite mostrar nome e tamanho sem ir ao banco. */
+  const [anexo, setAnexo] = useState<ArquivoAnexado | null>(
+    lancamento?.comprovante
+      ? {
+          id: null,
+          nome: lancamento.comprovante_nome ?? "Comprovante",
+          caminho: lancamento.comprovante,
+          mime: "",
+          tamanho: 0,
+          url: null,
+        }
+      : null,
   );
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
@@ -486,8 +526,15 @@ function Dialogo({
       status: d.status,
       valor: d.valor,
       vencimento: d.vencimento,
-      pago_em: d.status === "pago" ? d.vencimento : null,
+      pago_em: d.status === "pago" ? d.pago_em : null,
       observacoes: d.observacoes || null,
+      competencia: d.competencia,
+      valor_pago: d.status === "pago" ? d.valor_pago || d.valor : 0,
+      forma_pagamento: d.forma_pagamento || null,
+      categoria_id: d.categoria_id,
+      categoria: categorias.find((c) => c.id === d.categoria_id)?.nome ?? null,
+      comprovante: d.comprovante,
+      comprovante_nome: anexo?.nome ?? lancamento?.comprovante_nome ?? null,
     });
     toast.success(
       r.demo ? "Lançamento salvo (não persistido: demonstração)." : "Lançamento salvo.",
@@ -574,21 +621,109 @@ function Dialogo({
             </Campo>
           </div>
 
-          {clientes.length > 0 && (
-            <Campo rotulo="Cliente" dica="Opcional">
+          <div className="grid gap-4 sm:grid-cols-2">
+            {/* Competência decide a que mês o valor pertence no resultado;
+                vencimento decide quando o dinheiro entra no caixa. Um fee
+                de setembro pago em outubro conta nos dois lugares certos. */}
+            <Campo rotulo="Competência" dica="Mês a que o valor se refere">
+              <Entrada
+                type="date"
+                value={d.competencia}
+                onChange={(e) => setD((x) => ({ ...x, competencia: e.target.value }))}
+              />
+            </Campo>
+            <Campo rotulo="Forma de pagamento" dica="Opcional">
               <Selecao
-                value={d.cliente_id ?? ""}
-                onChange={(e) => setD((x) => ({ ...x, cliente_id: e.target.value || null }))}
+                value={d.forma_pagamento}
+                onChange={(e) => setD((x) => ({ ...x, forma_pagamento: e.target.value }))}
               >
-                <option value="">Sem cliente</option>
-                {clientes.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.nome}
+                <option value="">Não informada</option>
+                {FORMAS.map((f) => (
+                  <option key={f} value={f}>
+                    {ROTULO_FORMA[f]}
                   </option>
                 ))}
               </Selecao>
             </Campo>
+          </div>
+
+          {/* Só quando está pago: perguntar quando e quanto entrou num
+              lançamento pendente não faz sentido e só ocupa a tela. */}
+          {d.status === "pago" && (
+            <div className="grid gap-4 rounded-md border border-borda bg-nevoa p-4 sm:grid-cols-2">
+              <Campo rotulo="Pago em">
+                <Entrada
+                  type="date"
+                  value={d.pago_em ?? ""}
+                  onChange={(e) => setD((x) => ({ ...x, pago_em: e.target.value || null }))}
+                />
+              </Campo>
+              <Campo rotulo="Valor pago (R$)" dica="Em branco quita o total">
+                <Entrada
+                  inputMode="decimal"
+                  value={d.valor_pago ? String(d.valor_pago) : ""}
+                  onChange={(e) =>
+                    setD((x) => ({
+                      ...x,
+                      valor_pago: Number(e.target.value.replace(",", ".")) || 0,
+                    }))
+                  }
+                  placeholder={String(d.valor)}
+                />
+              </Campo>
+            </div>
           )}
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {clientes.length > 0 && (
+              <Campo rotulo="Cliente" dica="Opcional">
+                <Selecao
+                  value={d.cliente_id ?? ""}
+                  onChange={(e) => setD((x) => ({ ...x, cliente_id: e.target.value || null }))}
+                >
+                  <option value="">Sem cliente</option>
+                  {clientes.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nome}
+                    </option>
+                  ))}
+                </Selecao>
+              </Campo>
+            )}
+
+            {/* A lista segue o tipo: oferecer "Impostos" numa receita só
+                serviria para errar a classificação. */}
+            {categorias.length > 0 && (
+              <Campo rotulo="Categoria" dica="Opcional">
+                <Selecao
+                  value={d.categoria_id ?? ""}
+                  onChange={(e) => setD((x) => ({ ...x, categoria_id: e.target.value || null }))}
+                >
+                  <option value="">Sem categoria</option>
+                  {categorias
+                    .filter((c) => c.tipo === d.tipo)
+                    .map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.nome}
+                      </option>
+                    ))}
+                </Selecao>
+              </Campo>
+            )}
+          </div>
+
+          <EnvioArquivo
+            valor={anexo}
+            aoMudar={(a) => {
+              setAnexo(a);
+              setD((x) => ({ ...x, comprovante: a?.caminho ?? null }));
+            }}
+            escopo="financeiro"
+            recurso="financeiro"
+            clienteId={d.cliente_id}
+            rotulo="Comprovante de pagamento"
+            dica="PDF ou imagem do comprovante, nota ou recibo — até 25 MB."
+          />
 
           <Campo rotulo="Observações" dica="Opcional">
             <AreaTexto

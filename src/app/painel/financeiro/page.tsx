@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import { Topo } from "../_componentes/topo";
 import { Lancamentos } from "./lancamentos";
 import { AvisoDemo } from "@/components/painel/aviso-demo";
-import { carregarFinanceiro, listarClientesSimples } from "@/lib/financeiro";
+import { carregarFinanceiro, listarCategorias, listarClientesSimples } from "@/lib/financeiro";
 
 export const metadata: Metadata = { title: "Financeiro" };
 
 export default async function PaginaFinanceiro() {
-  const [{ lancamentos, demo }, clientes] = await Promise.all([
+  const [{ lancamentos, demo }, clientes, categorias] = await Promise.all([
     carregarFinanceiro(),
     listarClientesSimples(),
+    listarCategorias(),
   ]);
 
   return (
@@ -21,7 +22,7 @@ export default async function PaginaFinanceiro() {
 
       <div className="space-y-6 p-5 sm:p-8">
         {demo && <AvisoDemo />}
-        <Lancamentos lancamentos={lancamentos} clientes={clientes} />
+        <Lancamentos lancamentos={lancamentos} clientes={clientes} categorias={categorias} />
       </div>
     </>
   );

@@ -14,3 +14,9 @@ yarn-error.log*
 next-env.d.ts
 supabase/.branches
 supabase/.temp
+
+# Pacote de deploy, gerado por `git archive` a cada envio.
+mrgrow.zip
+# Arquivos SQL temporários de instalação.
+[0-9]*-*.sql
+aplicar-schema.mjs

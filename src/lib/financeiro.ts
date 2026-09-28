@@ -15,6 +15,15 @@ export type Lancamento = {
   vencimento: string;
   pago_em: string | null;
   observacoes: string | null;
+  /* Campos que a tabela já tinha e nenhuma tela lia. */
+  competencia: string;
+  valor_pago: number;
+  forma_pagamento: string | null;
+  categoria_id: string | null;
+  categoria: string | null;
+  /** Caminho do comprovante no Storage, quando houver. */
+  comprovante: string | null;
+  comprovante_nome: string | null;
 };
 
 export type Financeiro = { lancamentos: Lancamento[]; demo: boolean };
@@ -32,6 +41,13 @@ function demo(): Financeiro {
       vencimento: l.vencimento,
       pago_em: null,
       observacoes: null,
+      competencia: l.vencimento.slice(0, 8) + "01",
+      valor_pago: l.status === "pago" ? l.valor : 0,
+      forma_pagamento: null,
+      categoria_id: null,
+      categoria: null,
+      comprovante: null,
+      comprovante_nome: null,
     })),
     demo: true,
   };
@@ -47,7 +63,13 @@ type Linha = {
   vencimento: string;
   pago_em: string | null;
   observacoes: string | null;
+  competencia: string;
+  valor_pago: number | string | null;
+  forma_pagamento: string | null;
+  documento_url: string | null;
+  categoria_id: string | null;
   clientes: { nome: string } | { nome: string }[] | null;
+  categorias_financeiras: { nome: string } | { nome: string }[] | null;
 };
 
 const VAZIO: Financeiro = { lancamentos: [], demo: false };
@@ -63,7 +85,7 @@ export async function carregarFinanceiro(): Promise<Financeiro> {
     const { data, error } = await db
       .from("lancamentos")
       .select(
-        "id, descricao, cliente_id, tipo, status, valor, vencimento, pago_em, observacoes, clientes(nome)",
+        "id, descricao, cliente_id, tipo, status, valor, valor_pago, vencimento, competencia, pago_em, forma_pagamento, documento_url, categoria_id, observacoes, clientes(nome), categorias_financeiras(nome)",
       )
       .eq("organizacao_id", sessao.organizacaoId)
       .order("vencimento", { ascending: false })
@@ -89,6 +111,24 @@ export async function carregarFinanceiro(): Promise<Financeiro> {
           vencimento: l.vencimento,
           pago_em: l.pago_em,
           observacoes: l.observacoes,
+          competencia: l.competencia,
+          valor_pago: Number(l.valor_pago ?? 0),
+          forma_pagamento: l.forma_pagamento,
+          categoria_id: l.categoria_id,
+          categoria:
+            (Array.isArray(l.categorias_financeiras)
+              ? l.categorias_financeiras[0]
+              : l.categorias_financeiras)?.nome ?? null,
+          comprovante: l.documento_url,
+          /* O nome original fica na tabela `arquivos`; aqui vem o que o
+             caminho guarda, já higienizado. Serve para a tela mostrar algo
+             legível sem uma consulta a mais por lançamento. */
+          comprovante_nome: l.documento_url
+            ? decodeURIComponent(l.documento_url.split("/").pop() ?? "").replace(
+                /^[0-9a-f-]{36}-/i,
+                "",
+              )
+            : null,
         };
       }),
       demo: false,
@@ -114,6 +154,38 @@ export async function listarClientesSimples(): Promise<{ id: string; nome: strin
     return (data ?? []) as { id: string; nome: string }[];
   } catch (e) {
     registrarFalha("listarClientesSimples", e);
+    return [];
+  }
+}
+
+/**
+ * Categorias do plano de contas, para o seletor do lançamento.
+ *
+ * O tipo vem junto porque receita e despesa têm listas próprias: oferecer
+ * "Impostos" num lançamento de receita só serviria para errar.
+ */
+export async function listarCategorias(): Promise<{ id: string; nome: string; tipo: string }[]> {
+  if (modoDemonstracao()) return [];
+
+  try {
+    const sessao = await obterSessao();
+    if (!sessao) return [];
+
+    const db = await criarClienteServidor();
+    const { data, error } = await db
+      .from("categorias_financeiras")
+      .select("id, nome, tipo")
+      .eq("organizacao_id", sessao.organizacaoId)
+      .order("tipo")
+      .order("nome");
+
+    if (error) {
+      registrarFalha("listarCategorias", error);
+      return [];
+    }
+    return (data ?? []) as { id: string; nome: string; tipo: string }[];
+  } catch (e) {
+    registrarFalha("listarCategorias", e);
     return [];
   }
 }
