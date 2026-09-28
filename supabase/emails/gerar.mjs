@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
 
-const SITE = "https://painel.mrgrowagencia.com.br";
+const SITE = "https://mrgrowagencia.com.br";
 const LOGO = `${SITE}/marca/mr-grow-logo-email.png`;
 
 const AZUL = "#1668f5";
