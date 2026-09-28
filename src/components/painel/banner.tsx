@@ -11,6 +11,11 @@ import Image from "next/image";
  * e é ela que manda: a largura sai da proporção da arte (1447×193), e aí a
  * peça aparece inteira, sem recorte nenhum, à esquerda da busca.
  *
+ * No desktop ela cresce até quase encostar na busca: `flex-1` toma a largura
+ * que sobra na linha e a altura vem da proporção. O teto de largura existe
+ * para telas muito largas, onde sem ele a faixa passaria de 240px de altura e
+ * empurraria o conteúdo da página para fora da primeira tela.
+ *
  * O `self-start` do `sm` existe porque, enquanto a barra empilha, o item de
  * flex estica na largura por padrão: a arte ia a 740px de largura por 80px de
  * altura e perdia uma tira em cima e embaixo, cortando o logo.
@@ -26,12 +31,12 @@ const ALTERNATIVO = "Seja bem-vindo à MR Grow — estratégia, conteúdo e trá
 
 export function Banner() {
   return (
-    <div className="relative h-14 w-full overflow-hidden rounded-md sm:aspect-1447/193 sm:h-20 sm:w-auto sm:self-start lg:self-center">
+    <div className="relative h-14 w-full overflow-hidden rounded-md sm:aspect-1447/193 sm:h-20 sm:w-auto sm:self-start lg:h-auto lg:max-w-5xl lg:flex-1 lg:self-center">
       <Image
         src={IMAGEM}
         alt={ALTERNATIVO}
         fill
-        sizes="(max-width: 40rem) 100vw, 600px"
+        sizes="(max-width: 40rem) 100vw, (max-width: 64rem) 600px, 900px"
         className="object-cover object-[10%_center] sm:object-center"
         priority
       />
