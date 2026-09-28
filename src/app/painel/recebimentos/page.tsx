@@ -130,7 +130,7 @@ export default async function PaginaRecebimentos({
               </div>
               <LegendaGrafico series={SERIES} />
             </div>
-            <GraficoArea dados={serie} series={SERIES} rotuloX={(v) => v} />
+            <GraficoArea dados={serie} series={SERIES} formatoX="texto" />
           </section>
         )}
       </div>

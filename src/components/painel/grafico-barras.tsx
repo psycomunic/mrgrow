@@ -3,7 +3,7 @@
 import {
   Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
-import { brl, compacto, numero } from "@/lib/utils";
+import { brl, compacto, dataCurta, numero } from "@/lib/utils";
 import { useTema } from "./tema";
 import { CROMO, PALETA, type SerieGrafico } from "./grafico-area";
 
@@ -23,16 +23,26 @@ export function GraficoBarras({
   series,
   formatoY = "moeda",
   altura = 280,
-  rotuloX = (v) => v,
+  formatoX = "texto",
   vazio = "Sem dados no período.",
 }: {
   dados: Ponto[];
   series: SerieGrafico[];
   formatoY?: "moeda" | "numero";
   altura?: number;
-  rotuloX?: (v: string) => string;
+  /**
+   * Como formatar o eixo X.
+   *
+   * É um texto e não uma função porque quem chama pode ser componente de
+   * servidor, e função não atravessa a fronteira servidor/cliente: o React
+   * não consegue serializar e a página inteira responde erro 500. Já
+   * aconteceu com o fluxo de recebimentos, e só apareceu quando o gráfico
+   * passou a ter dados suficientes para ser desenhado.
+   */
+  formatoX?: "data" | "texto";
   vazio?: string;
 }) {
+  const eixoX = formatoX === "data" ? dataCurta : (v: string) => v;
   const { tema } = useTema();
   const cromo = CROMO[tema];
   const paleta = PALETA[tema];
@@ -52,7 +62,7 @@ export function GraficoBarras({
         <CartesianGrid stroke={cromo.grade} strokeDasharray="3 3" vertical={false} />
         <XAxis
           dataKey="data"
-          tickFormatter={rotuloX}
+          tickFormatter={eixoX}
           tick={{ fill: cromo.marca, fontSize: 11 }}
           axisLine={false}
           tickLine={false}
@@ -77,7 +87,7 @@ export function GraficoBarras({
             color: cromo.dicaTexto,
             fontSize: 12,
           }}
-          labelFormatter={(v: string) => rotuloX(v)}
+          labelFormatter={(v: string) => eixoX(v)}
           formatter={(v: number, nome: string) => [fmt(v), nome]}
         />
         {series.map((s) => (

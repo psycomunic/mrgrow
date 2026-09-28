@@ -78,7 +78,8 @@ export function GraficoArea({
   series,
   formatoY = "moeda",
   altura = 300,
-  rotuloX = dataCurta,
+  rotuloX,
+  formatoX = "data",
   vazio = "Sem dados no período.",
 }: {
   dados: Ponto[];
@@ -87,8 +88,20 @@ export function GraficoArea({
   altura?: number;
   /** O eixo X nem sempre é data: o fluxo mensal passa rótulos de mês. */
   rotuloX?: (v: string) => string;
+  /**
+   * Como formatar o eixo X.
+   *
+   * É um texto e não uma função porque quem chama pode ser componente de
+   * servidor, e função não atravessa a fronteira servidor/cliente: o React
+   * não consegue serializar e a página inteira responde erro 500. Já
+   * aconteceu com o fluxo de recebimentos, e só apareceu quando o gráfico
+   * passou a ter dados suficientes para ser desenhado.
+   */
+  formatoX?: "data" | "texto";
   vazio?: string;
 }) {
+  /* `rotuloX` continua aceito para quem já é cliente e quer formato próprio. */
+  const eixoX = rotuloX ?? (formatoX === "texto" ? (v: string) => v : dataCurta);
   /* Ids de gradiente precisam ser únicos no documento. Com o id derivado só
      da chave da série, dois gráficos que plotam "investimento" na mesma
      página disputavam o mesmo `<linearGradient>` — e um deles ficava sem
@@ -127,7 +140,7 @@ export function GraficoArea({
           <CartesianGrid stroke={cromo.grade} strokeDasharray="3 5" vertical={false} />
           <XAxis
             dataKey="data"
-            tickFormatter={(v) => rotuloX(v as string)}
+            tickFormatter={(v) => eixoX(v as string)}
             tick={{ fill: cromo.marca, fontSize: 11 }}
             axisLine={false}
             tickLine={false}
@@ -168,7 +181,7 @@ export function GraficoArea({
             itemStyle={{ padding: "2px 0" }}
             labelStyle={{ fontWeight: 600, marginBottom: 4, color: cromo.dicaTexto }}
             cursor={{ stroke: cromo.cursor, strokeWidth: 1 }}
-            labelFormatter={(v) => rotuloX(v as string)}
+            labelFormatter={(v) => eixoX(v as string)}
             formatter={(valor, nome) => [fmt(Number(valor)), nome as string]}
           />
           {series.map((s) => (
