@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "MR Grow — Landing page de alta conversão + Plataforma de gestão de agência (CRM, financeiro, integrações Meta/Google, automações)",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
