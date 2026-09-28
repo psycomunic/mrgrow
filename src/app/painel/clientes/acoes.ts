@@ -131,3 +131,82 @@ export async function atualizarCliente(id: string, d: DadosCliente): Promise<Res
     return falha("atualizarCliente", e, "Não foi possível salvar.");
   }
 }
+
+/**
+ * Slug a partir do nome: é ele que forma o endereço da ficha.
+ *
+ * Mesma regra da função `gerar_slug` do banco, refeita aqui porque o
+ * slug precisa existir antes do insert — e porque conferir a
+ * disponibilidade no cliente dá erro melhor que uma violação de índice
+ * único chegando crua do Postgres.
+ */
+function gerarSlug(nome: string) {
+  return nome
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+}
+
+export async function criarCliente(d: DadosCliente): Promise<Resultado & { slug?: string }> {
+  const erro = validar(d);
+  if (erro) return { ok: false, demo: false, erro };
+
+  const ctx = await contextoDeAcao("clientes", "criar");
+  if (ctx.estado === "demo") return { ok: true, demo: true };
+  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
+  const { sessao, db } = ctx;
+
+  const base = gerarSlug(d.nome);
+  if (!base) return { ok: false, demo: false, erro: "O nome precisa ter letras ou números." };
+
+  try {
+    /* O índice é único por organização, então dois clientes de nome
+       parecido colidiriam. Um sufixo numérico resolve sem pedir nada a
+       quem cadastra. */
+    const { data: usados } = await db
+      .from("clientes")
+      .select("slug")
+      .eq("organizacao_id", sessao.organizacaoId)
+      .like("slug", `${base}%`);
+
+    const ocupados = new Set(((usados ?? []) as { slug: string }[]).map((x) => x.slug));
+    let slug = base;
+    for (let i = 2; ocupados.has(slug); i++) slug = `${base}-${i}`;
+
+    const { data, error } = await db
+      .from("clientes")
+      .insert({
+        organizacao_id: sessao.organizacaoId,
+        slug,
+        nome: d.nome.trim(),
+        segmento: d.segmento.trim() || null,
+        status: d.status,
+        documento: d.documento.trim() || null,
+        site: endereco(d.site),
+        instagram: usuarioInstagram(d.instagram),
+        fee_mensal: d.fee_mensal,
+        investimento_previsto: d.investimento_previsto,
+        percentual_sobre_investimento: d.percentual_sobre_investimento,
+        dia_vencimento: d.dia_vencimento,
+        inicio_contrato: d.inicio_contrato || null,
+        fim_contrato: d.fim_contrato || null,
+        saude: d.saude,
+        nps: d.nps,
+        observacoes: d.observacoes.trim() || null,
+        responsavel_id: sessao.usuarioId,
+      })
+      .select("slug")
+      .single();
+
+    if (error) return falha("criarCliente", error, "Não foi possível criar o cliente.");
+
+    revalidatePath("/painel/clientes");
+    revalidatePath("/painel");
+    return { ok: true, demo: false, slug: (data as { slug: string }).slug };
+  } catch (e) {
+    return falha("criarCliente", e, "Não foi possível criar o cliente.");
+  }
+}
