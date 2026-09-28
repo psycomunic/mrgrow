@@ -11,6 +11,7 @@ import {
   Pencil,
   Plug,
   StickyNote,
+  Trash2,
   User,
   Users,
   X,
@@ -24,6 +25,7 @@ import { brl, cn, dataCompleta, iniciais, multiplo, numero, percentual } from "@
 import { pode } from "@/lib/papeis";
 import { usePainel } from "../_componentes/sessao-cliente";
 import { atualizarCliente, type DadosCliente } from "./acoes";
+import { DialogoExcluirCliente } from "./excluir";
 import type { ClienteCarteira } from "@/lib/clientes";
 
 const TOM: Record<string, "sucesso" | "azul" | "alerta" | "neutro"> = {
@@ -95,8 +97,10 @@ export function FichaCliente({
 }) {
   const { papel } = usePainel();
   const podeEditar = pode(papel, "clientes", "editar");
+  const podeExcluir = pode(papel, "clientes", "excluir");
 
   const [editando, setEditando] = useState(false);
+  const [excluindo, setExcluindo] = useState(false);
   const [dados, setDados] = useState<DadosCliente>(() => daFicha(cliente));
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -371,13 +375,39 @@ export function FichaCliente({
                 <Plug className="size-4" />
                 Contas
               </BotaoLink>
-              <Botao variante="fantasma" tamanho="sm" className="ml-auto" onClick={aoFechar}>
-                Fechar
-              </Botao>
+              <div className="ml-auto flex items-center gap-2">
+                {podeExcluir && (
+                  <Botao
+                    variante="fantasma"
+                    tamanho="sm"
+                    className="text-perigo hover:bg-perigo/10"
+                    onClick={() => setExcluindo(true)}
+                  >
+                    <Trash2 className="size-4" />
+                    Excluir
+                  </Botao>
+                )}
+                <Botao variante="fantasma" tamanho="sm" onClick={aoFechar}>
+                  Fechar
+                </Botao>
+              </div>
             </footer>
           </>
         )}
       </div>
+      {excluindo && (
+        <DialogoExcluirCliente
+          cliente={cliente}
+          aoFechar={() => setExcluindo(false)}
+          /* Encerrar é a saída segura: abre a edição já com o status
+             trocado, para a pessoa revisar e salvar. */
+          aoEncerrar={() => {
+            setDados({ ...daFicha(cliente), status: "encerrado" });
+            setErro(null);
+            setEditando(true);
+          }}
+        />
+      )}
     </Sobreposicao>
   );
 }

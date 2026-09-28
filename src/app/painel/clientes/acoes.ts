@@ -210,3 +210,98 @@ export async function criarCliente(d: DadosCliente): Promise<Resultado & { slug?
     return falha("criarCliente", e, "Não foi possível criar o cliente.");
   }
 }
+
+export type Vinculos = {
+  metricas: number;
+  tarefas: number;
+  projetos: number;
+  contratos: number;
+  faturas: number;
+  arquivos: number;
+  lancamentos: number;
+};
+
+/**
+ * O que existe pendurado no cliente.
+ *
+ * Serve para a confirmação dizer o que se perde, em número, em vez de um
+ * "tem certeza?" genérico. Quem apaga uma conta com dois anos de métrica
+ * merece ver os dois anos antes de clicar.
+ */
+export async function contarVinculos(id: string): Promise<Vinculos | null> {
+  const ctx = await contextoDeAcao("clientes", "excluir");
+  if (ctx.estado !== "ok") return null;
+  const { sessao, db } = ctx;
+
+  const contar = async (tabela: string) => {
+    const { count } = await db
+      .from(tabela)
+      .select("id", { count: "exact", head: true })
+      .eq("organizacao_id", sessao.organizacaoId)
+      .eq("cliente_id", id);
+    return count ?? 0;
+  };
+
+  const [metricas, tarefas, projetos, contratos, faturas, arquivos, lancamentos] =
+    await Promise.all([
+      contar("metricas_diarias"),
+      contar("tarefas"),
+      contar("projetos"),
+      contar("contratos"),
+      contar("faturas"),
+      contar("arquivos"),
+      contar("lancamentos"),
+    ]);
+
+  return { metricas, tarefas, projetos, contratos, faturas, arquivos, lancamentos };
+}
+
+/**
+ * Apaga o cliente e tudo que depende dele.
+ *
+ * O banco cascateia: métricas, tarefas, projetos, contratos, faturas,
+ * criativos, campanhas e arquivos somem junto. Lançamentos financeiros
+ * sobrevivem — a coluna vira nula — porque o dinheiro que entrou continua
+ * sendo verdade do caixa mesmo sem a conta.
+ *
+ * Exige digitar o nome porque não há desfazer e porque a lista de
+ * clientes tem linhas parecidas: um clique errado numa carteira de vinte
+ * contas apaga a conta vizinha. Só quem tem `excluir` em clientes chega
+ * aqui — pela matriz, proprietário e administrador.
+ */
+export async function excluirCliente(id: string, confirmacao: string): Promise<Resultado> {
+  const ctx = await contextoDeAcao("clientes", "excluir");
+  if (ctx.estado === "demo") return { ok: true, demo: true };
+  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
+  const { sessao, db } = ctx;
+
+  try {
+    const { data: cliente } = await db
+      .from("clientes")
+      .select("nome")
+      .eq("id", id)
+      .eq("organizacao_id", sessao.organizacaoId)
+      .maybeSingle();
+
+    const nome = (cliente as { nome: string } | null)?.nome;
+    if (!nome) return { ok: false, demo: false, erro: "Cliente não encontrado." };
+
+    if (confirmacao.trim().toLowerCase() !== nome.trim().toLowerCase()) {
+      return { ok: false, demo: false, erro: "O nome digitado não confere." };
+    }
+
+    const { error } = await db
+      .from("clientes")
+      .delete()
+      .eq("id", id)
+      .eq("organizacao_id", sessao.organizacaoId);
+
+    if (error) return falha("excluirCliente", error, "Não foi possível excluir.");
+
+    revalidatePath("/painel/clientes");
+    revalidatePath("/painel");
+    return { ok: true, demo: false };
+  } catch (e) {
+    return falha("excluirCliente", e, "Não foi possível excluir.");
+  }
+}
