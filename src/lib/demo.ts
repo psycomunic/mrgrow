@@ -124,16 +124,88 @@ export const DEMO_ETAPAS = [
   { id: "e5", nome: "Negociação", ordem: 4, probabilidade: 80, cor: "#12316d", tipo: "aberta" },
 ];
 
+/**
+ * Negócios do funil, com a ficha do contato junto.
+ *
+ * `etapa_desde` e `proxima` existem porque são as duas perguntas que o
+ * quadro precisa responder de relance: há quanto tempo o negócio está
+ * parado nesta etapa e qual é o próximo passo combinado. Alguns vêm de
+ * propósito sem `proxima` — negócio sem próximo passo é exatamente o que
+ * o funil tem de mostrar em vermelho.
+ */
 export const DEMO_NEGOCIOS = [
-  { id: "n1", titulo: "Loja Bella Fiore", etapa_id: "e1", valor_mensal: 3500, valor_unico: 0, temperatura: "quente", origem: "meta_ads", contato: "Renata Alves", previsao: emDias(17) },
-  { id: "n2", titulo: "Padaria do Largo", etapa_id: "e1", valor_mensal: 2200, valor_unico: 2400, temperatura: "frio", origem: "organico", contato: "Wilson Prado", previsao: emDias(38) },
-  { id: "n3", titulo: "Studio Nova Pele", etapa_id: "e2", valor_mensal: 3500, valor_unico: 2400, temperatura: "quente", origem: "meta_ads", contato: "Camila Reis", previsao: emDias(9) },
-  { id: "n4", titulo: "Pet House", etapa_id: "e2", valor_mensal: 2500, valor_unico: 0, temperatura: "morno", origem: "indicacao", contato: "Igor Souza", previsao: emDias(24) },
-  { id: "n5", titulo: "Móveis Duarte", etapa_id: "e3", valor_mensal: 4200, valor_unico: 4900, temperatura: "quente", origem: "outbound", contato: "Sandra Duarte", previsao: emDias(6) },
-  { id: "n6", titulo: "Advocacia Terra Nova", etapa_id: "e3", valor_mensal: 3800, valor_unico: 0, temperatura: "morno", origem: "indicacao", contato: "Dra. Helena Terra", previsao: emDias(15) },
-  { id: "n7", titulo: "TechParts Distribuidora", etapa_id: "e4", valor_mensal: 5200, valor_unico: 0, temperatura: "quente", origem: "google_ads", contato: "Marcelo Tan", previsao: emDias(4) },
-  { id: "n8", titulo: "Colégio Horizonte", etapa_id: "e4", valor_mensal: 4600, valor_unico: 3200, temperatura: "morno", origem: "outbound", contato: "Paulo Andrade", previsao: emDias(11) },
-  { id: "n9", titulo: "Ótica Visão Clara", etapa_id: "e5", valor_mensal: 2800, valor_unico: 1900, temperatura: "quente", origem: "meta_ads", contato: "Bianca Prado", previsao: emDias(2) },
+  {
+    id: "n1", titulo: "Loja Bella Fiore", etapa_id: "e1", valor_mensal: 3500, valor_unico: 0,
+    temperatura: "quente", origem: "meta_ads", previsao: emDias(17),
+    contato: { nome: "Renata Alves", email: "renata@bellafiore.com.br", telefone: "+55 51 99812-4477", cargo: "Sócia", empresa: "Loja Bella Fiore", instagram: "lojabellafiore", site: "bellafiore.com.br" },
+    responsavel: "Mateus Rodrigues", criado_em: emDias(-4), etapa_desde: emDias(-4),
+    ultimo_contato: emDias(-1),
+    proxima: { id: "pa1", tipo: "ligacao", titulo: "Ligar para entender o momento da loja", vence_em: emDias(1) },
+  },
+  {
+    id: "n2", titulo: "Padaria do Largo", etapa_id: "e1", valor_mensal: 2200, valor_unico: 2400,
+    temperatura: "frio", origem: "organico", previsao: emDias(38),
+    contato: { nome: "Wilson Prado", email: "contato@padariadolargo.com.br", telefone: "+55 51 99640-2210", cargo: "Proprietário", empresa: "Padaria do Largo", instagram: "padariadolargo", site: null },
+    responsavel: "Mateus Rodrigues", criado_em: emDias(-21), etapa_desde: emDias(-21),
+    ultimo_contato: emDias(-18),
+    proxima: null,
+  },
+  {
+    id: "n3", titulo: "Studio Nova Pele", etapa_id: "e2", valor_mensal: 3500, valor_unico: 2400,
+    temperatura: "quente", origem: "meta_ads", previsao: emDias(9),
+    contato: { nome: "Camila Reis", email: "camila@studionovapele.com.br", telefone: "+55 51 98177-3390", cargo: "Fundadora", empresa: "Studio Nova Pele", instagram: "studionovapele", site: "studionovapele.com.br" },
+    responsavel: "Gestor de Tráfego", criado_em: emDias(-9), etapa_desde: emDias(-3),
+    ultimo_contato: emDias(-2),
+    proxima: { id: "pa2", tipo: "reuniao", titulo: "Diagnóstico por vídeo (40 min)", vence_em: emDias(2) },
+  },
+  {
+    id: "n4", titulo: "Pet House", etapa_id: "e2", valor_mensal: 2500, valor_unico: 0,
+    temperatura: "morno", origem: "indicacao", previsao: emDias(24),
+    contato: { nome: "Igor Souza", email: "igor@pethouse.com.br", telefone: "+55 51 99503-8812", cargo: "Gerente", empresa: "Pet House", instagram: "pethouseoficial", site: null },
+    responsavel: "Mateus Rodrigues", criado_em: emDias(-14), etapa_desde: emDias(-11),
+    ultimo_contato: emDias(-10),
+    proxima: { id: "pa3", tipo: "whatsapp", titulo: "Cobrar retorno sobre o orçamento de mídia", vence_em: emDias(-2) },
+  },
+  {
+    id: "n5", titulo: "Móveis Duarte", etapa_id: "e3", valor_mensal: 4200, valor_unico: 4900,
+    temperatura: "quente", origem: "outbound", previsao: emDias(6),
+    contato: { nome: "Sandra Duarte", email: "sandra@moveisduarte.com.br", telefone: "+55 51 99211-4506", cargo: "Diretora comercial", empresa: "Móveis Duarte", instagram: "moveisduarte", site: "moveisduarte.com.br" },
+    responsavel: "Mateus Rodrigues", criado_em: emDias(-12), etapa_desde: emDias(-2),
+    ultimo_contato: emDias(-2),
+    proxima: { id: "pa4", tipo: "reuniao", titulo: "Apresentar diagnóstico e escopo", vence_em: emDias(1) },
+  },
+  {
+    id: "n6", titulo: "Advocacia Terra Nova", etapa_id: "e3", valor_mensal: 3800, valor_unico: 0,
+    temperatura: "morno", origem: "indicacao", previsao: emDias(15),
+    contato: { nome: "Helena Terra", email: "helena@terranova.adv.br", telefone: "+55 51 99388-1120", cargo: "Sócia-fundadora", empresa: "Terra Nova Advocacia", instagram: null, site: "terranova.adv.br" },
+    responsavel: "Gestor de Tráfego", criado_em: emDias(-19), etapa_desde: emDias(-13),
+    ultimo_contato: emDias(-12),
+    proxima: null,
+  },
+  {
+    id: "n7", titulo: "TechParts Distribuidora", etapa_id: "e4", valor_mensal: 5200, valor_unico: 0,
+    temperatura: "quente", origem: "google_ads", previsao: emDias(4),
+    contato: { nome: "Marcelo Tan", email: "marcelo@techparts.com.br", telefone: "+55 51 98844-7702", cargo: "Head de marketing", empresa: "TechParts Distribuidora", instagram: null, site: "techparts.com.br" },
+    responsavel: "Mateus Rodrigues", criado_em: emDias(-26), etapa_desde: emDias(-5),
+    ultimo_contato: emDias(-1),
+    proxima: { id: "pa5", tipo: "ligacao", titulo: "Follow-up da proposta enviada", vence_em: emDias(0) },
+  },
+  {
+    id: "n8", titulo: "Colégio Horizonte", etapa_id: "e4", valor_mensal: 4600, valor_unico: 3200,
+    temperatura: "morno", origem: "outbound", previsao: emDias(11),
+    contato: { nome: "Paulo Andrade", email: "paulo@colegiohorizonte.com.br", telefone: "+55 51 99127-6690", cargo: "Diretor", empresa: "Colégio Horizonte", instagram: "colegiohorizonte", site: "colegiohorizonte.com.br" },
+    responsavel: "Gestor de Tráfego", criado_em: emDias(-31), etapa_desde: emDias(-16),
+    ultimo_contato: emDias(-16),
+    proxima: null,
+  },
+  {
+    id: "n9", titulo: "Ótica Visão Clara", etapa_id: "e5", valor_mensal: 2800, valor_unico: 1900,
+    temperatura: "quente", origem: "meta_ads", previsao: emDias(2),
+    contato: { nome: "Bianca Prado", email: "bianca@visaoclara.com.br", telefone: "+55 51 99770-3344", cargo: "Proprietária", empresa: "Ótica Visão Clara", instagram: "oticavisaoclara", site: null },
+    responsavel: "Mateus Rodrigues", criado_em: emDias(-38), etapa_desde: emDias(-6),
+    ultimo_contato: emDias(-1),
+    proxima: { id: "pa6", tipo: "reuniao", titulo: "Fechar condições e assinar", vence_em: emDias(1) },
+  },
 ];
 
 /* ── Operação ───────────────────────────────────────────────────── */

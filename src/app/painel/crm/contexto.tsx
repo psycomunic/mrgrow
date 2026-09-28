@@ -21,7 +21,7 @@ type Crm = {
   criar: (d: DadosNegocio) => Promise<boolean>;
   editar: (id: string, d: DadosNegocio) => Promise<boolean>;
   mover: (id: string, etapaId: string) => void;
-  fechar: (id: string, status: "ganho" | "perdido") => void;
+  fechar: (id: string, status: "ganho" | "perdido", motivo?: string) => void;
   excluir: (id: string) => void;
 };
 
@@ -70,6 +70,7 @@ export function CrmProvider({
   const criar = useCallback(
     async (d: DadosNegocio) => {
       const anterior = negocios;
+      const agora = new Date().toISOString();
       const otimista: NegocioQuadro = {
         id: idLocal(),
         titulo: d.titulo,
@@ -79,7 +80,23 @@ export function CrmProvider({
         temperatura: d.temperatura,
         origem: d.origem || null,
         contato: d.contato || null,
+        dados: d.contato
+          ? {
+              nome: d.contato,
+              email: d.email || null,
+              telefone: d.telefone || null,
+              cargo: null,
+              empresa: null,
+              instagram: null,
+              site: null,
+            }
+          : null,
+        responsavel: null,
         previsao: d.previsao,
+        criado_em: agora,
+        etapa_desde: agora,
+        ultimo_contato: null,
+        proxima: null,
         ordem_kanban: negocios.length,
       };
       setNegocios((l) => [...l, otimista]);
@@ -111,6 +128,17 @@ export function CrmProvider({
                 temperatura: d.temperatura,
                 origem: d.origem || null,
                 contato: d.contato || n.contato,
+                dados: d.contato
+                  ? {
+                      nome: d.contato,
+                      email: d.email || null,
+                      telefone: d.telefone || null,
+                      cargo: n.dados?.cargo ?? null,
+                      empresa: n.dados?.empresa ?? null,
+                      instagram: n.dados?.instagram ?? null,
+                      site: n.dados?.site ?? null,
+                    }
+                  : n.dados,
                 previsao: d.previsao,
               }
             : n,
@@ -152,12 +180,12 @@ export function CrmProvider({
   );
 
   const fechar = useCallback(
-    (id: string, status: "ganho" | "perdido") => {
+    (id: string, status: "ganho" | "perdido", motivo?: string) => {
       const anterior = negocios;
       setNegocios((l) => l.filter((n) => n.id !== id));
 
       iniciar(async () => {
-        const r = await fecharNegocio(id, status);
+        const r = await fecharNegocio(id, status, motivo);
         if (!r.ok) {
           setNegocios(anterior);
           toast.error(r.erro ?? "Não foi possível fechar.");

@@ -1,7 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { contextoDeAcao, falha, fkDaOrganizacao, pertence, type Resultado } from "@/lib/acoes";
+import {
+  contextoDeAcao,
+  falha,
+  fkDaOrganizacao,
+  pertence,
+  type Banco,
+  type Resultado,
+} from "@/lib/acoes";
 
 export type { Resultado };
 
@@ -9,6 +16,8 @@ export type { Resultado };
 export type DadosNegocio = {
   titulo: string;
   contato: string;
+  email: string;
+  telefone: string;
   valor_mensal: number;
   valor_unico: number;
   temperatura: string;
@@ -24,6 +33,8 @@ function validar(d: DadosNegocio): string | null {
   if (!d.titulo.trim()) return "Informe o nome do negócio.";
   if (d.titulo.trim().length > 120) return "O nome ficou longo demais.";
   if (d.contato.trim().length > 120) return "O nome do contato ficou longo demais.";
+  if (d.email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email.trim())) return "E-mail inválido.";
+  if (d.telefone.trim().length > 40) return "Telefone longo demais.";
   if (!d.etapa_id) return "Selecione a etapa.";
   if (!TEMPERATURAS.includes(d.temperatura)) return "Temperatura inválida.";
   if (d.origem && !ORIGENS.includes(d.origem)) return "Origem inválida.";
@@ -57,7 +68,12 @@ export async function criarNegocio(funilId: string | null, d: DadosNegocio): Pro
     if (d.contato.trim()) {
       const { data: contato, error: erroContato } = await db
         .from("contatos")
-        .insert({ organizacao_id: sessao.organizacaoId, nome: d.contato.trim() })
+        .insert({
+          organizacao_id: sessao.organizacaoId,
+          nome: d.contato.trim(),
+          email: d.email.trim() || null,
+          telefone: d.telefone.trim() || null,
+        })
         .select("id")
         .single();
       if (erroContato) return falha("criarNegocio/contato", erroContato, "Não foi possível salvar o contato.");
@@ -103,9 +119,18 @@ export async function atualizarNegocio(id: string, d: DadosNegocio): Promise<Res
       return { ok: false, demo: false, erro: "Etapa não encontrada." };
     }
 
+    /* A ficha do contato vive noutra tabela, então editar o negócio precisa
+       alcançá-la: sem isto, trocar o telefone no formulário não mudava nada.
+       Negócio que ainda não tem contato ganha um agora. */
+    const contatoId = await manterContato(db, id, d, sessao.organizacaoId);
+    if (contatoId === false) {
+      return { ok: false, demo: false, erro: "Não foi possível salvar o contato." };
+    }
+
     const { error } = await db
       .from("negocios")
       .update({
+        contato_id: contatoId,
         etapa_id: d.etapa_id,
         titulo: d.titulo.trim(),
         valor_mensal: d.valor_mensal,
@@ -123,6 +148,61 @@ export async function atualizarNegocio(id: string, d: DadosNegocio): Promise<Res
   } catch (e) {
     return falha("atualizarNegocio", e, "Não foi possível salvar.");
   }
+}
+
+/**
+ * Cria ou atualiza o contato do negócio e devolve o id.
+ *
+ * Devolve `false` quando a gravação falha — `null` já significa "este negócio
+ * não tem contato", que é um estado válido.
+ */
+async function manterContato(
+  db: Banco,
+  negocioId: string,
+  d: DadosNegocio,
+  organizacaoId: string,
+): Promise<string | null | false> {
+  const nome = d.contato.trim();
+  const campos = {
+    nome,
+    email: d.email.trim() || null,
+    telefone: d.telefone.trim() || null,
+  };
+
+  const { data: atual } = await db
+    .from("negocios")
+    .select("contato_id")
+    .eq("id", negocioId)
+    .eq("organizacao_id", organizacaoId)
+    .maybeSingle();
+
+  const contatoId = (atual as { contato_id: string | null } | null)?.contato_id ?? null;
+
+  if (!nome) return contatoId;
+
+  if (contatoId) {
+    const { error } = await db
+      .from("contatos")
+      .update(campos)
+      .eq("id", contatoId)
+      .eq("organizacao_id", organizacaoId);
+    if (error) {
+      falha("manterContato", error, "");
+      return false;
+    }
+    return contatoId;
+  }
+
+  const { data, error } = await db
+    .from("contatos")
+    .insert({ organizacao_id: organizacaoId, ...campos })
+    .select("id")
+    .single();
+  if (error) {
+    falha("manterContato", error, "");
+    return false;
+  }
+  return (data as { id: string }).id;
 }
 
 /**
@@ -228,27 +308,37 @@ export async function excluirNegocio(id: string): Promise<Resultado> {
 export type Atividade = {
   id: string;
   tipo: string;
+  titulo: string | null;
   conteudo: string | null;
   criado_em: string;
+  /** Preenchido só nas atividades agendadas — as combinadas para depois. */
+  vence_em: string | null;
+  concluida: boolean;
   autor: string | null;
 };
 
-const TIPOS_ATIVIDADE = ["nota", "ligacao", "reuniao", "email", "whatsapp"];
+const TIPOS_ATIVIDADE = ["nota", "ligacao", "reuniao", "email", "whatsapp", "tarefa"];
 
 /** Demonstração: dá o que ler no painel antes do banco existir. */
 const ATIVIDADES_DEMO: Atividade[] = [
   {
     id: "a1",
     tipo: "reuniao",
+    titulo: null,
     conteudo: "Diagnóstico feito. Conta com rastreamento quebrado e criativo parado há 3 meses.",
     criado_em: new Date(Date.now() - 2 * 86_400_000).toISOString(),
+    vence_em: null,
+    concluida: true,
     autor: "Mateus Rodrigues",
   },
   {
     id: "a2",
     tipo: "whatsapp",
+    titulo: null,
     conteudo: "Retornou pedindo a proposta com o escopo de landing page incluso.",
     criado_em: new Date(Date.now() - 86_400_000).toISOString(),
+    vence_em: null,
+    concluida: true,
     autor: "Mateus Rodrigues",
   },
 ];
@@ -262,7 +352,7 @@ export async function listarAtividades(negocioId: string): Promise<Atividade[]> 
   try {
     const { data, error } = await db
       .from("atividades")
-      .select("id, tipo, conteudo, criado_em, perfis(nome_completo)")
+      .select("id, tipo, titulo, conteudo, criado_em, vence_em, concluida, perfis(nome_completo)")
       .eq("negocio_id", negocioId)
       .eq("organizacao_id", sessao.organizacaoId)
       .order("criado_em", { ascending: false })
@@ -276,8 +366,11 @@ export async function listarAtividades(negocioId: string): Promise<Atividade[]> 
     type Linha = {
       id: string;
       tipo: string;
+      titulo: string | null;
       conteudo: string | null;
       criado_em: string;
+      vence_em: string | null;
+      concluida: boolean;
       perfis: { nome_completo: string | null } | { nome_completo: string | null }[] | null;
     };
 
@@ -286,8 +379,11 @@ export async function listarAtividades(negocioId: string): Promise<Atividade[]> 
       return {
         id: a.id,
         tipo: a.tipo,
+        titulo: a.titulo,
         conteudo: a.conteudo,
         criado_em: a.criado_em,
+        vence_em: a.vence_em,
+        concluida: a.concluida,
         autor: p?.nome_completo ?? null,
       };
     });
@@ -329,5 +425,78 @@ export async function registrarAtividade(
     return { ok: true, demo: false };
   } catch (e) {
     return falha("registrarAtividade", e, "Não foi possível registrar.");
+  }
+}
+
+/**
+ * Agenda o próximo passo do negócio.
+ *
+ * É a mesma tabela do histórico, separada pelo `vence_em`: com data, é
+ * compromisso futuro; sem data, é registro do que já aconteceu. Guardar as
+ * duas coisas junto é o que deixa a linha do tempo do negócio contínua, do
+ * que foi feito ao que ainda falta.
+ */
+export async function agendarAtividade(
+  negocioId: string,
+  tipo: string,
+  titulo: string,
+  venceEm: string,
+): Promise<Resultado> {
+  if (!titulo.trim()) return { ok: false, demo: false, erro: "Descreva o próximo passo." };
+  if (titulo.length > 200) return { ok: false, demo: false, erro: "Título longo demais." };
+  if (!TIPOS_ATIVIDADE.includes(tipo)) return { ok: false, demo: false, erro: "Tipo inválido." };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(venceEm)) return { ok: false, demo: false, erro: "Data inválida." };
+
+  const ctx = await contextoDeAcao("crm", "editar");
+  if (ctx.estado === "demo") return { ok: true, demo: true };
+  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
+  const { sessao, db } = ctx;
+
+  try {
+    if (!(await pertence(db, "negocios", negocioId, sessao.organizacaoId))) {
+      return { ok: false, demo: false, erro: "Negócio não encontrado." };
+    }
+
+    const { error } = await db.from("atividades").insert({
+      organizacao_id: sessao.organizacaoId,
+      negocio_id: negocioId,
+      tipo,
+      titulo: titulo.trim(),
+      /* Meio-dia, e não meia-noite: `vence_em` é timestamptz, e meia-noite
+         em UTC cai no dia anterior no fuso de Brasília. */
+      vence_em: `${venceEm}T12:00:00`,
+      concluida: false,
+      usuario_id: sessao.usuarioId,
+    });
+
+    if (error) return falha("agendarAtividade", error, "Não foi possível agendar.");
+    revalidatePath("/painel/crm");
+    return { ok: true, demo: false };
+  } catch (e) {
+    return falha("agendarAtividade", e, "Não foi possível agendar.");
+  }
+}
+
+/** Marca o próximo passo como feito — ele sai da agenda e vira histórico. */
+export async function concluirAtividade(id: string): Promise<Resultado> {
+  const ctx = await contextoDeAcao("crm", "editar");
+  if (ctx.estado === "demo") return { ok: true, demo: true };
+  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
+  const { sessao, db } = ctx;
+
+  try {
+    const { data, error } = await db
+      .from("atividades")
+      .update({ concluida: true })
+      .eq("id", id)
+      .eq("organizacao_id", sessao.organizacaoId)
+      .select("id");
+
+    if (error) return falha("concluirAtividade", error, "Não foi possível concluir.");
+    if (!data?.length) return { ok: false, demo: false, erro: "Atividade não encontrada." };
+    revalidatePath("/painel/crm");
+    return { ok: true, demo: false };
+  } catch (e) {
+    return falha("concluirAtividade", e, "Não foi possível concluir.");
   }
 }

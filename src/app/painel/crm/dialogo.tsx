@@ -15,6 +15,8 @@ function vazio(etapaId: string): DadosNegocio {
   return {
     titulo: "",
     contato: "",
+    email: "",
+    telefone: "",
     valor_mensal: 0,
     valor_unico: 0,
     temperatura: "morno",
@@ -28,6 +30,8 @@ function deNegocio(n: NegocioQuadro): DadosNegocio {
   return {
     titulo: n.titulo,
     contato: n.contato ?? "",
+    email: n.dados?.email ?? "",
+    telefone: n.dados?.telefone ?? "",
     valor_mensal: n.valor_mensal,
     valor_unico: n.valor_unico,
     temperatura: n.temperatura,
@@ -77,7 +81,7 @@ export function DialogoNegocio({
   const contrato = dados.valor_mensal * 12 + dados.valor_unico;
 
   const texto =
-    (campo: "titulo" | "contato" | "etapa_id" | "origem") =>
+    (campo: "titulo" | "contato" | "email" | "telefone" | "etapa_id" | "origem") =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       setDados((d) => ({ ...d, [campo]: e.target.value }));
       setErro(null);
@@ -141,6 +145,27 @@ export function DialogoNegocio({
                     value={dados.contato}
                     onChange={texto("contato")}
                     placeholder="Nome da pessoa"
+                  />
+                </Campo>
+              </div>
+
+              {/* Telefone e e-mail viram os atalhos de ligar, chamar no
+                  WhatsApp e escrever, lá no card do lead. */}
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <Campo rotulo="Telefone" dica="Com DDD — vira o atalho do WhatsApp">
+                  <Entrada
+                    type="tel"
+                    value={dados.telefone}
+                    onChange={texto("telefone")}
+                    placeholder="+55 51 99999-0000"
+                  />
+                </Campo>
+                <Campo rotulo="E-mail">
+                  <Entrada
+                    type="email"
+                    value={dados.email}
+                    onChange={texto("email")}
+                    placeholder="nome@empresa.com.br"
                   />
                 </Campo>
               </div>
