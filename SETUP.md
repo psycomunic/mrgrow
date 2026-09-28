@@ -23,18 +23,82 @@ Ou cole o conteúdo dos arquivos de `supabase/migrations/` no **SQL Editor**, na
 npx supabase gen types typescript --linked > src/types/supabase.ts
 ```
 
-## 2. Primeiro usuário
+## 2. Primeiro usuário e níveis de acesso
 
-1. Rode `npm run dev` e acesse `/cadastro`.
-2. Confirme o e-mail.
-3. No SQL Editor do Supabase, vincule seu usuário à organização como proprietário:
+O primeiro acesso é o único que precisa de SQL: sem ninguém na
+organização, não há quem abra o painel para criar os outros.
 
 ```sql
-insert into public.membros_organizacao (organizacao_id, usuario_id, papel)
-select o.id, u.id, 'proprietario'
-from public.organizacoes o, auth.users u
-where o.slug = 'mr-grow' and u.email = 'seu@email.com';
+-- Cria o usuário no Auth já com senha e o vincula como proprietário.
+-- Versão pronta, com verificações: 2-CRIAR-ADMIN.sql
+do $$
+declare uid uuid; org uuid;
+begin
+  select id into org from public.organizacoes where slug = 'mr-grow';
+  uid := gen_random_uuid();
+
+  insert into auth.users (
+    instance_id, id, aud, role, email, encrypted_password,
+    email_confirmed_at, created_at, updated_at,
+    raw_app_meta_data, raw_user_meta_data,
+    confirmation_token, recovery_token, email_change_token_new, email_change
+  ) values (
+    '00000000-0000-0000-0000-000000000000', uid, 'authenticated', 'authenticated',
+    'voce@empresa.com.br', extensions.crypt('sua-senha', extensions.gen_salt('bf')),
+    now(), now(), now(),
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    jsonb_build_object('nome_completo', 'Seu Nome'),
+    '', '', '', ''
+  );
+
+  -- Sem esta linha o login não acha o usuário: o GoTrue procura em
+  -- `identities`, não em `users`.
+  insert into auth.identities (
+    id, user_id, provider_id, identity_data, provider,
+    last_sign_in_at, created_at, updated_at
+  ) values (
+    gen_random_uuid(), uid, uid::text,
+    jsonb_build_object('sub', uid::text, 'email', 'voce@empresa.com.br'),
+    'email', now(), now(), now()
+  );
+
+  insert into public.membros_organizacao (organizacao_id, usuario_id, papel, ativo)
+  values (org, uid, 'proprietario', true);
+end $$;
 ```
+
+As quatro colunas de token vão em branco, e não nulas: nulo faz a rotina
+de login estourar ao comparar o token recebido com o guardado.
+
+**Do segundo em diante, nada de SQL.** Em `/painel/equipe` →
+**Adicionar pessoa**, com dois caminhos: criar o acesso na hora, com a
+senha que você define, ou gerar um link de convite válido por 7 dias
+para a pessoa se cadastrar sozinha.
+
+### Os papéis
+
+O vínculo é o que dá acesso — só existir em `auth.users` não basta, e
+quem entra sem vínculo é devolvido para `/entrar`.
+
+| Papel | Abre | Não abre |
+|---|---|---|
+| `proprietario` | tudo | — |
+| `administrador` | tudo, menos apagar configurações | — |
+| `gestor` | operação e comercial por inteiro | criar/excluir equipe |
+| `comercial` | funil, propostas, clientes, tarefas | financeiro, equipe, integrações |
+| `marketing` | projetos, tarefas, integrações, automações, relatórios | financeiro, propostas, equipe |
+| `financeiro` | financeiro por inteiro, leitura do resto | funil, projetos, equipe |
+| `cliente` | só as próprias contas, em leitura | todo o resto |
+
+A matriz vive em `src/lib/papeis.ts` e controla a interface. A barreira
+real é a RLS no Postgres: `e_equipe` aceita qualquer papel que não seja
+`cliente`, e `e_gestor` lista `proprietario`, `administrador` e `gestor`
+pelo nome — por isso `comercial` e `marketing` entram como equipe sem
+ganhar poder administrativo.
+
+A organização exige pelo menos um `proprietario` ativo. Rebaixar ou
+desativar o último é recusado: sem ele, ninguém mexeria em equipe,
+cobrança e integrações, e a correção voltaria a passar pelo SQL.
 
 ## 3. Chave de criptografia
 
