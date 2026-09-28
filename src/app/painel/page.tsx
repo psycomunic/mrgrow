@@ -163,12 +163,19 @@ export default async function PaginaVisao({
   const emDia = cobrancas.length - vencidas.length;
   const adimplencia: FatiaRosca[] = cobrancas.length
     ? [
-        { rotulo: "Em dia", valor: emDia, cor: "var(--color-sucesso)", formatado: numero(emDia) },
+        {
+          rotulo: "Em dia",
+          valor: emDia,
+          cor: "var(--color-sucesso)",
+          formatado: numero(emDia),
+          href: `/painel/recebimentos?mes=${competencia()}&situacao=previsto`,
+        },
         {
           rotulo: "Atrasado",
           valor: vencidas.length,
           cor: "var(--color-perigo)",
           formatado: numero(vencidas.length),
+          href: `/painel/recebimentos?mes=${competencia()}&situacao=atrasado`,
         },
       ].filter((f) => f.valor > 0)
     : [];
@@ -186,6 +193,7 @@ export default async function PaginaVisao({
         valor: soma,
         cor: TONS_ROSCA[i % TONS_ROSCA.length],
         formatado: brl(soma),
+        href: `/painel/clientes?status=${st}`,
       };
     })
     .filter((f) => f.valor > 0);
@@ -200,11 +208,16 @@ export default async function PaginaVisao({
      como impureza — com razão, servidor e cliente cairiam em milissegundos
      diferentes. */
   const agora = new Date(`${hoje()}T00:00:00`).getTime();
-  const mesesMedios = comInicio.length
-    ? comInicio.reduce((acc, cl) => {
-        const ini = new Date(`${cl.inicio_contrato}T00:00:00`).getTime();
-        return acc + Math.max(0, (agora - ini) / (1000 * 60 * 60 * 24 * 30.44));
-      }, 0) / comInicio.length
+  const tempoDeCasa = comInicio
+    .map((cl) => ({
+      nome: cl.nome,
+      slug: cl.slug,
+      meses: Math.max(0, (agora - new Date(`${cl.inicio_contrato}T00:00:00`).getTime()) / (1000 * 60 * 60 * 24 * 30.44)),
+    }))
+    .sort((a, b) => b.meses - a.meses);
+
+  const mesesMedios = tempoDeCasa.length
+    ? tempoDeCasa.reduce((acc, c) => acc + c.meses, 0) / tempoDeCasa.length
     : 0;
 
   /* ── Funil ────────────────────────────────────────────────────── */
@@ -488,6 +501,7 @@ export default async function PaginaVisao({
                     proporcao={cobranca ? divisao(aReceber, cobranca) : undefined}
                     cor="var(--color-sucesso)"
                     icone={<Wallet />}
+                    href={`/painel/recebimentos?mes=${competencia()}&situacao=previsto`}
                   />
                   <Faixa
                     rotulo="Em atraso"
@@ -500,6 +514,7 @@ export default async function PaginaVisao({
                     proporcao={cobranca ? divisao(emAtraso, cobranca) : undefined}
                     cor={emAtraso ? "var(--color-perigo)" : "var(--color-sucesso)"}
                     icone={<CalendarClock />}
+                    href={`/painel/recebimentos?mes=${competencia()}&situacao=atrasado`}
                   />
                 </>
               ) : (
@@ -579,18 +594,45 @@ export default async function PaginaVisao({
             </div>
           </div>
 
-          <div className="cartao flex flex-col justify-center rounded-lg p-5">
-            <h2 className="font-display text-sm font-bold text-tinta">Tempo médio de casa</h2>
+          <div className="cartao flex flex-col rounded-lg p-5">
+            <h2 className="font-display text-sm font-bold text-tinta">Tempo de casa</h2>
             <p className="mt-0.5 text-xs text-cinza">
-              Quanto tempo o cliente fica, não quanto o contrato promete
+              Quanto o cliente fica, não quanto o contrato promete
             </p>
-            <p className="mt-6 font-display text-5xl font-extrabold tabular-nums text-tinta">
-              {numero(mesesMedios)}
-              <span className="ml-2 text-base font-semibold text-cinza">meses</span>
-            </p>
-            <p className="mt-2 text-xs text-cinza">
-              média de {numero(comInicio.length)}{" "}
-              {comInicio.length === 1 ? "conta com início registrado" : "contas com início registrado"}
+
+            <div className="mt-5 flex items-baseline gap-2">
+              <span className="font-display text-4xl font-extrabold leading-none tabular-nums text-tinta">
+                {numero(mesesMedios)}
+              </span>
+              <span className="text-sm font-semibold text-cinza">meses em média</span>
+            </div>
+
+            {/* A média sozinha esconde a carteira: um cliente de dois anos
+                e três de dois meses dão a mesma média que quatro de um ano.
+                As três contas mais antigas mostram se existe base fiel. */}
+            {tempoDeCasa.length > 0 && (
+              <ol className="mt-5 space-y-0.5 border-t border-borda pt-4">
+                {tempoDeCasa.slice(0, 3).map((c) => (
+                  <li key={c.slug}>
+                    <Link
+                      href={`/painel/clientes/${c.slug}`}
+                      className="foco-anel group -mx-2 flex items-center justify-between gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-nevoa"
+                    >
+                      <span className="min-w-0 truncate text-[13px] text-grafite group-hover:text-tinta">
+                        {c.nome}
+                      </span>
+                      <span className="shrink-0 text-[13px] font-semibold tabular-nums text-cinza">
+                        {numero(c.meses)} m
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+            )}
+
+            <p className="mt-auto pt-4 text-[11px] text-cinza-claro">
+              média de {numero(tempoDeCasa.length)}{" "}
+              {tempoDeCasa.length === 1 ? "conta com início registrado" : "contas com início registrado"}
             </p>
           </div>
         </section>

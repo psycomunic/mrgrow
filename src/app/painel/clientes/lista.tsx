@@ -15,7 +15,12 @@ const FILTROS = [
   { v: "todos", r: "Todos" },
   { v: "ativo", r: "Ativos" },
   { v: "onboarding", r: "Onboarding" },
+  { v: "prospecto", r: "Prospectos" },
   { v: "pausado", r: "Pausados" },
+  /* Encerrado entrou junto com o histórico importado: são quase cinquenta
+     contas que já foram da casa, e sem filtro próprio elas só apareciam
+     misturadas em "Todos", empurrando a carteira viva para o fim da lista. */
+  { v: "encerrado", r: "Encerrados" },
 ];
 
 const ORDENS: { v: Ordem; r: string }[] = [
@@ -31,12 +36,18 @@ const ORDENS: { v: Ordem; r: string }[] = [
 export function ListaClientes({
   clientes,
   aberturaInicial = null,
+  filtroInicial = null,
 }: {
   clientes: ClienteCarteira[];
   /** Slug vindo de `?cliente=`, para o link da ficha ser compartilhável. */
   aberturaInicial?: string | null;
+  /** Estágio vindo de `?status=`, para o link da visão geral já chegar filtrado. */
+  filtroInicial?: string | null;
 }) {
-  const [filtro, setFiltro] = useState("todos");
+  /* O recorte pode vir do endereço: a rosca da visão geral leva para cá
+     já filtrada por estágio, e chegar numa lista inteira obrigaria a
+     procurar de novo o que se acabou de clicar. */
+  const [filtro, setFiltro] = useState(filtroInicial ?? "todos");
   const [busca, setBusca] = useState("");
   const [ordem, setOrdem] = useState<Ordem>("saude");
   const [aberto, setAberto] = useState<string | null>(

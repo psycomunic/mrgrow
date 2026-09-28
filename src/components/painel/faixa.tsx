@@ -1,4 +1,5 @@
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
+import { ArrowDownRight, ArrowUpRight, ChevronRight } from "lucide-react";
 import { cn, numero } from "@/lib/utils";
 
 /**
@@ -21,6 +22,7 @@ export function Faixa({
   invertido = false,
   cor = "var(--color-acento)",
   icone,
+  href,
 }: {
   rotulo: string;
   valor: string;
@@ -31,12 +33,22 @@ export function Faixa({
   invertido?: boolean;
   cor?: string;
   icone?: React.ReactNode;
+  /** Destino ao clicar. Com ele a linha vira link e ganha a seta. */
+  href?: string;
 }) {
   const boa = variacao === undefined ? null : invertido ? variacao < 0 : variacao > 0;
   const largura = proporcao === undefined ? 0 : Math.min(Math.max(proporcao, 0), 1) * 100;
 
+  /* Com destino, a linha inteira vira alvo de clique — não só o número.
+     Uma seta discreta à direita avisa que dá para clicar; sem ela, ninguém
+     descobre que o valor leva a algum lugar. */
+  const Envolucro = href ? Link : "div";
+  const props = href
+    ? { href, className: "foco-anel group -mx-2 block rounded-md px-2 py-3.5 transition-colors hover:bg-nevoa first:pt-2 last:pb-2" }
+    : { className: "py-3.5 first:pt-0 last:pb-0" };
+
   return (
-    <div className="py-3.5 first:pt-0 last:pb-0">
+    <Envolucro {...(props as { href: string; className: string })}>
       <div className="flex items-center gap-3">
         {icone && (
           <span
@@ -48,7 +60,9 @@ export function Faixa({
         )}
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[13px] font-medium text-grafite">{rotulo}</p>
+          <p className="truncate text-[13px] font-medium text-grafite group-hover:text-tinta">
+            {rotulo}
+          </p>
           {detalhe && <p className="mt-0.5 truncate text-[11px] text-cinza-claro">{detalhe}</p>}
         </div>
 
@@ -72,6 +86,10 @@ export function Faixa({
             </p>
           )}
         </div>
+
+        {href && (
+          <ChevronRight className="size-4 shrink-0 text-cinza-claro transition-colors group-hover:text-acento" />
+        )}
       </div>
 
       {proporcao !== undefined && (
@@ -79,6 +97,6 @@ export function Faixa({
           <div className="h-full rounded-full" style={{ width: `${largura}%`, background: cor }} />
         </div>
       )}
-    </div>
+    </Envolucro>
   );
 }

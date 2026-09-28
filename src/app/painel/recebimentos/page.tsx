@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Topo } from "../_componentes/topo";
-import { Grade, SeletorMes } from "./grade";
+import { Grade, Recorte, SeletorMes } from "./grade";
 import { Kpi } from "@/components/painel/kpi";
 import { GraficoArea, LegendaGrafico, type SerieGrafico } from "@/components/painel/grafico-area";
 import { AvisoDemo } from "@/components/painel/aviso-demo";
@@ -30,22 +30,36 @@ function rotuloMes(comp: string) {
 export default async function PaginaRecebimentos({
   searchParams,
 }: {
-  searchParams: Promise<{ mes?: string }>;
+  searchParams: Promise<{ mes?: string; situacao?: string }>;
 }) {
   const sessao = await exigirEquipe();
   const p = await searchParams;
   const mes = p.mes && /^\d{4}-\d{2}$/.test(p.mes) ? p.mes : competencia();
 
-  const { linhas, historico, demo } = await carregarRecebimentos(mes);
+  const { linhas: todas, historico, demo } = await carregarRecebimentos(mes);
+
+  /* O recorte vem da visão geral: clicar em "em atraso" lá tem de abrir a
+     lista já filtrada aqui, senão a pessoa chega numa tela cheia e precisa
+     procurar de novo o que acabou de clicar. */
+  const recorte = ["pago", "previsto", "atrasado"].includes(p.situacao ?? "")
+    ? (p.situacao as "pago" | "previsto" | "atrasado")
+    : null;
+  const linhas = recorte ? todas.filter((l) => l.situacao === recorte) : todas;
   const podeEditar = pode(sessao.papel, "financeiro", "editar");
 
-  const previsto = linhas.reduce((s, l) => s + l.valor, 0);
-  const recebido = linhas.filter((l) => l.situacao === "pago").reduce((s, l) => s + l.valor, 0);
-  const atrasadas = linhas.filter((l) => l.situacao === "atrasado");
+  /* Os quatro números somam o mês inteiro mesmo com recorte ativo: eles são
+     o contexto de onde a lista filtrada saiu. Se encolhessem junto, "em
+     atraso" passaria a dizer 100% do previsto, que é verdade só dentro do
+     próprio filtro e mentira sobre o mês. */
+  const previsto = todas.reduce((s, l) => s + l.valor, 0);
+  const recebido = todas.filter((l) => l.situacao === "pago").reduce((s, l) => s + l.valor, 0);
+  const atrasadas = todas.filter((l) => l.situacao === "atrasado");
   const emAtraso = atrasadas.reduce((s, l) => s + l.valor, 0);
 
   /* Últimos doze meses: o suficiente para ver sazonalidade sem espremer as
      barras a ponto de não dar para comparar duas. */
+  const emAberto = todas.filter((l) => l.situacao !== "pago").length;
+
   const serie = historico.slice(-12).map((m) => ({
     data: rotuloMes(m.competencia),
     previsto: m.previsto,
@@ -68,7 +82,7 @@ export default async function PaginaRecebimentos({
             rotulo="Previsto no mês"
             dica="Soma das mensalidades que vencem neste mês, geradas a partir do contrato de cada cliente."
             valor={brl(previsto)}
-            detalhe={`${numero(linhas.length)} ${linhas.length === 1 ? "cobrança" : "cobranças"}`}
+            detalhe={`${numero(todas.length)} ${todas.length === 1 ? "cobrança" : "cobranças"}`}
           />
           <Kpi
             rotulo="Recebido"
@@ -81,7 +95,7 @@ export default async function PaginaRecebimentos({
             rotulo="A receber"
             dica="O que falta entrar até o fim do mês, incluindo o que já venceu."
             valor={brl(previsto - recebido)}
-            detalhe={`${numero(linhas.filter((l) => l.situacao !== "pago").length)} em aberto`}
+            detalhe={`${numero(emAberto)} em aberto`}
           />
           <Kpi
             rotulo="Em atraso"
@@ -95,6 +109,13 @@ export default async function PaginaRecebimentos({
             }
           />
         </section>
+
+        <Recorte atual={recorte} mes={mes} contagens={{
+          todas: todas.length,
+          pago: todas.length - emAberto,
+          previsto: todas.filter((l) => l.situacao === "previsto").length,
+          atrasado: atrasadas.length,
+        }} />
 
         <Grade linhas={linhas} competencia={mes} podeEditar={podeEditar} />
 

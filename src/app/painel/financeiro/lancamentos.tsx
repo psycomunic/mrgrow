@@ -13,7 +13,7 @@ import { Etiqueta } from "@/components/ui/etiqueta";
 import { Kpi } from "@/components/painel/kpi";
 import { GraficoArea } from "@/components/painel/grafico-area";
 import { Tabela, Cabecalhos, Linha, Celula } from "@/components/painel/tabela";
-import { brl, dataCompleta, numero } from "@/lib/utils";
+import { brl, cn, dataCompleta, dataCurta, numero } from "@/lib/utils";
 import { STATUS_LANCAMENTO } from "@/lib/rotulos";
 import { hoje } from "@/lib/tempo";
 import {
@@ -115,6 +115,10 @@ export function Lancamentos({
   const [periodo, setPeriodo] = useState("mes");
   const [criando, setCriando] = useState(false);
   const [editando, setEditando] = useState<Lancamento | null>(null);
+  /* Baixa é irreversível pela tela: uma vez pago, só editando o lançamento
+     se volta atrás. E a linha inteira do mês vizinho fica a um pixel de
+     distância, então o clique errado acontece. */
+  const [baixando, setBaixando] = useState<Lancamento | null>(null);
 
   // Sincroniza com o que o servidor devolve depois de gravar.
   if (iniciais !== doServidor) {
@@ -195,6 +199,7 @@ export function Lancamentos({
   }, [noPeriodo]);
 
   async function baixar(l: Lancamento) {
+    setBaixando(null);
     const anterior = lancamentos;
     setLancamentos((x) =>
       x.map((i) => (i.id === l.id ? { ...i, status: "pago", pago_em: hoje() } : i)),
@@ -223,16 +228,16 @@ export function Lancamentos({
     <>
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi
-          rotulo={`Receitas · ${rotuloPeriodo}
-          dica="Tudo que entrou ou está previsto entrar no período, já descontados os cancelados."`}
+          rotulo={`Receitas · ${rotuloPeriodo}`}
+          dica="Tudo que entrou ou está previsto entrar no período, já descontados os cancelados."
           valor={brl(kpis.receita)}
           tom="menta"
           icone={<TrendingUp />}
           serie={fluxo.map((m) => m.receitas)}
         />
         <Kpi
-          rotulo={`Despesas · ${rotuloPeriodo}
-          dica="Tudo que a agência pagou ou vai pagar no período: equipe, ferramentas, escritório e impostos."`}
+          rotulo={`Despesas · ${rotuloPeriodo}`}
+          dica="Tudo que a agência pagou ou vai pagar no período: equipe, ferramentas, escritório e impostos."
           valor={brl(kpis.despesa)}
           tom="rosa"
           icone={<TrendingDown />}
@@ -393,14 +398,21 @@ export function Lancamentos({
                   </Celula>
                   <Celula>
                     <div className="flex items-center justify-end gap-1">
+                      {/* Verde e com contorno desde o repouso, não só no
+                          hover: era o cinza igual ao dos outros dois, e a
+                          ação mais usada da tela ficava indistinguível de
+                          "editar" e "excluir" — e vizinha da lixeira. */}
                       {l.status !== "pago" && (
-                        <Acao
-                          rotulo="Dar baixa"
-                          onClick={() => baixar(l)}
-                          classe="hover:bg-chip-menta hover:text-sucesso"
+                        <button
+                          type="button"
+                          title="Dar baixa"
+                          aria-label={`Dar baixa em ${l.descricao}`}
+                          onClick={() => setBaixando(l)}
+                          className="foco-anel flex items-center gap-1.5 rounded-full border border-sucesso/40 bg-sucesso/12 px-2.5 py-1.5 text-[12px] font-semibold text-sucesso transition-colors hover:bg-sucesso hover:text-papel"
                         >
-                          <Check className="size-4" />
-                        </Acao>
+                          <Check className="size-4" strokeWidth={2.5} />
+                          <span className="hidden sm:inline">Baixa</span>
+                        </button>
                       )}
                       <Acao rotulo="Editar" onClick={() => setEditando(l)}>
                         <Pencil className="size-4" />
@@ -420,6 +432,14 @@ export function Lancamentos({
           </Tabela>
         )}
       </section>
+
+      {baixando && (
+        <ConfirmarBaixa
+          lancamento={baixando}
+          aoFechar={() => setBaixando(null)}
+          aoConfirmar={() => baixar(baixando)}
+        />
+      )}
 
       {criando && (
         <Dialogo
@@ -746,6 +766,102 @@ function Dialogo({
             </Botao>
           </div>
         </form>
+      </div>
+    </Sobreposicao>
+  );
+}
+
+/**
+ * Confirmação da baixa.
+ *
+ * A tela não desfaz uma baixa: uma vez pago, só editando o lançamento se
+ * volta atrás. E o botão fica a poucos pixels da lixeira, numa lista onde
+ * as linhas de meses diferentes se parecem. Mostrar quem, quanto e quando
+ * antes de gravar custa um clique e evita o telefonema para o cliente
+ * errado.
+ */
+function ConfirmarBaixa({
+  lancamento,
+  aoFechar,
+  aoConfirmar,
+}: {
+  lancamento: Lancamento;
+  aoFechar: () => void;
+  aoConfirmar: () => void;
+}) {
+  useEffect(() => {
+    const aoTeclar = (e: KeyboardEvent) => {
+      if (e.key === "Escape") aoFechar();
+    };
+    document.addEventListener("keydown", aoTeclar);
+    return () => document.removeEventListener("keydown", aoTeclar);
+  }, [aoFechar]);
+
+  const receita = lancamento.tipo === "receita";
+
+  return (
+    <Sobreposicao
+      className="fixed inset-0 z-[60] grid place-items-center overflow-y-auto bg-papel/85 p-4 backdrop-blur-sm"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) aoFechar();
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titulo-baixa"
+        className="cartao my-auto w-full max-w-md overflow-hidden rounded-xl"
+      >
+        <div className="flex items-start gap-3 border-b border-borda px-6 py-4">
+          <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-full bg-sucesso/15 text-sucesso">
+            <Check className="size-4" strokeWidth={2.5} />
+          </span>
+          <div>
+            <h2 id="titulo-baixa" className="font-display text-lg font-bold text-tinta">
+              Confirmar {receita ? "recebimento" : "pagamento"}?
+            </h2>
+            <p className="mt-0.5 text-xs text-cinza">
+              O lançamento passa a contar como quitado no caixa.
+            </p>
+          </div>
+        </div>
+
+        <dl className="space-y-3 px-6 py-5 text-sm">
+          <div className="flex items-baseline justify-between gap-4">
+            <dt className="text-cinza">Descrição</dt>
+            <dd className="text-right font-medium text-tinta">{lancamento.descricao}</dd>
+          </div>
+          {lancamento.cliente && (
+            <div className="flex items-baseline justify-between gap-4">
+              <dt className="text-cinza">Cliente</dt>
+              <dd className="text-right font-medium text-tinta">{lancamento.cliente}</dd>
+            </div>
+          )}
+          <div className="flex items-baseline justify-between gap-4">
+            <dt className="text-cinza">Vencimento</dt>
+            <dd className="text-right font-medium text-tinta">{dataCurta(lancamento.vencimento)}</dd>
+          </div>
+          <div className="flex items-baseline justify-between gap-4 border-t border-borda pt-3">
+            <dt className="text-cinza">Valor</dt>
+            <dd
+              className={cn(
+                "text-right font-display text-lg font-bold tabular-nums",
+                receita ? "text-sucesso" : "text-perigo",
+              )}
+            >
+              {receita ? "+" : "−"} {brl(lancamento.valor)}
+            </dd>
+          </div>
+        </dl>
+
+        <div className="flex justify-end gap-2 border-t border-borda px-6 py-4">
+          <Botao variante="contorno" onClick={aoFechar}>
+            Cancelar
+          </Botao>
+          <Botao variante="sucesso" onClick={aoConfirmar}>
+            Confirmar baixa
+          </Botao>
+        </div>
       </div>
     </Sobreposicao>
   );

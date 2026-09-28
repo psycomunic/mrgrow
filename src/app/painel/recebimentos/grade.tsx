@@ -171,3 +171,53 @@ export function SeletorMes({ competencia }: { competencia: string }) {
     />
   );
 }
+
+const RECORTES = [
+  { v: null, r: "Todas", chave: "todas" as const },
+  { v: "atrasado", r: "Atrasadas", chave: "atrasado" as const },
+  { v: "previsto", r: "Em dia", chave: "previsto" as const },
+  { v: "pago", r: "Recebidas", chave: "pago" as const },
+];
+
+/**
+ * Filtro por situação.
+ *
+ * É link e não estado local de propósito: quem chega da visão geral clicando
+ * em "em atraso" precisa cair aqui já filtrado, e o endereço tem de carregar
+ * o recorte para poder ser recarregado ou mandado para outra pessoa.
+ */
+export function Recorte({
+  atual,
+  mes,
+  contagens,
+}: {
+  atual: string | null;
+  mes: string;
+  contagens: { todas: number; pago: number; previsto: number; atrasado: number };
+}) {
+  return (
+    <div className="flex flex-wrap gap-1">
+      {RECORTES.map((r) => {
+        const n = contagens[r.chave];
+        const ativo = atual === r.v;
+        return (
+          <Link
+            key={r.r}
+            href={`/painel/recebimentos?mes=${mes}${r.v ? `&situacao=${r.v}` : ""}`}
+            className={cn(
+              "foco-anel rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+              ativo
+                ? "bg-acento text-white"
+                : "border border-borda bg-nevoa text-grafite hover:border-borda-forte hover:text-tinta",
+            )}
+          >
+            {r.r}
+            <span className={cn("ml-1.5 tabular-nums", ativo ? "text-white/70" : "text-cinza")}>
+              {n}
+            </span>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}

@@ -10,9 +10,9 @@ export const metadata: Metadata = { title: "Clientes" };
 export default async function PaginaClientes({
   searchParams,
 }: {
-  searchParams: Promise<{ cliente?: string }>;
+  searchParams: Promise<{ cliente?: string; status?: string }>;
 }) {
-  const [{ clientes, demo }, { cliente }] = await Promise.all([
+  const [{ clientes, demo }, { cliente, status }] = await Promise.all([
     carregarCarteira(),
     searchParams,
   ]);
@@ -31,7 +31,11 @@ export default async function PaginaClientes({
 
       <div className="space-y-6 p-5 sm:p-8">
         {demo && <AvisoDemo />}
-        <ListaClientes clientes={clientes} aberturaInicial={cliente ?? null} />
+        <ListaClientes
+          clientes={clientes}
+          aberturaInicial={cliente ?? null}
+          filtroInicial={status ?? null}
+        />
       </div>
     </>
   );

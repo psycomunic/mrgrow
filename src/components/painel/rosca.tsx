@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export type FatiaRosca = {
@@ -6,6 +7,8 @@ export type FatiaRosca = {
   cor: string;
   /** Texto já formatado à direita da legenda (moeda, contagem, o que for). */
   formatado?: string;
+  /** Destino ao clicar na linha da legenda. Sem ele, a linha não é link. */
+  href?: string;
 };
 
 /**
@@ -94,21 +97,47 @@ export function Rosca({
         </div>
       </div>
 
-      <ul className="min-w-0 flex-1 space-y-2.5 self-stretch sm:self-center">
-        {arcos.map((a) => (
-          <li key={a.rotulo} className="flex items-center gap-2.5 text-[13px]">
-            <span
-              className="size-2.5 shrink-0 rounded-full"
-              style={{ background: a.cor }}
-              aria-hidden
-            />
-            <span className="min-w-0 flex-1 truncate text-grafite">{a.rotulo}</span>
-            <span className="shrink-0 tabular-nums text-cinza">
-              {a.formatado ?? `${Math.round(a.fracao * 100)}%`}
-            </span>
-          </li>
-        ))}
-        {!arcos.length && <li className="text-[13px] text-cinza-claro">{vazio}</li>}
+      <ul className="min-w-0 flex-1 space-y-0.5 self-stretch sm:self-center">
+        {arcos.map((a) => {
+          const conteudo = (
+            <>
+              <span
+                className="size-2.5 shrink-0 rounded-full"
+                style={{ background: a.cor }}
+                aria-hidden
+              />
+              <span className="min-w-0 flex-1 truncate text-grafite group-hover:text-tinta">
+                {a.rotulo}
+              </span>
+              <span className="shrink-0 text-right tabular-nums">
+                <span className="text-cinza">{a.formatado ?? ""}</span>
+                {/* O percentual sempre aparece, mesmo quando há valor
+                    formatado: sozinho, "R$ 33.100,00" não diz se é metade
+                    ou um terço da carteira — e é essa a pergunta que
+                    alguém faz olhando para uma rosca. */}
+                <span className="ml-2 inline-block w-9 text-cinza-claro">
+                  {Math.round(a.fracao * 100)}%
+                </span>
+              </span>
+            </>
+          );
+
+          return (
+            <li key={a.rotulo}>
+              {a.href ? (
+                <Link
+                  href={a.href}
+                  className="foco-anel group -mx-2 flex items-center gap-2.5 rounded-md px-2 py-2 text-[13px] transition-colors hover:bg-nevoa"
+                >
+                  {conteudo}
+                </Link>
+              ) : (
+                <div className="flex items-center gap-2.5 px-0 py-2 text-[13px]">{conteudo}</div>
+              )}
+            </li>
+          );
+        })}
+        {!arcos.length && <li className="py-2 text-[13px] text-cinza-claro">{vazio}</li>}
       </ul>
     </div>
   );
