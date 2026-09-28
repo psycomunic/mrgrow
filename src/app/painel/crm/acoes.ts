@@ -500,3 +500,247 @@ export async function concluirAtividade(id: string): Promise<Resultado> {
     return falha("concluirAtividade", e, "Não foi possível concluir.");
   }
 }
+
+/* ── Etapas do funil ──────────────────────────────────────────────
+   O desenho do funil é do comercial, não do desenvolvedor: cada
+   agência vende num número diferente de passos, e quem fecha negócio
+   precisa poder mudar isso sem abrir um chamado. */
+
+export type DadosEtapa = {
+  nome: string;
+  probabilidade: number;
+  cor: string;
+  tipo: string;
+};
+
+const TIPOS_ETAPA = ["aberta", "ganho", "perdido"];
+
+function validarEtapa(d: DadosEtapa): string | null {
+  if (!d.nome.trim()) return "Dê um nome à etapa.";
+  if (d.nome.trim().length > 60) return "O nome da etapa ficou longo demais.";
+  if (!Number.isInteger(d.probabilidade) || d.probabilidade < 0 || d.probabilidade > 100) {
+    return "A probabilidade vai de 0 a 100.";
+  }
+  if (!TIPOS_ETAPA.includes(d.tipo)) return "Tipo de etapa inválido.";
+  /* Cor entra em `style` no quadro: sem conferir o formato, qualquer
+     string vira valor de CSS. */
+  if (d.cor && !/^#[0-9a-f]{6}$/i.test(d.cor)) return "Cor inválida.";
+  return null;
+}
+
+export async function criarEtapa(funilId: string, d: DadosEtapa): Promise<Resultado> {
+  const erro = validarEtapa(d);
+  if (erro) return { ok: false, demo: false, erro };
+
+  const ctx = await contextoDeAcao("crm", "editar");
+  if (ctx.estado === "demo") return { ok: true, demo: true };
+  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
+  const { sessao, db } = ctx;
+
+  try {
+    if (!(await fkDaOrganizacao(db, "funis", funilId, sessao.organizacaoId))) {
+      return { ok: false, demo: false, erro: "Funil não encontrado." };
+    }
+
+    /* Entra no fim do funil. `ordem` é um inteiro sem unicidade no banco,
+       então basta passar do maior que existe. */
+    const { data: ultima } = await db
+      .from("etapas_funil")
+      .select("ordem")
+      .eq("funil_id", funilId)
+      .eq("organizacao_id", sessao.organizacaoId)
+      .order("ordem", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const { error } = await db.from("etapas_funil").insert({
+      organizacao_id: sessao.organizacaoId,
+      funil_id: funilId,
+      nome: d.nome.trim(),
+      probabilidade: d.probabilidade,
+      cor: d.cor || null,
+      tipo: d.tipo,
+      ordem: ((ultima as { ordem: number } | null)?.ordem ?? -1) + 1,
+    });
+
+    if (error) return falha("criarEtapa", error, "Não foi possível criar a etapa.");
+    revalidatePath("/painel/crm");
+    return { ok: true, demo: false };
+  } catch (e) {
+    return falha("criarEtapa", e, "Não foi possível criar a etapa.");
+  }
+}
+
+export async function atualizarEtapa(id: string, d: DadosEtapa): Promise<Resultado> {
+  const erro = validarEtapa(d);
+  if (erro) return { ok: false, demo: false, erro };
+
+  const ctx = await contextoDeAcao("crm", "editar");
+  if (ctx.estado === "demo") return { ok: true, demo: true };
+  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
+  const { sessao, db } = ctx;
+
+  try {
+    if (!(await pertence(db, "etapas_funil", id, sessao.organizacaoId))) {
+      return { ok: false, demo: false, erro: "Etapa não encontrada." };
+    }
+
+    const { error } = await db
+      .from("etapas_funil")
+      .update({
+        nome: d.nome.trim(),
+        probabilidade: d.probabilidade,
+        cor: d.cor || null,
+        tipo: d.tipo,
+      })
+      .eq("id", id)
+      .eq("organizacao_id", sessao.organizacaoId);
+
+    if (error) return falha("atualizarEtapa", error, "Não foi possível salvar a etapa.");
+    revalidatePath("/painel/crm");
+    return { ok: true, demo: false };
+  } catch (e) {
+    return falha("atualizarEtapa", e, "Não foi possível salvar a etapa.");
+  }
+}
+
+/** Quantos negócios estão parados em cada etapa do funil. */
+export async function contarPorEtapa(): Promise<Record<string, number>> {
+  const ctx = await contextoDeAcao("crm", "ver");
+  if (ctx.estado !== "ok") return {};
+  const { sessao, db } = ctx;
+
+  const { data } = await db
+    .from("negocios")
+    .select("etapa_id")
+    .eq("organizacao_id", sessao.organizacaoId)
+    .eq("status", "aberto");
+
+  const contagem: Record<string, number> = {};
+  for (const n of (data ?? []) as { etapa_id: string }[]) {
+    contagem[n.etapa_id] = (contagem[n.etapa_id] ?? 0) + 1;
+  }
+  return contagem;
+}
+
+/**
+ * Apaga uma etapa, levando os negócios dela para outra.
+ *
+ * A chave estrangeira é `on delete restrict`, então o banco já recusaria
+ * apagar uma etapa cheia — mas o erro cru não diz quantos negócios estão
+ * lá nem para onde poderiam ir. Pedir o destino antes transforma isso numa
+ * escolha: nenhum lead do comercial some porque alguém arrumou o funil.
+ */
+export async function excluirEtapa(id: string, destinoId: string | null): Promise<Resultado> {
+  const ctx = await contextoDeAcao("crm", "editar");
+  if (ctx.estado === "demo") return { ok: true, demo: true };
+  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
+  const { sessao, db } = ctx;
+
+  try {
+    const { data: etapa } = await db
+      .from("etapas_funil")
+      .select("funil_id")
+      .eq("id", id)
+      .eq("organizacao_id", sessao.organizacaoId)
+      .maybeSingle();
+
+    const funilId = (etapa as { funil_id: string } | null)?.funil_id;
+    if (!funilId) return { ok: false, demo: false, erro: "Etapa não encontrada." };
+
+    /* Um funil sem etapa nenhuma não tem como receber negócio: o quadro
+       fica vazio e o botão de novo negócio não sabe onde colocá-lo. */
+    const { count: quantas } = await db
+      .from("etapas_funil")
+      .select("id", { count: "exact", head: true })
+      .eq("funil_id", funilId)
+      .eq("organizacao_id", sessao.organizacaoId);
+
+    if ((quantas ?? 0) <= 1) {
+      return { ok: false, demo: false, erro: "O funil precisa de pelo menos uma etapa." };
+    }
+
+    const { count: negocios } = await db
+      .from("negocios")
+      .select("id", { count: "exact", head: true })
+      .eq("etapa_id", id)
+      .eq("organizacao_id", sessao.organizacaoId);
+
+    if (negocios) {
+      if (!destinoId) {
+        return {
+          ok: false,
+          demo: false,
+          erro: `Esta etapa tem ${negocios} ${negocios === 1 ? "negócio" : "negócios"}. Escolha para onde eles vão.`,
+        };
+      }
+      if (destinoId === id) {
+        return { ok: false, demo: false, erro: "Escolha uma etapa diferente." };
+      }
+      if (!(await fkDaOrganizacao(db, "etapas_funil", destinoId, sessao.organizacaoId))) {
+        return { ok: false, demo: false, erro: "Etapa de destino não encontrada." };
+      }
+
+      const { error: erroMover } = await db
+        .from("negocios")
+        .update({ etapa_id: destinoId })
+        .eq("etapa_id", id)
+        .eq("organizacao_id", sessao.organizacaoId);
+
+      if (erroMover) return falha("excluirEtapa", erroMover, "Não foi possível mover os negócios.");
+    }
+
+    const { error } = await db
+      .from("etapas_funil")
+      .delete()
+      .eq("id", id)
+      .eq("organizacao_id", sessao.organizacaoId);
+
+    if (error) return falha("excluirEtapa", error, "Não foi possível excluir a etapa.");
+    revalidatePath("/painel/crm");
+    return { ok: true, demo: false };
+  } catch (e) {
+    return falha("excluirEtapa", e, "Não foi possível excluir a etapa.");
+  }
+}
+
+/** Grava a nova ordem das colunas; recebe os ids na ordem em que ficam. */
+export async function reordenarEtapas(ids: string[]): Promise<Resultado> {
+  if (!Array.isArray(ids) || !ids.length) {
+    return { ok: false, demo: false, erro: "Nada para reordenar." };
+  }
+
+  const ctx = await contextoDeAcao("crm", "editar");
+  if (ctx.estado === "demo") return { ok: true, demo: true };
+  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
+  const { sessao, db } = ctx;
+
+  try {
+    /* Confere a posse de todas antes de gravar qualquer uma: senão um id
+       de fora no meio da lista deixaria o funil meio reordenado. */
+    const { data: minhas } = await db
+      .from("etapas_funil")
+      .select("id")
+      .eq("organizacao_id", sessao.organizacaoId)
+      .in("id", ids);
+
+    if ((minhas ?? []).length !== ids.length) {
+      return { ok: false, demo: false, erro: "Etapa não encontrada." };
+    }
+
+    await Promise.all(
+      ids.map((id, i) =>
+        db
+          .from("etapas_funil")
+          .update({ ordem: i })
+          .eq("id", id)
+          .eq("organizacao_id", sessao.organizacaoId),
+      ),
+    );
+
+    revalidatePath("/painel/crm");
+    return { ok: true, demo: false };
+  } catch (e) {
+    return falha("reordenarEtapas", e, "Não foi possível reordenar.");
+  }
+}
