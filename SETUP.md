@@ -91,7 +91,55 @@ GET /api/cron/sincronizar
 Authorization: Bearer SEU_CRON_SECRET
 ```
 
-## 7. Deploy na Vercel
+## 7. Deploy na Hostinger (hospedagem Node)
+
+O servidor da Hostinger tem glibc antiga, e isso impõe quatro coisas.
+As três primeiras já estão no repositório; a quarta é do envio.
+
+1. **`output: "standalone"`** no `next.config.mjs`. É o formato que a
+   Hostinger executa, a partir de `.next/standalone/server.js`.
+
+2. **Config em `.mjs`, não em `.ts`.** O SWC nativo não carrega lá
+   (`GLIBC_2.29 not found`) e o build cai no SWC em WASM, que não
+   transpila config em TypeScript. O build morre antes de começar, com
+   `ERR_MODULE_NOT_FOUND` apontando para o próprio `next.config`.
+
+3. **Build por webpack.** O Turbopack exige binários nativos, que é
+   justamente o que falta. Por isso existe o script `build:webpack`. O
+   `build` normal segue em Turbopack para uso local e na Vercel, que são
+   mais rápidos.
+
+4. **Node 22.** Os pacotes do Supabase declaram `node: >=22.0.0`. Em
+   Node 20 o build passa, com aviso `EBADENGINE`, e o painel quebra em
+   execução.
+
+### Enviando
+
+O pacote sai do git, que já exclui o que está no `.gitignore`. A pasta
+`imagenssite/` é excluída à mão: são 120 MB de originais que o site não
+usa, ele serve de `public/`.
+
+```
+git archive --format=zip -o mrgrow.zip HEAD -- . ':(exclude)imagenssite'
+```
+
+Depois, pela API: `Deploy JS application` para subir o arquivo e, em
+seguida, `Start Node.js build` com `node_version: 22` e
+`build_script: build:webpack`.
+
+São dois passos de propósito. O deploy detecta as configurações a partir
+do arquivo e ignora as que estão salvas, então ele sempre dispara um
+build em Node 20 com Turbopack, que falha. O segundo comando substitui
+esse build. Cadastrar as configurações antes não evita isso.
+
+### Variáveis
+
+`NEXT_PUBLIC_SITE_URL` precisa apontar para o domínio, senão os links
+das propostas saem para o endereço errado. Como o Next assa as
+`NEXT_PUBLIC_*` no build, mudá-las exige um build novo: reiniciar o
+processo não basta.
+
+## 8. Deploy na Vercel
 
 ```bash
 npx vercel
@@ -99,7 +147,7 @@ npx vercel
 
 Cadastre todas as variáveis do `.env.example` em **Settings → Environment Variables** e atualize `NEXT_PUBLIC_SITE_URL` e as URIs de redirecionamento OAuth para o domínio final.
 
-## 8. Integrações opcionais
+## 9. Integrações opcionais
 
 | Serviço | Variável | Para quê |
 |---|---|---|
