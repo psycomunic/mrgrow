@@ -9,7 +9,7 @@ import {
   type Banco,
   type Resultado,
 } from "@/lib/acoes";
-import { STATUS_TAREFA, PRIORIDADE } from "@/lib/rotulos";
+import { STATUS_TAREFA, PRIORIDADE, RECORRENCIAS } from "@/lib/rotulos";
 
 export type { Resultado };
 
@@ -31,7 +31,6 @@ export type DadosTarefa = {
 
 const STATUS = STATUS_TAREFA.lista.map((s) => s.valor);
 const PRIORIDADES = PRIORIDADE.lista.map((p) => p.valor);
-export const RECORRENCIAS = ["diaria", "semanal", "quinzenal", "mensal"] as const;
 
 /** Teto de horas por tarefa. Acima disso é projeto, não tarefa. */
 const MAX_HORAS = 999;

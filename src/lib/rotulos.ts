@@ -140,3 +140,32 @@ export const TIPO_ATIVIDADE = tabela({
   email: { rotulo: "E-mail", tom: "neutro" },
   whatsapp: { rotulo: "WhatsApp", tom: "sucesso" },
 });
+
+/* ── Tarefas: recorrência ────────────────────────────────────────
+
+   Estas listas moram aqui, e não junto das Server Actions que as usam:
+   um arquivo `"use server"` só pode exportar função assíncrona, e
+   exportar uma constante dele derruba o módulo inteiro em produção —
+   com a tela caindo em "A server error occurred". O `tsc` e o ESLint
+   não pegam isso; só o build de produção. */
+
+export const RECORRENCIAS = ["diaria", "semanal", "quinzenal", "mensal"] as const;
+
+export const ROTULO_RECORRENCIA: Record<string, string> = {
+  diaria: "Todo dia",
+  semanal: "Toda semana",
+  quinzenal: "A cada 15 dias",
+  mensal: "Todo mês",
+};
+
+/* ── Financeiro: forma de pagamento ──────────────────────────── */
+
+export const FORMAS_PAGAMENTO = ["pix", "boleto", "cartao", "transferencia", "dinheiro"] as const;
+
+export const ROTULO_FORMA: Record<string, string> = {
+  pix: "PIX",
+  boleto: "Boleto",
+  cartao: "Cartão",
+  transferencia: "Transferência",
+  dinheiro: "Dinheiro",
+};

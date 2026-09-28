@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { contextoDeAcao, falha, fkDaOrganizacao, type Resultado } from "@/lib/acoes";
 import { hoje } from "@/lib/tempo";
+import { FORMAS_PAGAMENTO } from "@/lib/rotulos";
 
 export type { Resultado };
 
@@ -23,15 +24,6 @@ export type DadosLancamento = {
   observacoes: string;
 };
 
-export const FORMAS = ["pix", "boleto", "cartao", "transferencia", "dinheiro"] as const;
-
-export const ROTULO_FORMA: Record<string, string> = {
-  pix: "PIX",
-  boleto: "Boleto",
-  cartao: "Cartão",
-  transferencia: "Transferência",
-  dinheiro: "Dinheiro",
-};
 
 const TIPOS = ["receita", "despesa"];
 const STATUS = ["pendente", "previsto", "pago", "atrasado", "cancelado"];
@@ -51,7 +43,7 @@ function validar(d: DadosLancamento): string | null {
   if (!Number.isFinite(d.valor_pago) || d.valor_pago < 0) return "Valor pago inválido.";
   if (d.valor_pago > d.valor) return "O valor pago não pode passar do valor do lançamento.";
 
-  if (d.forma_pagamento && !FORMAS.includes(d.forma_pagamento as (typeof FORMAS)[number])) {
+  if (d.forma_pagamento && !FORMAS_PAGAMENTO.includes(d.forma_pagamento as (typeof FORMAS_PAGAMENTO)[number])) {
     return "Forma de pagamento inválida.";
   }
 

@@ -17,14 +17,13 @@ import { brl, dataCompleta, numero } from "@/lib/utils";
 import { STATUS_LANCAMENTO } from "@/lib/rotulos";
 import { hoje } from "@/lib/tempo";
 import {
-  FORMAS,
-  ROTULO_FORMA,
   criarLancamento,
   atualizarLancamento,
   excluirLancamento,
   marcarPago,
   type DadosLancamento,
 } from "./acoes";
+import { FORMAS_PAGAMENTO, ROTULO_FORMA } from "@/lib/rotulos";
 import type { Lancamento } from "@/lib/financeiro";
 
 const BARRA: Record<string, string> = {
@@ -638,7 +637,7 @@ function Dialogo({
                 onChange={(e) => setD((x) => ({ ...x, forma_pagamento: e.target.value }))}
               >
                 <option value="">Não informada</option>
-                {FORMAS.map((f) => (
+                {FORMAS_PAGAMENTO.map((f) => (
                   <option key={f} value={f}>
                     {ROTULO_FORMA[f]}
                   </option>

@@ -9,15 +9,10 @@ import { AreaTexto, Campo, Entrada, Selecao } from "@/components/ui/campo";
 import { PRIORIDADE, STATUS_TAREFA } from "@/lib/rotulos";
 import { cn } from "@/lib/utils";
 import { useTarefas } from "./contexto";
-import { RECORRENCIAS, type DadosTarefa } from "./acoes";
+import { type DadosTarefa } from "./acoes";
+import { RECORRENCIAS, ROTULO_RECORRENCIA } from "@/lib/rotulos";
 import type { Tarefa } from "@/lib/tarefas";
 
-const ROTULO_RECORRENCIA: Record<string, string> = {
-  diaria: "Todo dia",
-  semanal: "Toda semana",
-  quinzenal: "A cada 15 dias",
-  mensal: "Todo mês",
-};
 
 function vazio(status: string, responsavelPadrao: string | null): DadosTarefa {
   return {
