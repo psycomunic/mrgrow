@@ -7,8 +7,15 @@ import { carregarCarteira } from "@/lib/clientes";
 
 export const metadata: Metadata = { title: "Clientes" };
 
-export default async function PaginaClientes() {
-  const { clientes, demo } = await carregarCarteira();
+export default async function PaginaClientes({
+  searchParams,
+}: {
+  searchParams: Promise<{ cliente?: string }>;
+}) {
+  const [{ clientes, demo }, { cliente }] = await Promise.all([
+    carregarCarteira(),
+    searchParams,
+  ]);
 
   return (
     <>
@@ -24,7 +31,7 @@ export default async function PaginaClientes() {
 
       <div className="space-y-6 p-5 sm:p-8">
         {demo && <AvisoDemo />}
-        <ListaClientes clientes={clientes} />
+        <ListaClientes clientes={clientes} aberturaInicial={cliente ?? null} />
       </div>
     </>
   );

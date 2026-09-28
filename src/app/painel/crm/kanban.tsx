@@ -46,11 +46,14 @@ const VAZIO: Filtros = {
  * Toda mudança passa pelo contexto, que aplica na tela na hora e chama a
  * Server Action; o trigger `ao_mover_negocio` grava o histórico no banco.
  */
-export function Kanban() {
+export function Kanban({ aberturaInicial = null }: { aberturaInicial?: string | null }) {
   const { etapas, negocios, mover } = useCrm();
   const [arrastando, setArrastando] = useState<string | null>(null);
   const [sobre, setSobre] = useState<string | null>(null);
-  const [aberto, setAberto] = useState<string | null>(null);
+  /* `?negocio=<id>` abre o card direto: é o que torna o link de um negócio
+     compartilhável por WhatsApp ou e-mail, sem mandar a pessoa caçar o
+     cartão no quadro. Depois disso o estado é só do cliente. */
+  const [aberto, setAberto] = useState<string | null>(aberturaInicial);
   const [criandoEm, setCriandoEm] = useState<string | null>(null);
   const [filtros, setFiltros] = useState<Filtros>(VAZIO);
 

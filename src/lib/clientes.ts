@@ -22,6 +22,11 @@ export type ClienteCarteira = {
   fim_contrato: string | null;
   dia_vencimento: number;
   responsavel: string | null;
+  /* Campos que a tabela já tinha e nenhuma tela lia. */
+  documento: string | null;
+  percentual_sobre_investimento: number;
+  observacoes: string | null;
+  gestor_trafego: string | null;
 };
 
 export type Carteira = { clientes: ClienteCarteira[]; demo: boolean };
@@ -40,12 +45,16 @@ function carteiraDemo(): Carteira {
       saude: c.saude,
       nps: c.nps,
       roas: c.roas,
-      site: null,
-      instagram: null,
-      inicio_contrato: null,
-      fim_contrato: null,
-      dia_vencimento: 10,
-      responsavel: null,
+      dia_vencimento: c.dia_vencimento ?? 10,
+      responsavel: c.responsavel ?? null,
+      documento: c.documento ?? null,
+      percentual_sobre_investimento: c.percentual ?? 0,
+      observacoes: c.observacoes ?? null,
+      gestor_trafego: c.gestor_trafego ?? null,
+      site: c.site ?? null,
+      instagram: c.instagram ?? null,
+      inicio_contrato: c.inicio_contrato ?? null,
+      fim_contrato: c.fim_contrato ?? null,
     })),
     demo: true,
   };
@@ -66,7 +75,11 @@ type Linha = {
   inicio_contrato: string | null;
   fim_contrato: string | null;
   dia_vencimento: number | null;
+  documento: string | null;
+  percentual_sobre_investimento: number | string | null;
+  observacoes: string | null;
   perfis: { nome_completo: string | null } | { nome_completo: string | null }[] | null;
+  gestor: { nome_completo: string | null } | { nome_completo: string | null }[] | null;
 };
 
 /** Com banco ligado, carteira vazia é carteira vazia — nunca a demonstração. */
@@ -83,7 +96,7 @@ export async function carregarCarteira(): Promise<Carteira> {
     const { data, error } = await db
       .from("clientes")
       .select(
-        "id, nome, slug, segmento, status, fee_mensal, investimento_previsto, saude, nps, site, instagram, inicio_contrato, fim_contrato, dia_vencimento, perfis:responsavel_id(nome_completo)",
+        "id, nome, slug, segmento, status, fee_mensal, investimento_previsto, saude, nps, site, instagram, inicio_contrato, fim_contrato, dia_vencimento, documento, percentual_sobre_investimento, observacoes, perfis:responsavel_id(nome_completo), gestor:gestor_trafego_id(nome_completo)",
       )
       .eq("organizacao_id", sessao.organizacaoId)
       .order("nome", { ascending: true });
@@ -119,6 +132,11 @@ export async function carregarCarteira(): Promise<Carteira> {
           fim_contrato: c.fim_contrato,
           dia_vencimento: c.dia_vencimento ?? 10,
           responsavel: p?.nome_completo ?? null,
+          documento: c.documento,
+          percentual_sobre_investimento: Number(c.percentual_sobre_investimento ?? 0),
+          observacoes: c.observacoes,
+          gestor_trafego:
+            (Array.isArray(c.gestor) ? c.gestor[0] : c.gestor)?.nome_completo ?? null,
         };
       }),
       demo: false,

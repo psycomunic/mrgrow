@@ -27,11 +27,20 @@ const ORDENS: { v: Ordem; r: string }[] = [
  * Carteira de clientes. Os KPIs seguem o recorte filtrado, para o número
  * bater com os cartões que estão à vista.
  */
-export function ListaClientes({ clientes }: { clientes: ClienteCarteira[] }) {
+export function ListaClientes({
+  clientes,
+  aberturaInicial = null,
+}: {
+  clientes: ClienteCarteira[];
+  /** Slug vindo de `?cliente=`, para o link da ficha ser compartilhável. */
+  aberturaInicial?: string | null;
+}) {
   const [filtro, setFiltro] = useState("todos");
   const [busca, setBusca] = useState("");
   const [ordem, setOrdem] = useState<Ordem>("saude");
-  const [aberto, setAberto] = useState<string | null>(null);
+  const [aberto, setAberto] = useState<string | null>(
+    () => clientes.find((c) => c.slug === aberturaInicial)?.id ?? null,
+  );
 
   const visiveis = useMemo(() => {
     const termo = slugificar(busca.trim());

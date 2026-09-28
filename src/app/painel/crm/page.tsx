@@ -8,8 +8,15 @@ import { carregarFunil } from "@/lib/crm";
 
 export const metadata: Metadata = { title: "CRM" };
 
-export default async function PaginaCrm() {
-  const { etapas, negocios, funilId, demo } = await carregarFunil();
+export default async function PaginaCrm({
+  searchParams,
+}: {
+  searchParams: Promise<{ negocio?: string }>;
+}) {
+  const [{ etapas, negocios, funilId, demo }, { negocio }] = await Promise.all([
+    carregarFunil(),
+    searchParams,
+  ]);
 
   return (
     <CrmProvider etapas={etapas} negociosIniciais={negocios} funilId={funilId} demo={demo}>
@@ -22,7 +29,7 @@ export default async function PaginaCrm() {
       <div className="space-y-6 p-5 sm:p-8">
         {demo && <AvisoDemo />}
         <Indicadores />
-        <Kanban />
+        <Kanban aberturaInicial={negocio ?? null} />
       </div>
     </CrmProvider>
   );
