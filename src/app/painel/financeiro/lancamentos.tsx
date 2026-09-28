@@ -223,14 +223,16 @@ export function Lancamentos({
     <>
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi
-          rotulo={`Receitas · ${rotuloPeriodo}`}
+          rotulo={`Receitas · ${rotuloPeriodo}
+          dica="Tudo que entrou ou está previsto entrar no período, já descontados os cancelados."`}
           valor={brl(kpis.receita)}
           tom="menta"
           icone={<TrendingUp />}
           serie={fluxo.map((m) => m.receitas)}
         />
         <Kpi
-          rotulo={`Despesas · ${rotuloPeriodo}`}
+          rotulo={`Despesas · ${rotuloPeriodo}
+          dica="Tudo que a agência pagou ou vai pagar no período: equipe, ferramentas, escritório e impostos."`}
           valor={brl(kpis.despesa)}
           tom="rosa"
           icone={<TrendingDown />}
@@ -238,6 +240,7 @@ export function Lancamentos({
         />
         <Kpi
           rotulo={kpis.resultado >= 0 ? "Resultado, no azul" : "Resultado, no vermelho"}
+          dica="Receitas menos despesas. É o que sobra da operação antes de retiradas extras."
           valor={brl(kpis.resultado)}
           tom="azul"
           icone={<Scale />}
@@ -245,6 +248,7 @@ export function Lancamentos({
         />
         <Kpi
           rotulo="A receber em atraso"
+          dica="Cobranças vencidas e ainda não quitadas. Quanto mais tempo aqui, menor a chance de entrar."
           valor={brl(kpis.atrasado)}
           tom="pessego"
           icone={<AlertTriangle />}

@@ -32,12 +32,14 @@ export default async function PaginaPortal() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi
           rotulo="Investimento"
+          dica="Quanto foi investido em anúncios no período. Este valor você paga direto às plataformas."
           valor={brl(c.atual.investimento)}
           variacao={c.delta("investimento")}
           serie={tracado(c.serie, "investimento")}
         />
         <Kpi
           rotulo="Retorno atribuído"
+          dica="Vendas que Meta e Google conseguiram ligar a um anúncio. Quem compra por outro caminho não aparece aqui, então o resultado real costuma ser maior."
           valor={brl(c.atual.receita)}
           variacao={c.delta("receita")}
           tom="menta"
@@ -45,12 +47,14 @@ export default async function PaginaPortal() {
         />
         <Kpi
           rotulo="ROAS"
+          dica="Quantos reais de venda para cada real investido em anúncio. 3x significa três por um."
           valor={multiplo(c.atual.roas)}
           variacao={c.delta("roas")}
           detalhe="cada R$ 1 investido"
         />
         <Kpi
           rotulo="Leads e vendas"
+          dica="Contatos e compras que vieram das campanhas no período."
           valor={`${numero(c.atual.leads)} / ${numero(c.atual.compras)}`}
           variacao={c.delta("leads")}
           detalhe={`CPL ${brl(c.atual.cpl)}`}

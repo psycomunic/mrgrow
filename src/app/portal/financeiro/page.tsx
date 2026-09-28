@@ -40,8 +40,10 @@ export default async function PaginaFaturasCliente() {
       {demo && <AvisoDemo />}
 
       <section className="grid gap-4 sm:grid-cols-2">
-        <Kpi rotulo="Em aberto" valor={brl(emAberto)} detalhe="a vencer e vencidas" />
-        <Kpi rotulo="Pago no ano" valor={brl(pagoNoAno)} tom="menta" detalhe="faturas liquidadas" />
+        <Kpi rotulo="Em aberto"
+  dica="Faturas emitidas que ainda não foram pagas." valor={brl(emAberto)} detalhe="a vencer e vencidas" />
+        <Kpi rotulo="Pago no ano"
+  dica="Tudo que você já quitou com a agência neste ano." valor={brl(pagoNoAno)} tom="menta" detalhe="faturas liquidadas" />
       </section>
 
       {faturas.length ? (

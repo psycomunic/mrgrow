@@ -66,15 +66,18 @@ export function Indicadores() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:col-span-8 xl:grid-cols-4">
-        <Kpi rotulo="Em aberto" valor={numero(abertas.length)} detalhe="fora das concluídas" />
+        <Kpi rotulo="Em aberto"
+  dica="Tarefas que ainda não foram concluídas, em qualquer coluna do quadro." valor={numero(abertas.length)} detalhe="fora das concluídas" />
         <Kpi
           rotulo="Vencem hoje"
+          dica="Tarefas com prazo para hoje e ainda não concluídas."
           valor={numero(paraHoje.length)}
           tom="pessego"
           detalhe="prazo é hoje"
         />
         <Kpi
           rotulo="Atrasadas"
+          dica="Tarefas cujo prazo já passou. Quanto maior este número, menos o prazo significa alguma coisa para a equipe."
           valor={numero(vencidas.length)}
           tom={vencidas.length ? "rosa" : "menta"}
           detalhe={vencidas.length ? "precisam de decisão" : "nenhuma no vermelho"}

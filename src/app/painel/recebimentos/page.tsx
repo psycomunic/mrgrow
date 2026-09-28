@@ -66,22 +66,26 @@ export default async function PaginaRecebimentos({
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Kpi
             rotulo="Previsto no mês"
+            dica="Soma das mensalidades que vencem neste mês, geradas a partir do contrato de cada cliente."
             valor={brl(previsto)}
             detalhe={`${numero(linhas.length)} ${linhas.length === 1 ? "cobrança" : "cobranças"}`}
           />
           <Kpi
             rotulo="Recebido"
+            dica="Quanto já foi confirmado com o check. Enquanto ninguém marca, a cobrança continua contando como em aberto."
             valor={brl(recebido)}
             tom="menta"
             detalhe={`${numero(divisao(recebido, previsto) * 100)}% do previsto`}
           />
           <Kpi
             rotulo="A receber"
+            dica="O que falta entrar até o fim do mês, incluindo o que já venceu."
             valor={brl(previsto - recebido)}
             detalhe={`${numero(linhas.filter((l) => l.situacao !== "pago").length)} em aberto`}
           />
           <Kpi
             rotulo="Em atraso"
+            dica="Cobranças cujo vencimento já passou e ninguém marcou como paga. É aqui que a inadimplência aparece antes de virar problema."
             valor={brl(emAtraso)}
             tom={atrasadas.length ? "rosa" : "menta"}
             detalhe={

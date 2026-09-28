@@ -203,6 +203,7 @@ function BlocoResumo({ c }: { c: Comparativo }) {
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <Kpi
         rotulo="Investimento em mídia"
+        dica="Quanto foi investido em anúncios no período, pago por você direto às plataformas."
         valor={brl(c.atual.investimento)}
         variacao={c.delta("investimento")}
         serie={tracado(c.serie, "investimento")}
@@ -210,6 +211,7 @@ function BlocoResumo({ c }: { c: Comparativo }) {
       />
       <Kpi
         rotulo="Retorno atribuído"
+        dica="Vendas que as plataformas ligaram a um anúncio dentro da janela de atribuição delas."
         valor={brl(c.atual.receita)}
         variacao={c.delta("receita")}
         serie={tracado(c.serie, "receita")}
@@ -218,6 +220,7 @@ function BlocoResumo({ c }: { c: Comparativo }) {
       />
       <Kpi
         rotulo="ROAS"
+        dica="Retorno dividido pelo investimento. 3x significa três reais de venda para cada real de anúncio."
         valor={roas(c.atual.roas)}
         variacao={c.delta("roas")}
         tom="azul"
@@ -225,6 +228,7 @@ function BlocoResumo({ c }: { c: Comparativo }) {
       />
       <Kpi
         rotulo="Ticket médio"
+        dica="Valor médio de cada venda no período."
         valor={brl(c.atual.ticketMedio)}
         variacao={c.delta("ticketMedio")}
         tom="pessego"
@@ -324,12 +328,14 @@ function Leads({ c }: { c: Comparativo }) {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi
           rotulo="Leads gerados"
+          dica="Contatos que chegaram pelos anúncios: formulário, WhatsApp ou conversa iniciada."
           valor={numero(c.atual.leads)}
           variacao={c.delta("leads")}
           serie={tracado(c.serie, "leads")}
         />
         <Kpi
           rotulo="Custo por lead"
+          dica="Quanto custou cada contato novo. Quanto menor, mais barato sai encher a agenda."
           valor={brl(c.atual.cpl)}
           variacao={c.delta("cpl")}
           invertido
@@ -337,6 +343,7 @@ function Leads({ c }: { c: Comparativo }) {
         />
         <Kpi
           rotulo="Vendas"
+          dica="Compras concluídas e rastreadas no período."
           valor={numero(c.atual.compras)}
           variacao={c.delta("compras")}
           serie={tracado(c.serie, "compras")}
@@ -344,6 +351,7 @@ function Leads({ c }: { c: Comparativo }) {
         />
         <Kpi
           rotulo="Custo por venda"
+          dica="Quanto custou em anúncio cada venda fechada. Compare com a sua margem."
           valor={brl(c.atual.cpa)}
           variacao={c.delta("cpa")}
           invertido

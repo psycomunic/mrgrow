@@ -110,12 +110,14 @@ export default async function PaginaCliente({ params }: { params: Promise<{ slug
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Kpi
             rotulo="Investimento · 30 dias"
+            dica="Quanto este cliente gastou em anúncios nos últimos 30 dias, nas contas conectadas."
             valor={brl(c.atual.investimento)}
             variacao={c.delta("investimento")}
             serie={tracado(c.serie, "investimento")}
           />
           <Kpi
             rotulo="Receita atribuída"
+            dica="Vendas que as plataformas ligaram aos anúncios deste cliente."
             valor={brl(c.atual.receita)}
             variacao={c.delta("receita")}
             tom="menta"
@@ -123,12 +125,14 @@ export default async function PaginaCliente({ params }: { params: Promise<{ slug
           />
           <Kpi
             rotulo="ROAS"
+            dica="Receita atribuída dividida pelo investimento deste cliente."
             valor={multiplo(c.atual.roas)}
             variacao={c.delta("roas")}
             detalhe="receita ÷ investimento"
           />
           <Kpi
             rotulo="Leads gerados"
+            dica="Contatos que os anúncios trouxeram: formulário, WhatsApp ou conversa iniciada."
             valor={numero(c.atual.leads)}
             variacao={c.delta("leads")}
             detalhe={`CPL ${brl(c.atual.cpl)}`}

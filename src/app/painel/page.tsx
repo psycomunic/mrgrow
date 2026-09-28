@@ -17,6 +17,7 @@ import { Anel, Rosca, type FatiaRosca } from "@/components/painel/rosca";
 import { Faixa } from "@/components/painel/faixa";
 import { Avatar, Avatares } from "@/components/painel/avatares";
 import { GraficoArea, LegendaGrafico, type SerieGrafico } from "@/components/painel/grafico-area";
+import { GraficoBarras } from "@/components/painel/grafico-barras";
 import { AvisoDemo, AvisoFalha } from "@/components/painel/aviso-demo";
 import { Banner } from "@/components/painel/banner";
 import { Etiqueta } from "@/components/ui/etiqueta";
@@ -29,7 +30,8 @@ import { carregarCarteira, listarClientesParaSelecao } from "@/lib/clientes";
 import { carregarFunil } from "@/lib/crm";
 import { carregarFinanceiro } from "@/lib/financeiro";
 import { carregarTarefas } from "@/lib/tarefas";
-import { PRIORIDADE, STATUS_TAREFA, contratado, somarMrr } from "@/lib/rotulos";
+import { carregarRecebimentos } from "@/lib/recebimentos";
+import { PRIORIDADE, STATUS_CLIENTE, STATUS_TAREFA, contratado, somarMrr } from "@/lib/rotulos";
 import { competencia, hoje } from "@/lib/tempo";
 import { brl, cn, dataCurta, divisao, multiplo, numero, percentual } from "@/lib/utils";
 
@@ -37,6 +39,21 @@ const SERIES: SerieGrafico[] = [
   { chave: "investimento", rotulo: "Investimento", cor: "azul" },
   { chave: "receita", rotulo: "Receita atribuída", cor: "menta" },
 ];
+
+/* O par que a agência lia na planilha antes de existir painel. Mesma
+   ordem, mesma leitura: o claro é o que era para entrar, o forte é o que
+   entrou, e a folga entre os dois é a inadimplência do mês. */
+const SERIES_CAIXA: SerieGrafico[] = [
+  { chave: "previsto", rotulo: "Previsto", cor: "azul" },
+  { chave: "recebido", rotulo: "Recebido", cor: "menta" },
+];
+
+const MESES_CURTOS = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+
+function mesCurto(comp: string) {
+  const [ano, mes] = comp.split("-");
+  return `${MESES_CURTOS[Number(mes) - 1]}/${ano.slice(2)}`;
+}
 
 
 /* Paleta da rosca. As etapas do funil guardam a cor delas, mas aquela
@@ -80,13 +97,14 @@ export default async function PaginaVisao({
 
   /* Tudo em paralelo: são consultas independentes e em série elas somariam
      a latência de todas. */
-  const [metricas, carteira, funil, financeiro, quadro, opcoes] = await Promise.all([
+  const [metricas, carteira, funil, financeiro, quadro, opcoes, recebimentos] = await Promise.all([
     carregarDiagnostico({ de, ate, clienteId, provedor: null }),
     carregarCarteira(),
     carregarFunil(),
     verFinanceiro ? carregarFinanceiro() : Promise.resolve({ lancamentos: [], demo: false }),
     carregarTarefas(),
     listarClientesParaSelecao(),
+    carregarRecebimentos(competencia()),
   ]);
 
   const dias = diasNoIntervalo(de, ate);
@@ -122,6 +140,72 @@ export default async function PaginaVisao({
      cadastrado entra em onboarding e o fee dele já vale. */
   const emCarteira = daCarteira.filter((cl) => contratado(cl.status));
   const mrr = somarMrr(daCarteira);
+
+  /* ── Cobrança do mês ──────────────────────────────────────────── */
+  const cobrancas = clienteId
+    ? recebimentos.linhas.filter((l) => l.clienteId === clienteId)
+    : recebimentos.linhas;
+  const previstoMes = cobrancas.reduce((s, l) => s + l.valor, 0);
+  const recebidoMes = cobrancas.filter((l) => l.situacao === "pago").reduce((s, l) => s + l.valor, 0);
+  const vencidas = cobrancas.filter((l) => l.situacao === "atrasado");
+
+  /* Últimos doze meses do par previsto/recebido: é o gráfico que a equipe
+     já conhece da planilha, e o que dá para ler sazonalidade sem espremer
+     as barras a ponto de não dar para comparar duas. */
+  const serieCaixa = recebimentos.historico.slice(-12).map((m) => ({
+    data: mesCurto(m.competencia),
+    previsto: m.previsto,
+    recebido: m.recebido,
+  }));
+
+  /* Adimplência da carteira: quantas cobranças do mês estão em dia contra
+     quantas venceram sem pagamento. */
+  const emDia = cobrancas.length - vencidas.length;
+  const adimplencia: FatiaRosca[] = cobrancas.length
+    ? [
+        { rotulo: "Em dia", valor: emDia, cor: "var(--color-sucesso)", formatado: numero(emDia) },
+        {
+          rotulo: "Atrasado",
+          valor: vencidas.length,
+          cor: "var(--color-perigo)",
+          formatado: numero(vencidas.length),
+        },
+      ].filter((f) => f.valor > 0)
+    : [];
+
+  /* Distribuição da carteira por estágio do contrato. A planilha fazia
+     isto agrupando pelo WhatsApp do contato, o que produzia uma fatia por
+     cliente e não dizia nada; aqui o corte é o estágio, que é a pergunta
+     que a rosca responde. */
+  const porStatus: FatiaRosca[] = ["ativo", "onboarding", "prospecto", "pausado"]
+    .map((st, i) => {
+      const doStatus = daCarteira.filter((cl) => cl.status === st);
+      const soma = doStatus.reduce((acc, cl) => acc + cl.fee_mensal, 0);
+      return {
+        rotulo: STATUS_CLIENTE.rotulo(st),
+        valor: soma,
+        cor: TONS_ROSCA[i % TONS_ROSCA.length],
+        formatado: brl(soma),
+      };
+    })
+    .filter((f) => f.valor > 0);
+
+  /* Prazo médio de contrato, em meses corridos desde o início. A planilha
+     mostrava o prazo contratado (sempre 6); este diz quanto o cliente
+     realmente fica, que é o número que importa para saber se a carteira
+     renova. */
+  const comInicio = daCarteira.filter((cl) => cl.inicio_contrato);
+  /* `hoje()` e não `Date.now()`: a data precisa ser a mesma do resto da
+     página, e o compilador do React trata leitura de relógio no render
+     como impureza — com razão, servidor e cliente cairiam em milissegundos
+     diferentes. */
+  const agora = new Date(`${hoje()}T00:00:00`).getTime();
+  const mesesMedios = comInicio.length
+    ? comInicio.reduce((acc, cl) => {
+        const ini = new Date(`${cl.inicio_contrato}T00:00:00`).getTime();
+        return acc + Math.max(0, (agora - ini) / (1000 * 60 * 60 * 24 * 30.44));
+      }, 0) / comInicio.length
+    : 0;
 
   /* ── Funil ────────────────────────────────────────────────────── */
   const pipeline = funil.negocios.reduce((s, n) => s + n.valor_mensal + n.valor_unico, 0);
@@ -233,6 +317,7 @@ export default async function PaginaVisao({
           />
           <Kpi
             rotulo="Investimento gerido"
+            dica="Quanto os clientes gastaram em anúncios no período, somando as contas Meta e Google conectadas. Esse dinheiro é deles e vai direto às plataformas."
             valor={brl(t.investimento)}
             icone={<Megaphone />}
             variacao={delta("investimento")}
@@ -241,6 +326,7 @@ export default async function PaginaVisao({
           />
           <Kpi
             rotulo="Receita atribuída"
+            dica="Vendas que as plataformas conseguiram ligar a um anúncio. Compras por outros caminhos não entram aqui, então o número real costuma ser maior."
             valor={brl(t.receita)}
             variacao={delta("receita")}
             tom="menta"
@@ -426,6 +512,86 @@ export default async function PaginaVisao({
                 />
               )}
             </div>
+          </div>
+        </section>
+
+        {/* Caixa da carteira: os mesmos quatro recortes que a agência lia na
+            planilha, para quem já conhece aqueles gráficos reconhecer o
+            painel na primeira abertura. */}
+        <section className="grid gap-4 xl:grid-cols-3">
+          <div className="cartao rounded-lg p-5 xl:col-span-2">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="font-display text-sm font-bold text-tinta">
+                  Previsto contra recebido
+                </h2>
+                <p className="mt-0.5 text-xs text-cinza">
+                  Últimos doze meses · a folga entre as barras é a inadimplência
+                </p>
+              </div>
+              <LegendaGrafico series={SERIES_CAIXA} />
+            </div>
+            <GraficoBarras
+              dados={serieCaixa}
+              series={SERIES_CAIXA}
+              vazio="Marque os recebimentos do mês para a curva começar."
+            />
+          </div>
+
+          <div className="cartao flex flex-col rounded-lg p-5">
+            <h2 className="font-display text-sm font-bold text-tinta">Cobrança do mês</h2>
+            <p className="mt-0.5 text-xs text-cinza">
+              {numero(cobrancas.length)} {cobrancas.length === 1 ? "cobrança" : "cobranças"} ·{" "}
+              {brl(previstoMes)} previstos
+            </p>
+            <div className="mt-4 flex-1">
+              <Rosca
+                fatias={adimplencia}
+                centro={brl(recebidoMes)}
+                rotuloCentro="recebido"
+                vazio="Nenhuma cobrança neste mês."
+              />
+            </div>
+            <BotaoLink
+              href="/painel/recebimentos"
+              variante="contorno"
+              tamanho="sm"
+              className="mt-4 w-full"
+            >
+              Abrir a régua de cobrança
+            </BotaoLink>
+          </div>
+        </section>
+
+        <section className="grid gap-4 xl:grid-cols-3">
+          <div className="cartao rounded-lg p-5 xl:col-span-2">
+            <h2 className="font-display text-sm font-bold text-tinta">Carteira por estágio</h2>
+            <p className="mt-0.5 text-xs text-cinza">
+              Quanto de receita mensal está em cada fase do contrato
+            </p>
+            <div className="mt-4">
+              <Rosca
+                fatias={porStatus}
+                centro={brl(mrr)}
+                rotuloCentro="MRR contratado"
+                vazio="Nenhum cliente cadastrado."
+              />
+            </div>
+          </div>
+
+          <div className="cartao flex flex-col justify-center rounded-lg p-5">
+            <h2 className="font-display text-sm font-bold text-tinta">Tempo médio de casa</h2>
+            <p className="mt-0.5 text-xs text-cinza">
+              Quanto tempo o cliente fica, não quanto o contrato promete
+            </p>
+            <p className="mt-6 font-display text-5xl font-extrabold tabular-nums text-tinta">
+              {numero(mesesMedios)}
+              <span className="ml-2 text-base font-semibold text-cinza">meses</span>
+            </p>
+            <p className="mt-2 text-xs text-cinza">
+              média de {numero(comInicio.length)}{" "}
+              {comInicio.length === 1 ? "conta com início registrado" : "contas com início registrado"}
+            </p>
           </div>
         </section>
 

@@ -164,6 +164,7 @@ export default async function PaginaMetricas({
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Kpi
             rotulo="Investimento"
+            dica="Quanto foi gasto em anúncios no período, somando as plataformas do filtro."
             valor={brl(t.investimento)}
             variacao={delta("investimento")}
             detalhe={`${brl(divisao(t.investimento, dias))} por dia`}
@@ -171,6 +172,7 @@ export default async function PaginaMetricas({
           />
           <Kpi
             rotulo="Receita atribuída"
+            dica="Vendas que a plataforma ligou a um anúncio dentro da janela de atribuição dela."
             valor={brl(t.receita)}
             variacao={delta("receita")}
             tom="menta"
@@ -197,12 +199,14 @@ export default async function PaginaMetricas({
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Kpi
             rotulo="Leads"
+            dica="Contatos gerados pelos anúncios — formulário, WhatsApp ou conversa iniciada."
             valor={numero(t.leads)}
             variacao={delta("leads")}
             serie={tracado(d.serie, "leads")}
           />
           <Kpi
             rotulo="Custo por lead"
+            dica="Investimento dividido pelos leads. Quanto custa cada contato novo; quanto menor, melhor."
             valor={brl(t.cpl)}
             variacao={delta("cpl")}
             invertido
@@ -211,6 +215,7 @@ export default async function PaginaMetricas({
           />
           <Kpi
             rotulo="Compras"
+            dica="Vendas concluídas e rastreadas pelas plataformas."
             valor={numero(t.compras)}
             variacao={delta("compras")}
             tom="menta"
@@ -219,6 +224,7 @@ export default async function PaginaMetricas({
           />
           <Kpi
             rotulo="Custo por venda"
+            dica="Investimento dividido pelas compras. Compare com a sua margem: acima dela, a venda dá prejuízo."
             valor={brl(t.cpa)}
             variacao={delta("cpa")}
             invertido
@@ -229,11 +235,15 @@ export default async function PaginaMetricas({
 
         {/* ── Alcance ───────────────────────────────────────────── */}
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <Kpi rotulo="Impressões" valor={compacto(t.impressoes)} variacao={delta("impressoes")} />
-          <Kpi rotulo="Cliques" valor={compacto(t.cliques)} variacao={delta("cliques")} />
-          <Kpi rotulo="CTR" valor={percentual(t.ctr, 2)} variacao={delta("ctr")} />
+          <Kpi rotulo="Impressões"
+  dica="Quantas vezes os anúncios apareceram na tela de alguém. A mesma pessoa pode ver várias vezes." valor={compacto(t.impressoes)} variacao={delta("impressoes")} />
+          <Kpi rotulo="Cliques"
+  dica="Quantas vezes alguém clicou nos anúncios." valor={compacto(t.cliques)} variacao={delta("cliques")} />
+          <Kpi rotulo="CTR"
+  dica="Cliques divididos por impressões. Mede se a peça chama atenção de quem a vê." valor={percentual(t.ctr, 2)} variacao={delta("ctr")} />
           <Kpi
             rotulo="Custo por clique"
+            dica="Investimento dividido pelos cliques. Sobe quando a concorrência aumenta ou o anúncio perde relevância."
             valor={brl(t.cpc)}
             variacao={delta("cpc")}
             invertido

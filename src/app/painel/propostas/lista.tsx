@@ -80,14 +80,18 @@ export function ListaPropostas({ propostas: iniciais }: { propostas: Proposta[] 
   return (
     <>
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Kpi rotulo="Em aberto" valor={numero(kpis.abertas)} detalhe="aguardando resposta" />
-        <Kpi rotulo="Valor em negociação" valor={brl(kpis.valorAberto)} detalhe="recorrente mensal" />
+        <Kpi rotulo="Em aberto"
+  dica="Propostas enviadas ou visualizadas que ainda não foram respondidas nem venceram." valor={numero(kpis.abertas)} detalhe="aguardando resposta" />
+        <Kpi rotulo="Valor em negociação"
+  dica="Soma mensal recorrente das propostas em aberto. Não inclui setup nem o total do contrato." valor={brl(kpis.valorAberto)} detalhe="recorrente mensal" />
         <Kpi
           rotulo="Taxa de aceite"
+          dica="Quantas das propostas respondidas viraram contrato. Propostas ainda em aberto não entram na conta."
           valor={percentual(kpis.taxa, 0)}
           detalhe="sobre as respondidas"
         />
-        <Kpi rotulo="Ganho fechado" valor={brl(kpis.ganho)} detalhe="propostas aceitas" />
+        <Kpi rotulo="Ganho fechado"
+  dica="Receita mensal das propostas aceitas." valor={brl(kpis.ganho)} detalhe="propostas aceitas" />
       </section>
 
       <div className="flex justify-end">

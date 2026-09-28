@@ -49,6 +49,11 @@ export function Kpi({
   /* Três estados, não dois. Variação exatamente zero não é queda: antes ela
      caía no `else` e o cartão mostrava seta para baixo em vermelho para uma
      métrica que simplesmente não mudou. */
+  /* Id derivado do rótulo em vez de `useId`: o cartão é renderizado no
+     servidor e hook aqui obrigaria a marcar o arquivo inteiro como
+     cliente, levando junto todos os KPIs do painel para o navegador. */
+  const idDica = `dica-${rotulo.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+
   const direcao =
     variacao === undefined || Math.abs(variacao) < 0.05
       ? "estavel"
@@ -62,7 +67,24 @@ export function Kpi({
   const temRodape = variacao !== undefined || !!detalhe || temTraco;
 
   return (
-    <div className="cartao p-5" title={dica}>
+    /* A legenda é um balão próprio, e não o `title` do navegador: aquele
+       demora cerca de um segundo para aparecer, não aceita estilo e não
+       existe no toque. Aqui ela responde na hora, no teclado também, e
+       some da árvore de acessibilidade quando não há texto. */
+    <div
+      className={cn("cartao group relative p-5", dica && "focus-visible:outline-none")}
+      tabIndex={dica ? 0 : undefined}
+      aria-describedby={dica ? idDica : undefined}
+    >
+      {dica && (
+        <span
+          id={idDica}
+          role="tooltip"
+          className="pointer-events-none absolute bottom-full left-4 right-4 z-30 mb-2 rounded-md border border-borda-forte bg-carta px-3 py-2 text-[11px] leading-snug text-grafite opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+        >
+          {dica}
+        </span>
+      )}
       {icone && (
         <span
           className={cn(

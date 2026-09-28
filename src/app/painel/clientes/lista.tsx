@@ -71,20 +71,24 @@ export function ListaClientes({
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi
           rotulo="Clientes ativos"
+          dica="Contas com contrato em vigor e operação rodando. Onboarding e prospecto ficam de fora desta contagem."
           valor={numero(ativos.length)}
           detalhe={`${visiveis.length} no recorte`}
         />
         <Kpi
           rotulo="MRR da carteira"
+          dica="Receita recorrente do recorte visível na tela, somando ativos e em onboarding."
           valor={brl(mrr)}
           detalhe={`${numero(emCarteira.length)} contratados · ativos e em onboarding`}
         />
         {/* "Prevista" e não "gerida": este número é a soma do que foi orçado com
             os clientes. O investimento realizado vive em Métricas, e ver os dois
             com o mesmo rótulo em telas vizinhas confunde mais do que informa. */}
-        <Kpi rotulo="Verba prevista no mês" valor={brl(midia)} detalhe="somado dos contratos" />
+        <Kpi rotulo="Verba prevista no mês"
+  dica="O que foi orçado de mídia com os clientes. É previsão de contrato, não gasto realizado — o realizado fica em Métricas." valor={brl(midia)} detalhe="somado dos contratos" />
         <Kpi
           rotulo="Contas em risco"
+          dica="Clientes com saúde abaixo de 60. Saúde é a nota de 0 a 100 que a equipe mantém em cada ficha."
           valor={numero(emRisco)}
           detalhe={`saúde média ${numero(saude)}/100`}
           tom={emRisco ? "rosa" : "menta"}

@@ -24,14 +24,18 @@ export function Indicadores() {
 
   return (
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <Kpi rotulo="Negócios abertos" valor={numero(negocios.length)} detalhe="no funil comercial" />
-      <Kpi rotulo="Valor do pipeline" valor={brl(total)} detalhe="recorrente mensal" />
+      <Kpi rotulo="Negócios abertos"
+  dica="Oportunidades que ainda não foram ganhas nem perdidas, em qualquer etapa do funil." valor={numero(negocios.length)} detalhe="no funil comercial" />
+      <Kpi rotulo="Valor do pipeline"
+  dica="Soma cheia de tudo que está aberto. É o teto, não a expectativa: assume que todo negócio fecha." valor={brl(total)} detalhe="recorrente mensal" />
       <Kpi
         rotulo="Previsão ponderada"
+        dica="Cada negócio multiplicado pela chance de fechar da etapa em que está. É o número realista para planejar caixa."
         valor={brl(ponderado)}
         detalhe="pela probabilidade da etapa"
       />
-      <Kpi rotulo="Oportunidades quentes" valor={numero(quentes)} detalhe="prioridade de contato" />
+      <Kpi rotulo="Oportunidades quentes"
+  dica="Negócios nas etapas com maior chance de fechar. São os que merecem atenção esta semana." valor={numero(quentes)} detalhe="prioridade de contato" />
     </section>
   );
 }

@@ -13,7 +13,7 @@ type Ponto = Record<string, number | string>;
    JavaScript, e não em token CSS, porque o Recharts entrega estes valores
    como atributo de SVG — e `var()` não resolve em atributo, só em
    declaração de estilo. */
-const CROMO = {
+export const CROMO = {
   escuro: {
     grade: "#232833",
     marca: "#646d7e",
@@ -36,7 +36,7 @@ const CROMO = {
    o Recharts as entrega como atributo de SVG. Quem chama escolhe pelo nome
    e o tema decide o tom — assim a mesma série sai clara sobre preto e
    escura sobre branco sem nenhuma tela saber disso. */
-const PALETA = {
+export const PALETA = {
   escuro: {
     azul: "#5798ff",
     menta: "#2fd39b",
