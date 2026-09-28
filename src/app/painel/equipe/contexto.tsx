@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import {
   alterarPapel,
   convidarMembro,
+  criarUsuario,
   desativarMembro,
   reativarMembro,
   revogarConvite,
@@ -24,6 +25,7 @@ type Estado = {
   mudarPapel: (m: Membro, papel: Papel) => void;
   alternarAcesso: (m: Membro) => void;
   convidar: (email: string, papel: Papel) => Promise<string | null>;
+  criar: (email: string, senha: string, nome: string, papel: Papel) => Promise<boolean>;
   revogar: (c: Convite) => void;
 };
 
@@ -110,6 +112,22 @@ export function EquipeProvider({
     [membros],
   );
 
+  /** Cria o acesso já com senha. Devolve true quando deu certo. */
+  const criar = useCallback(
+    async (email: string, senha: string, nome: string, papel: Papel) => {
+      const r = await criarUsuario(email, senha, nome, papel);
+      if (!r.ok) {
+        toast.error(r.erro ?? "Não foi possível criar o acesso.");
+        return false;
+      }
+      toast.success(
+        r.demo ? "Acesso criado (não salvo: modo demonstração)." : `Acesso de ${nome} criado.`,
+      );
+      return true;
+    },
+    [],
+  );
+
   /** Devolve o link do convite para o diálogo mostrar, ou null se falhou. */
   const convidar = useCallback(async (email: string, papel: Papel) => {
     const r = await convidarMembro(email, papel);
@@ -164,9 +182,10 @@ export function EquipeProvider({
       mudarPapel,
       alternarAcesso,
       convidar,
+      criar,
       revogar,
     }),
-    [membros, convites, usuarioId, meuPapel, demo, ocupado, mudarPapel, alternarAcesso, convidar, revogar],
+    [membros, convites, usuarioId, meuPapel, demo, ocupado, mudarPapel, alternarAcesso, convidar, criar, revogar],
   );
 
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>;

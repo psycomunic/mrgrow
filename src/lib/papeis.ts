@@ -7,6 +7,8 @@ export type Papel =
   | "proprietario"
   | "administrador"
   | "gestor"
+  | "comercial"
+  | "marketing"
   | "operador"
   | "financeiro"
   | "cliente";
@@ -15,6 +17,8 @@ export const ROTULO_PAPEL: Record<Papel, string> = {
   proprietario: "Proprietário",
   administrador: "Administrador",
   gestor: "Gestor",
+  comercial: "Comercial",
+  marketing: "Marketing",
   operador: "Operador",
   financeiro: "Financeiro",
   cliente: "Cliente",
@@ -56,6 +60,20 @@ export const MATRIZ: Record<Papel, Partial<Record<Recurso, Acao[]>>> = {
     visao: LEITURA, crm: TUDO, clientes: EDICAO, propostas: TUDO, financeiro: LEITURA,
     projetos: TUDO, tarefas: TUDO, metricas: LEITURA, integracoes: EDICAO,
     automacoes: EDICAO, relatorios: EDICAO, equipe: LEITURA,
+  },
+  /* Comercial vive no funil: fecha negócio, monta proposta e cadastra a
+     conta que entra. Não toca em mídia nem em dinheiro — vê o próprio
+     resultado em Métricas, e só. */
+  comercial: {
+    visao: LEITURA, crm: TUDO, propostas: TUDO, clientes: EDICAO,
+    tarefas: TUDO, projetos: LEITURA, metricas: LEITURA, relatorios: LEITURA,
+  },
+  /* Marketing toca a entrega: campanha, criativo, projeto e relatório.
+     Enxerga o funil para saber o que está entrando, mas não mexe nele. */
+  marketing: {
+    visao: LEITURA, crm: LEITURA, clientes: LEITURA,
+    projetos: TUDO, tarefas: TUDO, metricas: LEITURA,
+    integracoes: EDICAO, automacoes: EDICAO, relatorios: TUDO,
   },
   operador: {
     visao: LEITURA, crm: EDICAO, clientes: LEITURA, propostas: LEITURA,

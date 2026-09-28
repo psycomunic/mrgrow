@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { contextoDeAcao, falha, pertence, type Banco, type Resultado } from "@/lib/acoes";
 import { ROTULO_PAPEL, type Papel } from "@/lib/papeis";
+import { criarClienteAdmin } from "@/lib/supabase/servidor";
 
 export type { Resultado };
 
@@ -259,5 +260,109 @@ export async function revogarConvite(conviteId: string): Promise<Resultado> {
     return { ok: true, demo: false };
   } catch (e) {
     return falha("revogarConvite", e, "Não foi possível revogar o convite.");
+  }
+}
+
+/**
+ * Cria a pessoa já com senha, sem passar pelo convite.
+ *
+ * O convite serve para quem vai se cadastrar sozinho; isto serve para quem
+ * administra querer entregar o acesso pronto — cria o usuário no Auth com a
+ * senha definida, o e-mail já confirmado, e vincula à organização.
+ *
+ * Precisa da service role: criar usuário é operação de administrador do Auth
+ * e não passa pelo cliente com RLS. Por isso a permissão é conferida antes,
+ * aqui no servidor, e a chave nunca sai daqui.
+ */
+export async function criarUsuario(
+  email: string,
+  senha: string,
+  nome: string,
+  papel: string,
+): Promise<Resultado> {
+  const alvo = email.trim().toLowerCase();
+  if (!EMAIL.test(alvo) || alvo.length > 160) {
+    return { ok: false, demo: false, erro: "Informe um e-mail válido." };
+  }
+  if (senha.length < 8) return { ok: false, demo: false, erro: "A senha precisa de 8 caracteres." };
+  if (senha.length > 72) {
+    /* O bcrypt do Auth ignora o que passa de 72 bytes: a senha seria aceita
+       e truncada em silêncio, e quem cadastrou nunca saberia. */
+    return { ok: false, demo: false, erro: "A senha passou de 72 caracteres." };
+  }
+  if (!nome.trim()) return { ok: false, demo: false, erro: "Informe o nome da pessoa." };
+  if (!PAPEIS.includes(papel as Papel)) return { ok: false, demo: false, erro: "Papel inválido." };
+
+  const ctx = await contextoDeAcao("equipe", "criar");
+  if (ctx.estado === "demo") return { ok: true, demo: true };
+  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
+  const { sessao, db } = ctx;
+
+  if (papel === "proprietario" && sessao.papel !== "proprietario") {
+    return { ok: false, demo: false, erro: "Só um proprietário cria outro proprietário." };
+  }
+
+  try {
+    const admin = criarClienteAdmin();
+
+    const { data, error } = await admin.auth.admin.createUser({
+      email: alvo,
+      password: senha,
+      email_confirm: true,
+      user_metadata: { nome_completo: nome.trim() },
+    });
+
+    let usuarioId = data?.user?.id ?? null;
+
+    if (error) {
+      /* Já existe no Auth — pode ser alguém de outra organização, ou um
+         acesso desativado aqui. Em vez de recusar, segue para o vínculo,
+         que é onde a duplicidade é de fato tratada. */
+      const jaExiste = /already|exists|registered/i.test(error.message ?? "");
+      if (!jaExiste) return falha("criarUsuario", error, "Não foi possível criar o acesso.");
+
+      const { data: perfil } = await admin
+        .from("perfis")
+        .select("id")
+        .eq("email", alvo)
+        .maybeSingle();
+      usuarioId = (perfil as { id: string } | null)?.id ?? null;
+      if (!usuarioId) {
+        return { ok: false, demo: false, erro: "Esse e-mail já existe e não foi possível localizá-lo." };
+      }
+    }
+
+    if (!usuarioId) return { ok: false, demo: false, erro: "Não foi possível criar o acesso." };
+
+    const { data: vinculo } = await db
+      .from("membros_organizacao")
+      .select("ativo")
+      .eq("organizacao_id", sessao.organizacaoId)
+      .eq("usuario_id", usuarioId)
+      .maybeSingle();
+
+    if (vinculo) {
+      return {
+        ok: false,
+        demo: false,
+        erro: (vinculo as { ativo: boolean }).ativo
+          ? "Essa pessoa já está na equipe."
+          : "Esse acesso existe e está desativado — reative na tabela.",
+      };
+    }
+
+    const { error: erroVinculo } = await db.from("membros_organizacao").insert({
+      organizacao_id: sessao.organizacaoId,
+      usuario_id: usuarioId,
+      papel,
+      ativo: true,
+    });
+
+    if (erroVinculo) return falha("criarUsuario/vinculo", erroVinculo, "Acesso criado, mas o vínculo falhou.");
+
+    revalidatePath("/painel/equipe");
+    return { ok: true, demo: false };
+  } catch (e) {
+    return falha("criarUsuario", e, "Não foi possível criar o acesso.");
   }
 }

@@ -205,7 +205,7 @@ export function AcaoConvidar() {
     <>
       <Botao tamanho="sm" onClick={() => setAberto(true)}>
         <UserPlus className="size-4" />
-        Convidar
+        Adicionar pessoa
       </Botao>
       {aberto && <DialogoConvite aoFechar={() => setAberto(false)} />}
     </>
@@ -213,9 +213,15 @@ export function AcaoConvidar() {
 }
 
 function DialogoConvite({ aoFechar }: { aoFechar: () => void }) {
-  const { convidar, meuPapel } = useEquipe();
+  const { convidar, criar, meuPapel } = useEquipe();
   const idBase = useId();
+  /* Dois caminhos para a mesma coisa: entregar o acesso pronto, com senha,
+     ou mandar um link e deixar a pessoa se cadastrar. O primeiro é o que
+     serve para a equipe interna; o segundo, para quem está de fora. */
+  const [modo, setModo] = useState<"direto" | "convite">("direto");
   const [email, setEmail] = useState("");
+  const [nome, setNome] = useState("");
+  const [senha, setSenha] = useState("");
   const [papel, setPapel] = useState<Papel>("operador");
   const [link, setLink] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
@@ -237,10 +243,21 @@ function DialogoConvite({ aoFechar }: { aoFechar: () => void }) {
     e.preventDefault();
     if (!email.includes("@")) return setErro("Informe o e-mail de quem vai receber o acesso.");
 
+    if (modo === "convite") {
+      setEnviando(true);
+      const gerado = await convidar(email, papel);
+      setEnviando(false);
+      if (gerado) setLink(gerado);
+      return;
+    }
+
+    if (!nome.trim()) return setErro("Informe o nome da pessoa.");
+    if (senha.length < 8) return setErro("A senha precisa de pelo menos 8 caracteres.");
+
     setEnviando(true);
-    const gerado = await convidar(email, papel);
+    const ok = await criar(email, senha, nome, papel);
     setEnviando(false);
-    if (gerado) setLink(gerado);
+    if (ok) aoFechar();
   }
 
   return (
@@ -259,10 +276,12 @@ function DialogoConvite({ aoFechar }: { aoFechar: () => void }) {
         <div className="flex items-start justify-between gap-3 border-b border-borda px-6 py-4">
           <div>
             <h2 id={`${idBase}-titulo`} className="font-display text-lg font-bold text-tinta">
-              Convidar para a equipe
+              Adicionar à equipe
             </h2>
             <p className="mt-0.5 text-xs text-cinza">
-              O convite gera um link de entrada válido por 7 dias. Você escolhe por onde mandar.
+              {modo === "direto"
+                ? "O acesso é criado na hora, com a senha que você definir."
+                : "O convite gera um link de entrada válido por 7 dias."}
             </p>
           </div>
           <button
@@ -296,6 +315,32 @@ function DialogoConvite({ aoFechar }: { aoFechar: () => void }) {
           </div>
         ) : (
           <form onSubmit={enviar} className="space-y-4 p-6" noValidate>
+            <div className="inline-flex gap-1 rounded-full border border-borda bg-nevoa p-1">
+              {(
+                [
+                  { v: "direto", r: "Criar agora" },
+                  { v: "convite", r: "Mandar convite" },
+                ] as const
+              ).map((o) => (
+                <button
+                  key={o.v}
+                  type="button"
+                  onClick={() => {
+                    setModo(o.v);
+                    setErro(null);
+                  }}
+                  aria-pressed={modo === o.v}
+                  className={
+                    modo === o.v
+                      ? "foco-anel rounded-full bg-mrg-500 px-3.5 py-1.5 text-[13px] font-semibold text-white"
+                      : "foco-anel rounded-full px-3.5 py-1.5 text-[13px] font-semibold text-cinza hover:text-tinta"
+                  }
+                >
+                  {o.r}
+                </button>
+              ))}
+            </div>
+
             <Campo rotulo="E-mail">
               <Entrada
                 ref={focar}
@@ -309,6 +354,33 @@ function DialogoConvite({ aoFechar }: { aoFechar: () => void }) {
                 autoComplete="off"
               />
             </Campo>
+
+            {modo === "direto" && (
+              <>
+                <Campo rotulo="Nome">
+                  <Entrada
+                    value={nome}
+                    onChange={(e) => {
+                      setNome(e.target.value);
+                      setErro(null);
+                    }}
+                    placeholder="Nome de quem vai usar"
+                  />
+                </Campo>
+                <Campo rotulo="Senha" dica="Mínimo de 8 caracteres. A pessoa pode trocar depois.">
+                  <Entrada
+                    type="text"
+                    value={senha}
+                    onChange={(e) => {
+                      setSenha(e.target.value);
+                      setErro(null);
+                    }}
+                    placeholder="senha de primeiro acesso"
+                    autoComplete="off"
+                  />
+                </Campo>
+              </>
+            )}
 
             <Campo rotulo="Papel" dica="Define o que a pessoa vê e altera no painel.">
               <Selecao value={papel} onChange={(e) => setPapel(e.target.value as Papel)}>
@@ -327,7 +399,11 @@ function DialogoConvite({ aoFechar }: { aoFechar: () => void }) {
                 Cancelar
               </Botao>
               <Botao type="submit" disabled={enviando}>
-                {enviando ? "Gerando…" : "Gerar convite"}
+                {enviando
+                  ? "Salvando…"
+                  : modo === "direto"
+                    ? "Criar acesso"
+                    : "Gerar convite"}
               </Botao>
             </div>
           </form>
