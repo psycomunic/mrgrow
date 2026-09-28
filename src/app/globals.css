@@ -122,28 +122,46 @@
 [data-tema="claro"] .tema-painel {
   color-scheme: light;
 
-  /* Mesma ideia de três degraus do escuro, ao contrário: a página é o
-     cinza mais baixo e o cartão é o branco puro, que é o que faz o
-     cartão flutuar sobre a página sem precisar de borda forte. */
-  --color-papel: #f4f6f9;
+  /* Estes quatro precisam ser repetidos aqui, e não só os `--color-*`.
+     São calculados no `:root` — `--borda: var(--color-borda)` resolve lá,
+     com o valor escuro, e depois só herda. Sem repetir, a regra
+     `* { border-color: var(--borda) }` pintava a borda padrão de todo
+     elemento com o quase-preto do tema escuro, e cada `border` sem classe
+     de cor virava um risco preto sobre o branco. */
+  --fundo: var(--color-papel);
+  --texto: var(--color-tinta);
+  --superficie: var(--color-carta);
+  --borda: var(--color-borda);
+
+  /* A ordem dos degraus se inverte em relação ao escuro. Lá a superfície
+     sobe de tom conforme se aproxima do olho; aqui ela clareia: o fundo
+     da janela é o cinza mais fechado, a concha do app é branca, e as
+     caixas embutidas nela — colunas do funil, campos, trilhos — voltam a
+     escurecer um pouco para se distinguirem do branco.
+
+     Na primeira tentativa a névoa ficou mais clara que a concha e as
+     colunas do funil sumiram dentro dela. */
+  --color-papel: #eef1f6;
   --color-concha: #ffffff;
   --color-carta: #ffffff;
-  --color-nevoa: #f7f9fc;
-  --color-nevoa-2: #eaeef4;
+  --color-nevoa: #f4f7fa;
+  --color-nevoa-2: #e8eef5;
 
-  --color-chip-azul:   #e7f0fe;
-  --color-chip-menta:  #e2f6ee;
-  --color-chip-rosa:   #fdeaec;
-  --color-chip-pessego:#fdf1e3;
+  --color-chip-azul:   #e8f1fe;
+  --color-chip-menta:  #e4f6ef;
+  --color-chip-rosa:   #fdedef;
+  --color-chip-pessego:#fdf3e7;
 
-  --color-borda: #e3e8ef;
-  --color-borda-fraca: #eff2f7;
-  --color-borda-forte: #ccd5e1;
+  /* Fio de cabelo, e frio. A primeira tentativa usava um cinza mais
+     fechado e a tela virava uma grade de linhas, em vez de cartões. */
+  --color-borda: #e8edf4;
+  --color-borda-fraca: #f1f5f9;
+  --color-borda-forte: #d6dee8;
 
-  --color-tinta: #0e1726;
-  --color-grafite: #3c4a5e;
-  --color-cinza: #64748b;
-  --color-cinza-claro: #94a3b8;
+  --color-tinta: #0f172a;
+  --color-grafite: #475569;
+  --color-cinza: #6b7684;
+  --color-cinza-claro: #98a2b3;
 
   /* Escurecidos: os tons do escuro foram clareados para ler sobre preto
      e, sobre branco, ficam fracos demais. */
@@ -162,13 +180,13 @@
   --color-grafico-5: #d92d3f;
   --color-grafico-6: #0891b2;
 
-  --color-grade: #e6eaf0;
+  --color-grade: #edf1f6;
   --color-dica-fundo: #ffffff;
 
-  /* Sombra de verdade no lugar do fio de luz: sobre branco, o `inset`
+  /* Sombra curta e fria no lugar do fio de luz: sobre branco, o `inset`
      claro do tema escuro não aparece, e quem dá relevo é a sombra. */
-  --shadow-card: 0 1px 2px 0 rgb(16 24 40 / .05), 0 1px 3px 0 rgb(16 24 40 / .07);
-  --shadow-concha: 0 1px 3px 0 rgb(16 24 40 / .06), 0 16px 40px -24px rgb(16 24 40 / .2);
+  --shadow-card: 0 1px 2px 0 rgb(15 23 42 / .04), 0 1px 1px 0 rgb(15 23 42 / .03);
+  --shadow-concha: 0 1px 3px 0 rgb(15 23 42 / .05), 0 20px 48px -28px rgb(15 23 42 / .16);
 }
 
 /* ── Base ───────────────────────────────────────────────────── */
