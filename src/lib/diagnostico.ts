@@ -99,6 +99,20 @@ export function periodoAnterior(de: string, ate: string) {
   return { de: iso(inicio), ate: iso(fim) };
 }
 
+/**
+ * Resumo do período anterior, ou zerado quando ele mal existe.
+ *
+ * Com recorte livre, o período anterior pode cair fora do histórico que a
+ * conta tem. Comparar 59 dias contra os 31 que sobraram dava "+135%" de
+ * investimento sem nada ter mudado. Abaixo de 80% de cobertura a comparação
+ * é descartada — e como `delta` devolve `undefined` quando a base é zero, o
+ * chip de variação simplesmente não aparece.
+ */
+function anteriorComparavel(atual: PontoSerie[], anterior: PontoSerie[]) {
+  if (!atual.length || anterior.length < atual.length * 0.8) return resumir([]);
+  return resumir(anterior);
+}
+
 /* ── Demonstração ──────────────────────────────────────────────── */
 
 /* Divisão fixa entre plataformas. Fixa, e não sorteada, para a tela não
@@ -243,7 +257,7 @@ function diagnosticoDemo(r: Recorte): Diagnostico {
   return {
     serie,
     totais: totalRecorte,
-    anterior: resumir(serieAnterior),
+    anterior: anteriorComparavel(serie, serieAnterior),
     porPlataforma,
     porCliente,
     porCampanha,
@@ -417,7 +431,7 @@ export async function carregarDiagnostico(r: Recorte): Promise<Diagnostico> {
     return {
       serie: porDia(doPeriodo),
       totais: resumir(porDia(doPeriodo)),
-      anterior: resumir(porDia(doAnterior)),
+      anterior: anteriorComparavel(porDia(doPeriodo), porDia(doAnterior)),
       porPlataforma: [...plataformas.entries()]
         .map(([provedor, a]) => ({
           provedor,

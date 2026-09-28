@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Topo } from "./_componentes/topo";
 import { Kpi } from "@/components/painel/kpi";
-import { Abas } from "@/components/painel/abas";
+import { FiltroPeriodo } from "@/components/painel/filtro-periodo";
 import { Anel, Rosca, type FatiaRosca } from "@/components/painel/rosca";
 import { Faixa } from "@/components/painel/faixa";
 import { Avatar, Avatares } from "@/components/painel/avatares";
@@ -23,9 +23,9 @@ import { Etiqueta } from "@/components/ui/etiqueta";
 import { BotaoLink } from "@/components/ui/botao";
 import { exigirEquipe } from "@/lib/sessao";
 import { pode } from "@/lib/papeis";
-import { carregarSerie } from "@/lib/metricas-servidor";
-import { comparar, tracado } from "@/lib/metricas";
-import { carregarCarteira } from "@/lib/clientes";
+import { carregarDiagnostico, diasNoIntervalo } from "@/lib/diagnostico";
+import { tracado } from "@/lib/metricas";
+import { carregarCarteira, listarClientesParaSelecao } from "@/lib/clientes";
 import { carregarFunil } from "@/lib/crm";
 import { carregarFinanceiro } from "@/lib/financeiro";
 import { carregarTarefas } from "@/lib/tarefas";
@@ -38,18 +38,6 @@ const SERIES: SerieGrafico[] = [
   { chave: "receita", rotulo: "Receita atribuída", cor: "menta" },
 ];
 
-/**
- * Recortes de período.
- *
- * Nenhum passa de 45 dias porque a comparação usa o período anterior de igual
- * tamanho: 45 dias já exigem 90 de histórico, que é o que a série carrega. Um
- * recorte de 90 dias mostraria variação vazia em toda a tela.
- */
-const PERIODOS = [
-  { dias: 7, rotulo: "7 dias" },
-  { dias: 30, rotulo: "30 dias" },
-  { dias: 45, rotulo: "45 dias" },
-] as const;
 
 /* Paleta da rosca. As etapas do funil guardam a cor delas, mas aquela
    escala desce até #12316d — azul quase preto, que sobre a superfície
@@ -64,33 +52,73 @@ const TONS_ROSCA = [
   "var(--color-grafico-6)",
 ];
 
+/** `YYYY-MM-DD` válido, senão o recorte cai no padrão. */
+function data(v: string | undefined, padrao: string) {
+  return v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : padrao;
+}
+
+function recuar(dias: number) {
+  const d = new Date();
+  d.setDate(d.getDate() - (dias - 1));
+  const mes = String(d.getMonth() + 1).padStart(2, "0");
+  const dia = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mes}-${dia}`;
+}
+
 export default async function PaginaVisao({
   searchParams,
 }: {
-  searchParams: Promise<{ periodo?: string }>;
+  searchParams: Promise<{ de?: string; ate?: string; cliente?: string }>;
 }) {
   const sessao = await exigirEquipe();
   const verFinanceiro = pode(sessao.papel, "financeiro");
 
-  const { periodo } = await searchParams;
-  const escolhido = PERIODOS.find((p) => String(p.dias) === periodo) ?? PERIODOS[1];
-  const dias = escolhido.dias;
+  const p = await searchParams;
+  const de = data(p.de, recuar(30));
+  const ate = data(p.ate, hoje());
+  const clienteId = p.cliente || null;
 
-  /* Tudo em paralelo: são cinco consultas independentes e em série elas
-     somariam a latência de todas. */
-  const [metricas, carteira, funil, financeiro, quadro] = await Promise.all([
-    carregarSerie(90),
+  /* Tudo em paralelo: são consultas independentes e em série elas somariam
+     a latência de todas. */
+  const [metricas, carteira, funil, financeiro, quadro, opcoes] = await Promise.all([
+    carregarDiagnostico({ de, ate, clienteId, provedor: null }),
     carregarCarteira(),
     carregarFunil(),
     verFinanceiro ? carregarFinanceiro() : Promise.resolve({ lancamentos: [], demo: false }),
     carregarTarefas(),
+    listarClientesParaSelecao(),
   ]);
 
+  const dias = diasNoIntervalo(de, ate);
+  const clienteEscolhido = opcoes.find((c) => c.id === clienteId) ?? null;
+
   const demo = metricas.demo || carteira.demo;
-  const c = comparar(metricas.serie, dias);
+
+  /* A visão geral compara com o período anterior de igual tamanho, que o
+     diagnóstico já traz pronto. `undefined` quando não há base — é o que
+     evita o "+100%" numa conta que começou ontem. */
+  const t = metricas.totais;
+  const delta = (chave: keyof typeof t) => {
+    const base = metricas.anterior[chave];
+    if (!base) return undefined;
+    return ((t[chave] - base) / base) * 100;
+  };
+
+  /* Com um cliente escolhido, tudo o que tem dono passa a olhar só para
+     ele: carteira, tarefas e financeiro. O funil fica de fora de propósito
+     — negócio aberto ainda não é cliente, então não há a quem filtrar. */
+  const daCarteira = clienteId
+    ? carteira.clientes.filter((cl) => cl.id === clienteId)
+    : carteira.clientes;
+  const lancamentos = clienteId
+    ? financeiro.lancamentos.filter((l) => l.cliente_id === clienteId)
+    : financeiro.lancamentos;
+  const tarefas = clienteId
+    ? quadro.tarefas.filter((tf) => tf.cliente_id === clienteId)
+    : quadro.tarefas;
 
   /* ── Carteira ─────────────────────────────────────────────────── */
-  const ativos = carteira.clientes.filter((cl) => cl.status === "ativo");
+  const ativos = daCarteira.filter((cl) => cl.status === "ativo");
   const mrr = ativos.reduce((s, cl) => s + cl.fee_mensal, 0);
 
   /* ── Funil ────────────────────────────────────────────────────── */
@@ -118,7 +146,7 @@ export default async function PaginaVisao({
 
   /* ── Caixa ────────────────────────────────────────────────────── */
   const mesAtual = competencia();
-  const receitas = financeiro.lancamentos.filter((l) => l.tipo === "receita");
+  const receitas = lancamentos.filter((l) => l.tipo === "receita");
   const aReceber = receitas
     .filter((l) => ["pendente", "previsto"].includes(l.status) && l.vencimento.startsWith(mesAtual))
     .reduce((s, l) => s + l.valor, 0);
@@ -129,8 +157,8 @@ export default async function PaginaVisao({
 
   /* ── Operação ─────────────────────────────────────────────────── */
   const dia = hoje();
-  const abertas = quadro.tarefas
-    .filter((t) => t.status !== "concluida")
+  const abertas = tarefas
+    .filter((tf) => tf.status !== "concluida")
     .sort((a, b) => (a.vence_em ?? "9999").localeCompare(b.vence_em ?? "9999"))
     .slice(0, 6);
 
@@ -138,15 +166,15 @@ export default async function PaginaVisao({
      `Set` porque a mesma pessoa responde por várias tarefas. */
   const responsaveis = [
     ...new Set(
-      quadro.tarefas
-        .filter((t) => t.status !== "concluida" && t.responsavel)
-        .map((t) => t.responsavel as string),
+      tarefas
+        .filter((tf) => tf.status !== "concluida" && tf.responsavel)
+        .map((tf) => tf.responsavel as string),
     ),
   ];
 
   /* Pior saúde primeiro: a lista existe para mostrar onde agir, não para
      exibir os melhores. */
-  const contas = [...carteira.clientes]
+  const contas = [...daCarteira]
     .filter((cl) => cl.status !== "encerrado")
     .sort((a, b) => a.saude - b.saude)
     .slice(0, 6);
@@ -171,19 +199,22 @@ export default async function PaginaVisao({
         {demo && <AvisoDemo />}
         {metricas.falhou && <AvisoFalha o_que="as métricas das contas conectadas" />}
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-[13px] text-cinza">
-            Recorte de <strong className="font-semibold text-tinta">{escolhido.rotulo}</strong>,
-            comparado com os {dias} dias anteriores.
-          </p>
-          <Abas
-            itens={PERIODOS.map((p) => ({
-              rotulo: p.rotulo,
-              href: p.dias === 30 ? "/painel" : `/painel?periodo=${p.dias}`,
-              ativo: p.dias === dias,
-            }))}
-          />
-        </div>
+        <FiltroPeriodo
+          caminho="/painel"
+          clientes={opcoes}
+          de={de}
+          ate={ate}
+          clienteId={clienteId}
+        />
+
+        <p className="text-[13px] text-cinza">
+          <strong className="font-semibold text-tinta">
+            {clienteEscolhido ? clienteEscolhido.nome : "Todos os clientes"}
+          </strong>{" "}
+          · {numero(dias)} {dias === 1 ? "dia" : "dias"}, comparado com os {numero(dias)}{" "}
+          anteriores.
+        </p>
+
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Kpi
@@ -200,26 +231,26 @@ export default async function PaginaVisao({
           />
           <Kpi
             rotulo="Investimento gerido"
-            valor={brl(c.atual.investimento)}
+            valor={brl(t.investimento)}
             icone={<Megaphone />}
-            variacao={c.delta("investimento")}
-            detalhe={escolhido.rotulo}
-            serie={tracado(c.serie, "investimento")}
+            variacao={delta("investimento")}
+            detalhe={`${numero(dias)} ${dias === 1 ? "dia" : "dias"}`}
+            serie={tracado(metricas.serie, "investimento")}
           />
           <Kpi
             rotulo="Receita atribuída"
-            valor={brl(c.atual.receita)}
-            variacao={c.delta("receita")}
+            valor={brl(t.receita)}
+            variacao={delta("receita")}
             tom="menta"
             icone={<TrendingUp />}
-            serie={tracado(c.serie, "receita")}
+            serie={tracado(metricas.serie, "receita")}
           />
           <Kpi
             rotulo="ROAS médio"
-            valor={multiplo(c.atual.roas)}
+            valor={multiplo(t.roas)}
             tom="pessego"
             icone={<Target />}
-            variacao={c.delta("roas")}
+            variacao={delta("roas")}
             detalhe="receita ÷ investimento"
             dica="Consolidado de todas as contas conectadas."
           />
@@ -233,7 +264,7 @@ export default async function PaginaVisao({
                   Investimento × receita atribuída
                 </h2>
                 <p className="mt-0.5 text-xs text-cinza">
-                  Consolidado das contas conectadas · {escolhido.rotulo}
+                  Consolidado das contas conectadas · {numero(dias)} dias
                 </p>
                 <div className="mt-3">
                   <LegendaGrafico series={SERIES} />
@@ -248,7 +279,7 @@ export default async function PaginaVisao({
             </div>
 
             <GraficoArea
-              dados={c.serie}
+              dados={metricas.serie}
               series={SERIES}
               altura={286}
               vazio="Nenhuma métrica sincronizada ainda."
@@ -273,6 +304,10 @@ export default async function PaginaVisao({
               </p>
               <p className="mt-2 max-w-[24ch] text-[13px] leading-snug text-white/75">
                 Pipeline de {brl(pipeline)} ponderado pela probabilidade de cada etapa.
+                {/* O funil não segue o filtro de cliente: negócio aberto
+                    ainda não é cliente. Dizer isso evita ler o número como
+                    se fosse da conta escolhida. */}
+                {clienteEscolhido && " Toda a agência."}
               </p>
             </div>
 
@@ -311,7 +346,14 @@ export default async function PaginaVisao({
         <section className="grid gap-4 xl:grid-cols-12">
           <div className="cartao rounded-lg p-5 xl:col-span-5">
             <div className="mb-4 flex items-baseline justify-between gap-3">
-              <h2 className="font-display text-[15px] font-bold text-tinta">Onde está o pipeline</h2>
+              <h2 className="font-display text-[15px] font-bold text-tinta">
+                Onde está o pipeline
+                {clienteEscolhido && (
+                  <span className="ml-1.5 text-[11px] font-normal text-cinza-claro">
+                    toda a agência
+                  </span>
+                )}
+              </h2>
               <Link
                 href="/painel/crm"
                 className="foco-anel shrink-0 text-xs font-semibold text-acento hover:text-acento-forte"
@@ -330,22 +372,22 @@ export default async function PaginaVisao({
           <div className="cartao rounded-lg p-5 xl:col-span-7">
             <div className="mb-1 flex items-baseline justify-between gap-3">
               <h2 className="font-display text-[15px] font-bold text-tinta">Demanda e caixa</h2>
-              <span className="shrink-0 text-xs text-cinza-claro">{escolhido.rotulo}</span>
+              <span className="shrink-0 text-xs text-cinza-claro">{numero(dias)} dias</span>
             </div>
 
             <div className="divide-y divide-borda-fraca">
               <Faixa
                 rotulo="Leads no período"
-                valor={numero(c.atual.leads)}
-                detalhe={`CPL ${brl(c.atual.cpl)}`}
-                variacao={c.delta("leads")}
+                valor={numero(t.leads)}
+                detalhe={`CPL ${brl(t.cpl)}`}
+                variacao={delta("leads")}
                 icone={<Users />}
               />
               <Faixa
                 rotulo="Compras atribuídas"
-                valor={numero(c.atual.compras)}
-                detalhe={`CPA ${brl(c.atual.cpa)}`}
-                variacao={c.delta("compras")}
+                valor={numero(t.compras)}
+                detalhe={`CPA ${brl(t.cpa)}`}
+                variacao={delta("compras")}
                 cor="var(--color-sucesso)"
                 icone={<Target />}
               />
@@ -375,9 +417,9 @@ export default async function PaginaVisao({
               ) : (
                 <Faixa
                   rotulo="Cliques"
-                  valor={numero(c.atual.cliques)}
-                  detalhe={`CPC ${brl(c.atual.cpc)} · CTR ${percentual(c.atual.ctr, 2)}`}
-                  variacao={c.delta("cliques")}
+                  valor={numero(t.cliques)}
+                  detalhe={`CPC ${brl(t.cpc)} · CTR ${percentual(t.ctr, 2)}`}
+                  variacao={delta("cliques")}
                   icone={<Megaphone />}
                 />
               )}

@@ -8,7 +8,7 @@ import { Tabela, Cabecalhos, Linha, Celula, CelulaTexto } from "@/components/pai
 import { Etiqueta } from "@/components/ui/etiqueta";
 import { Avatar } from "@/components/painel/avatares";
 import { BotaoSincronizar } from "./botao-sincronizar";
-import { FiltrosMetricas } from "./filtros";
+import { FiltroPeriodo } from "@/components/painel/filtro-periodo";
 import { exigirPermissao } from "@/lib/sessao";
 import { listarClientesParaSelecao } from "@/lib/clientes";
 import { carregarDiagnostico, diasNoIntervalo } from "@/lib/diagnostico";
@@ -140,12 +140,14 @@ export default async function PaginaMetricas({
         {d.demo && <AvisoDemo />}
         {d.falhou && <AvisoFalha o_que="as métricas sincronizadas" />}
 
-        <FiltrosMetricas
+        <FiltroPeriodo
+          caminho="/painel/metricas"
           clientes={clientes}
           de={de}
           ate={ate}
           clienteId={clienteId}
           provedor={provedor}
+          comPlataforma
         />
 
         <p className="text-[13px] text-cinza">

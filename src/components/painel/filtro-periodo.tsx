@@ -55,18 +55,24 @@ function recuar(dias: number) {
   return { de: iso(de), ate: iso(ate) };
 }
 
-export function FiltrosMetricas({
+export function FiltroPeriodo({
+  caminho,
   clientes,
   de,
   ate,
   clienteId,
   provedor,
+  comPlataforma = false,
 }: {
+  /** Rota que recebe o recorte — a mesma tela, com a busca reescrita. */
+  caminho: string;
   clientes: OpcaoCliente[];
   de: string;
   ate: string;
   clienteId: string | null;
-  provedor: string | null;
+  provedor?: string | null;
+  /** Só Métricas separa por plataforma; a visão geral não. */
+  comPlataforma?: boolean;
 }) {
   const router = useRouter();
   const busca = useSearchParams();
@@ -83,9 +89,9 @@ export function FiltrosMetricas({
         else p.set(k, v);
       }
       setPendente(true);
-      router.push(`/painel/metricas?${p.toString()}`);
+      router.push(`${caminho}?${p.toString()}`);
     },
-    [busca, router],
+    [busca, router, caminho],
   );
 
   const atalhoAtivo = ATALHOS.find((a) => {
@@ -151,18 +157,20 @@ export function FiltrosMetricas({
           ))}
         </Menu>
 
-        <Menu
-          rotulo="Filtrar por plataforma"
-          valor={provedor ?? ""}
-          aoMudar={(v) => navegar({ plataforma: v || null })}
-        >
-          <option value="">Todas as plataformas</option>
-          {PLATAFORMAS.map((p) => (
-            <option key={p.v} value={p.v}>
-              {p.r}
-            </option>
-          ))}
-        </Menu>
+        {comPlataforma && (
+          <Menu
+            rotulo="Filtrar por plataforma"
+            valor={provedor ?? ""}
+            aoMudar={(v) => navegar({ plataforma: v || null })}
+          >
+            <option value="">Todas as plataformas</option>
+            {PLATAFORMAS.map((p) => (
+              <option key={p.v} value={p.v}>
+                {p.r}
+              </option>
+            ))}
+          </Menu>
+        )}
 
         {(clienteId || provedor || !atalhoAtivo) && (
           <button
@@ -170,7 +178,7 @@ export function FiltrosMetricas({
             onClick={() => {
               const p = recuar(30);
               setPendente(true);
-              router.push(`/painel/metricas?de=${p.de}&ate=${p.ate}`);
+              router.push(`${caminho}?de=${p.de}&ate=${p.ate}`);
             }}
             className="foco-anel inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[13px] font-semibold text-cinza hover:text-tinta"
           >
