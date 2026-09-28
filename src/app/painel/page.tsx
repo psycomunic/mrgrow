@@ -29,7 +29,7 @@ import { carregarCarteira, listarClientesParaSelecao } from "@/lib/clientes";
 import { carregarFunil } from "@/lib/crm";
 import { carregarFinanceiro } from "@/lib/financeiro";
 import { carregarTarefas } from "@/lib/tarefas";
-import { PRIORIDADE, STATUS_TAREFA } from "@/lib/rotulos";
+import { PRIORIDADE, STATUS_TAREFA, contratado, somarMrr } from "@/lib/rotulos";
 import { competencia, hoje } from "@/lib/tempo";
 import { brl, cn, dataCurta, divisao, multiplo, numero, percentual } from "@/lib/utils";
 
@@ -118,8 +118,10 @@ export default async function PaginaVisao({
     : quadro.tarefas;
 
   /* ── Carteira ─────────────────────────────────────────────────── */
-  const ativos = daCarteira.filter((cl) => cl.status === "ativo");
-  const mrr = ativos.reduce((s, cl) => s + cl.fee_mensal, 0);
+  /* Contrato em vigor, não só conta em operação: quem acabou de ser
+     cadastrado entra em onboarding e o fee dele já vale. */
+  const emCarteira = daCarteira.filter((cl) => contratado(cl.status));
+  const mrr = somarMrr(daCarteira);
 
   /* ── Funil ────────────────────────────────────────────────────── */
   const pipeline = funil.negocios.reduce((s, n) => s + n.valor_mensal + n.valor_unico, 0);
@@ -223,11 +225,11 @@ export default async function PaginaVisao({
             tom="menta"
             icone={<CircleDollarSign />}
             detalhe={
-              ativos.length
-                ? `${numero(ativos.length)} ativos · ticket ${brl(divisao(mrr, ativos.length))}`
-                : "nenhum cliente ativo"
+              emCarteira.length
+                ? `${numero(emCarteira.length)} contratados · ticket ${brl(divisao(mrr, emCarteira.length))}`
+                : "nenhum cliente contratado"
             }
-            dica="Soma dos fees mensais dos clientes com status ativo."
+            dica="Soma dos fees mensais dos clientes ativos e em onboarding."
           />
           <Kpi
             rotulo="Investimento gerido"

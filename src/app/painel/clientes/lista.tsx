@@ -6,6 +6,7 @@ import { Kpi } from "@/components/painel/kpi";
 import { Etiqueta } from "@/components/ui/etiqueta";
 import { brl, iniciais, multiplo, numero, slugificar } from "@/lib/utils";
 import { FichaCliente, TOM, ROTULO_STATUS, corSaude } from "./ficha";
+import { contratado, somarMrr } from "@/lib/rotulos";
 import type { ClienteCarteira } from "@/lib/clientes";
 
 type Ordem = "saude" | "fee" | "nome";
@@ -55,7 +56,8 @@ export function ListaClientes({
   }, [clientes, filtro, busca, ordem]);
 
   const ativos = visiveis.filter((c) => c.status === "ativo");
-  const mrr = ativos.reduce((s, c) => s + c.fee_mensal, 0);
+  const emCarteira = visiveis.filter((c) => contratado(c.status));
+  const mrr = somarMrr(visiveis);
   const midia = visiveis.reduce((s, c) => s + c.investimento_previsto, 0);
   const saude = visiveis.length
     ? visiveis.reduce((s, c) => s + c.saude, 0) / visiveis.length
@@ -72,7 +74,11 @@ export function ListaClientes({
           valor={numero(ativos.length)}
           detalhe={`${visiveis.length} no recorte`}
         />
-        <Kpi rotulo="MRR da carteira" valor={brl(mrr)} detalhe="somente contas ativas" />
+        <Kpi
+          rotulo="MRR da carteira"
+          valor={brl(mrr)}
+          detalhe={`${numero(emCarteira.length)} contratados · ativos e em onboarding`}
+        />
         {/* "Prevista" e não "gerida": este número é a soma do que foi orçado com
             os clientes. O investimento realizado vive em Métricas, e ver os dois
             com o mesmo rótulo em telas vizinhas confunde mais do que informa. */}

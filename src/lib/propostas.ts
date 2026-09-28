@@ -4,6 +4,7 @@ import { modoDemonstracao, registrarFalha } from "@/lib/dados";
 import { obterSessao } from "@/lib/sessao";
 import { DEMO_PROPOSTAS } from "@/lib/demo";
 import { hoje } from "@/lib/tempo";
+import { prazoValido, PRAZO_PADRAO } from "@/lib/rotulos";
 
 /**
  * O token público tem 16 bytes em hex (`encode(gen_random_bytes(16),'hex')`).
@@ -25,6 +26,8 @@ export type Proposta = {
   condicoes: string | null;
   valor_mensal: number;
   valor_setup: number;
+  /** Duração do contrato em meses; é ela que multiplica o valor mensal. */
+  meses_contrato: number;
   total: number;
   validade: string | null;
   criado_em: string;
@@ -41,15 +44,18 @@ function lerValores(condicoes: string | null) {
     return {
       mensal: Number(j.mensal ?? 0),
       setup: Number(j.setup ?? 0),
+      /* Proposta salva antes deste campo existir não tem `meses`, e cai no
+         padrão — não em zero, que zeraria o total do contrato na tela. */
+      meses: prazoValido(j.meses),
       condicoes: typeof j.texto === "string" ? j.texto : null,
     };
   } catch {
-    return { mensal: 0, setup: 0, condicoes: condicoes };
+    return { mensal: 0, setup: 0, meses: PRAZO_PADRAO, condicoes: condicoes };
   }
 }
 
-export function escreverCondicoes(mensal: number, setup: number, texto: string) {
-  return JSON.stringify({ mensal, setup, texto });
+export function escreverCondicoes(mensal: number, setup: number, texto: string, meses: number) {
+  return JSON.stringify({ mensal, setup, meses: prazoValido(meses), texto });
 }
 
 function demo(): Lista {
@@ -72,9 +78,10 @@ function demo(): Lista {
         "Landing page própria com teste A/B",
         "Painel aberto com investimento e retorno em tempo real",
       ].join("\n"),
-      condicoes: "Contrato de 3 meses iniciais. Depois disso, mensal.",
+      condicoes: "Contrato semestral. Depois disso, renovação mensal.",
       valor_mensal: p.mensal,
       valor_setup: p.setup,
+      meses_contrato: PRAZO_PADRAO,
       total: p.mensal + p.setup,
       validade: p.validade,
       criado_em: new Date().toISOString(),
@@ -126,6 +133,7 @@ function daLinha(p: Linha): Proposta {
     condicoes: v.condicoes,
     valor_mensal: mensal,
     valor_setup: v.setup,
+    meses_contrato: v.meses,
     /* Primeiro ciclo do contrato: o recorrente mais o setup. É esse o número
        que o cliente vê no aceite e o que o financeiro precisa projetar. */
     total: mensal + v.setup,

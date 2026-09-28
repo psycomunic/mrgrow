@@ -63,6 +63,36 @@ export const STATUS_CLIENTE = tabela({
   encerrado: { rotulo: "Encerrado", tom: "perigo" },
 });
 
+/**
+ * Status em que o contrato já vale dinheiro.
+ *
+ * `onboarding` conta porque o contrato foi assinado e o fee, acordado: a
+ * conta ainda está sendo instalada, mas a receita já é compromisso dos
+ * dois lados. Fora dessa lista, um cliente recém-cadastrado não aparecia
+ * em número nenhum — e quem acabou de fechar abre o painel justamente
+ * para ver o valor subir.
+ *
+ * `pausado` fica de fora porque a cobrança parou, `prospecto` porque
+ * ainda não há contrato, e `encerrado` porque acabou.
+ */
+export const STATUS_CONTRATADO = ["ativo", "onboarding"] as const;
+
+export function contratado(status: string) {
+  return (STATUS_CONTRATADO as readonly string[]).includes(status);
+}
+
+/**
+ * MRR de uma lista de clientes.
+ *
+ * Existe como função porque a mesma soma aparece na visão geral e na
+ * carteira. Enquanto era uma linha copiada nos dois lugares, mudar a
+ * regra num arquivo e esquecer o outro deixava as duas telas discordando
+ * sobre quanto a agência fatura.
+ */
+export function somarMrr(clientes: readonly { status: string; fee_mensal: number }[]) {
+  return clientes.reduce((s, c) => (contratado(c.status) ? s + c.fee_mensal : s), 0);
+}
+
 /* ── Financeiro ─────────────────────────────────────────────────── */
 
 export const STATUS_LANCAMENTO = tabela({
@@ -157,6 +187,33 @@ export const ROTULO_RECORRENCIA: Record<string, string> = {
   quinzenal: "A cada 15 dias",
   mensal: "Todo mês",
 };
+
+/* ── Propostas: duração do contrato ──────────────────────────── */
+
+/**
+ * Prazos que a agência oferece, em meses.
+ *
+ * O semestral é o padrão: tráfego pago leva de 60 a 90 dias só para sair
+ * da fase de aprendizado, então um contrato de 3 meses termina quando a
+ * operação mal começou a render — e o cliente vai embora achando que não
+ * funcionou.
+ */
+export const PRAZOS_CONTRATO = [3, 6, 12, 24] as const;
+
+export const PRAZO_PADRAO = 6;
+
+export function rotuloPrazo(meses: number) {
+  if (meses === 1) return "1 mês";
+  if (meses === 12) return "12 meses (1 ano)";
+  if (meses === 24) return "24 meses (2 anos)";
+  return `${meses} meses`;
+}
+
+/** Aceita só os prazos oferecidos; qualquer outro vira o padrão. */
+export function prazoValido(meses: unknown) {
+  const n = Number(meses);
+  return (PRAZOS_CONTRATO as readonly number[]).includes(n) ? n : PRAZO_PADRAO;
+}
 
 /* ── Financeiro: forma de pagamento ──────────────────────────── */
 

@@ -6,6 +6,7 @@ import { modoDemonstracao } from "@/lib/dados";
 import { contextoDeAcao, falha, type Banco } from "@/lib/acoes";
 import { escreverCondicoes, TOKEN_VALIDO } from "@/lib/propostas";
 import { hoje } from "@/lib/tempo";
+import { PRAZOS_CONTRATO } from "@/lib/rotulos";
 
 export type Resultado = { ok: boolean; demo: boolean; token?: string; erro?: string };
 
@@ -18,6 +19,7 @@ export type DadosProposta = {
   condicoes: string;
   valor_mensal: number;
   valor_setup: number;
+  meses_contrato: number;
   validade: string | null;
 };
 
@@ -35,6 +37,11 @@ function validar(d: DadosProposta): string | null {
   if (!d.escopo.trim()) return "Descreva ao menos um item do escopo.";
   if (d.escopo.length > 8000) return "O escopo ficou longo demais.";
   if (d.validade && !/^\d{4}-\d{2}-\d{2}$/.test(d.validade)) return "Data de validade inválida.";
+  /* Conferido aqui e não só no `select` da tela: a action é chamável direto,
+     e um prazo inventado multiplicaria o contrato por qualquer número. */
+  if (!(PRAZOS_CONTRATO as readonly number[]).includes(d.meses_contrato)) {
+    return "Prazo de contrato inválido.";
+  }
   return null;
 }
 
@@ -45,7 +52,12 @@ function paraBanco(d: DadosProposta) {
     cliente_logo_url: d.cliente_logo_url.trim() || null,
     introducao: d.introducao.trim() || null,
     escopo: d.escopo.trim(),
-    condicoes: escreverCondicoes(d.valor_mensal, d.valor_setup, d.condicoes.trim()),
+    condicoes: escreverCondicoes(
+      d.valor_mensal,
+      d.valor_setup,
+      d.condicoes.trim(),
+      d.meses_contrato,
+    ),
     /* Primeiro ciclo: recorrente + setup. Antes só o mensal ia para `total`,
        e todo relatório financeiro subestimava o contrato pelo valor do setup. */
     total: d.valor_mensal + d.valor_setup,

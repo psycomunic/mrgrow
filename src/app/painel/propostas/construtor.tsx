@@ -5,8 +5,9 @@ import { X } from "lucide-react";
 import { toast } from "sonner";
 import { Botao } from "@/components/ui/botao";
 import { Sobreposicao } from "@/components/ui/sobreposicao";
-import { Campo, Entrada, AreaTexto } from "@/components/ui/campo";
+import { Campo, Entrada, AreaTexto, Selecao } from "@/components/ui/campo";
 import { brl } from "@/lib/utils";
+import { PRAZOS_CONTRATO, PRAZO_PADRAO, rotuloPrazo } from "@/lib/rotulos";
 import { criarProposta, atualizarProposta, type DadosProposta } from "./acoes";
 import type { Proposta } from "@/lib/propostas";
 
@@ -27,9 +28,10 @@ function vazia(): DadosProposta {
     introducao: "",
     escopo: ESCOPO_PADRAO,
     condicoes:
-      "O investimento em mídia é pago diretamente por você às plataformas. O valor acima é o da assessoria. Contrato de 3 meses iniciais.",
+      "O investimento em mídia é pago diretamente por você às plataformas. O valor acima é o da assessoria.",
     valor_mensal: 0,
     valor_setup: 0,
+    meses_contrato: PRAZO_PADRAO,
     validade: null,
   };
 }
@@ -44,6 +46,7 @@ function daProposta(p: Proposta): DadosProposta {
     condicoes: p.condicoes ?? "",
     valor_mensal: p.valor_mensal,
     valor_setup: p.valor_setup,
+    meses_contrato: p.meses_contrato,
     validade: p.validade,
   };
 }
@@ -76,7 +79,7 @@ export function Construtor({
   const focar = useCallback((el: HTMLInputElement | null) => el?.focus(), []);
 
   const itens = d.escopo.split("\n").filter((l) => l.trim()).length;
-  const contrato = d.valor_mensal * 12 + d.valor_setup;
+  const contrato = d.valor_mensal * d.meses_contrato + d.valor_setup;
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
@@ -221,17 +224,34 @@ export function Construtor({
                     }
                   />
                 </Campo>
-                <Campo rotulo="Válida até">
-                  <Entrada
-                    type="date"
-                    value={d.validade ?? ""}
-                    onChange={(e) => setD((x) => ({ ...x, validade: e.target.value || null }))}
-                  />
+                <Campo rotulo="Prazo do contrato">
+                  <Selecao
+                    value={String(d.meses_contrato)}
+                    onChange={(e) =>
+                      setD((x) => ({ ...x, meses_contrato: Number(e.target.value) }))
+                    }
+                  >
+                    {PRAZOS_CONTRATO.map((m) => (
+                      <option key={m} value={m}>
+                        {rotuloPrazo(m)}
+                      </option>
+                    ))}
+                  </Selecao>
                 </Campo>
               </div>
 
+              <Campo rotulo="Válida até" className="mt-4">
+                <Entrada
+                  type="date"
+                  value={d.validade ?? ""}
+                  onChange={(e) => setD((x) => ({ ...x, validade: e.target.value || null }))}
+                />
+              </Campo>
+
               <div className="mt-3 flex items-baseline justify-between rounded-md border border-borda bg-nevoa px-4 py-3">
-                <span className="text-xs text-cinza">Contrato em 12 meses</span>
+                <span className="text-xs text-cinza">
+                  Contrato em {rotuloPrazo(d.meses_contrato)}
+                </span>
                 <span className="font-display text-lg font-extrabold text-tinta">
                   {brl(contrato)}
                 </span>

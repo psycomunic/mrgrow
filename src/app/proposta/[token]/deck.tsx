@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, Check, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { MARCA, linkWhatsApp } from "@/lib/marca";
 import { brl, dataCompleta, iniciais } from "@/lib/utils";
+import { rotuloPrazo } from "@/lib/rotulos";
 import { aceitarProposta } from "@/app/painel/propostas/acoes";
 import type { Proposta } from "@/lib/propostas";
 
@@ -26,7 +27,7 @@ export function Deck({ proposta }: { proposta: Proposta }) {
     .map((l) => l.replace(/^[-•*]\s*/, "").trim())
     .filter(Boolean);
 
-  const contrato = proposta.valor_mensal * 12 + proposta.valor_setup;
+  const contrato = proposta.valor_mensal * proposta.meses_contrato + proposta.valor_setup;
   const total = 5;
 
   const irPara = useCallback((i: number) => {
@@ -180,7 +181,7 @@ export function Deck({ proposta }: { proposta: Proposta }) {
                   </div>
                 )}
                 <div>
-                  <dt>Contrato em 12 meses</dt>
+                  <dt>Contrato em {rotuloPrazo(proposta.meses_contrato)}</dt>
                   <dd>{brl(contrato)}</dd>
                 </div>
                 {proposta.validade && (
