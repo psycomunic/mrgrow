@@ -150,6 +150,7 @@ export default async function PaginaVisao({
       <Topo
         titulo="Visão geral"
         descricao="O estado da agência agora — comercial, operação e caixa."
+        banner={<Banner />}
         acao={
           <BotaoLink href="/painel/crm" tamanho="sm">
             Abrir CRM
@@ -158,8 +159,6 @@ export default async function PaginaVisao({
       />
 
       <div className="space-y-4 p-5 sm:p-8">
-        <Banner />
-
         {demo && <AvisoDemo />}
         {metricas.falhou && <AvisoFalha o_que="as métricas das contas conectadas" />}
 
