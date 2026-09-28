@@ -1,40 +1,38 @@
 import Image from "next/image";
 
 /**
- * Banner institucional, na faixa mais alta do painel.
+ * Banner institucional, no lugar do título da página.
  *
  * Para trocar a arte, basta substituir o arquivo em `public/` e ajustar
- * `IMAGEM` e a proporção da classe `xl:aspect-…` — nada mais no componente
+ * `IMAGEM` e a proporção da classe `sm:aspect-…` — nada mais no componente
  * depende da peça atual.
  *
- * A arte é larguíssima (1447×193, quase 7,5:1) e já traz o texto embutido. Na
- * largura cheia do desktop ela aparece inteira, na proporção original. Abaixo
- * disso, manter a proporção encolheria o banner a uma tira de 50px e a
- * manchete viraria um borrão — então em tela estreita o banner ganha altura
- * fixa e a arte é recortada. O recorte puxa para a esquerda porque é lá que
- * está o texto (medido: de 15% a 56% da largura); quem sai de cena é a pessoa
- * à direita, que é o que a peça tem de mais dispensável.
+ * Ele vive dentro da barra do cabeçalho, então a altura é a da própria barra
+ * e é ela que manda: a largura sai da proporção da arte (1447×193), e aí a
+ * peça aparece inteira, sem recorte nenhum, à esquerda da busca.
  *
- * As duas medidas do recorte saíram de conta, não de tentativa:
+ * O `self-start` do `sm` existe porque, enquanto a barra empilha, o item de
+ * flex estica na largura por padrão: a arte ia a 740px de largura por 80px de
+ * altura e perdia uma tira em cima e embaixo, cortando o logo.
  *
- * - a altura manda na ampliação, e ampliar demais espreme a largura visível.
- *   Para a manchete caber numa tela de 320px sobrando espaço para o botão de
- *   menu, a altura precisa ficar em 82px ou menos — daí os 80.
- * - o deslocamento de 8% é o que faz o texto começar depois desse botão, que
- *   é `fixed` no canto superior esquerdo e passaria por cima de "Seja".
+ * No celular a barra empilha e sobra pouca largura — na proporção original a
+ * arte viraria uma tira de 37px. Ali ela ganha altura fixa e é recortada pela
+ * esquerda, que é onde está o texto (medido nos pixels da peça: de 15% a 56%
+ * da largura). Quem sai de cena é a pessoa à direita, que é o que a arte tem
+ * de mais dispensável.
  */
 const IMAGEM = "/banner-painel.png";
 const ALTERNATIVO = "Seja bem-vindo à MR Grow — estratégia, conteúdo e tráfego";
 
 export function Banner() {
   return (
-    <div className="relative h-20 overflow-hidden sm:h-33 lg:rounded-t-xl xl:aspect-1447/193 xl:h-auto">
+    <div className="relative h-14 w-full overflow-hidden rounded-md sm:aspect-1447/193 sm:h-20 sm:w-auto sm:self-start lg:self-center">
       <Image
         src={IMAGEM}
         alt={ALTERNATIVO}
         fill
-        sizes="(max-width: 80rem) 100vw, 1280px"
-        className="object-cover object-[8%_center] xl:object-center"
+        sizes="(max-width: 40rem) 100vw, 600px"
+        className="object-cover object-[10%_center] sm:object-center"
         priority
       />
     </div>

@@ -147,9 +147,10 @@ export default async function PaginaVisao({
 
   return (
     <>
+      {/* Sem `descricao`: com banner, o bloco do título dá lugar à arte e a
+          descrição não teria onde aparecer. */}
       <Topo
         titulo="Visão geral"
-        descricao="O estado da agência agora — comercial, operação e caixa."
         banner={<Banner />}
         acao={
           <BotaoLink href="/painel/crm" tamanho="sm">
