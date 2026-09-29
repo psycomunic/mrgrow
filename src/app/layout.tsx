@@ -48,6 +48,14 @@ export const metadata: Metadata = {
   },
   description: MARCA.descricao,
   applicationName: MARCA.nome,
+  /* O iPhone não lê o manifesto: ele tem as próprias marcas para abrir em
+     tela cheia, e sem elas "Adicionar à Tela de Início" cria um atalho
+     que abre no Safari com barra de endereço — ou seja, não vira app. */
+  appleWebApp: {
+    capable: true,
+    title: MARCA.nome,
+    statusBarStyle: "black-translucent",
+  },
   authors: [{ name: MARCA.fundador }],
   keywords: [
     "agência de tráfego pago",
@@ -74,6 +82,9 @@ export const viewport: Viewport = {
   themeColor: "#04060b",
   width: "device-width",
   initialScale: 1,
+  /* Respeita o recorte da câmera e a barra de gestos do iPhone: sem isto
+     a tela cheia do app deixa faixas brancas em cima e embaixo. */
+  viewportFit: "cover",
 };
 
 export default function LayoutRaiz({ children }: { children: React.ReactNode }) {

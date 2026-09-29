@@ -1,4 +1,5 @@
 import { Kpi } from "@/components/painel/kpi";
+import { ConviteInstalacao } from "@/components/painel/instalar";
 import { GraficoArea, LegendaGrafico, type SerieGrafico } from "@/components/painel/grafico-area";
 import { AvisoDemo } from "@/components/painel/aviso-demo";
 import { carregarSerie } from "@/lib/metricas-servidor";
@@ -16,6 +17,7 @@ export default async function PaginaPortal() {
 
   return (
     <div className="space-y-6">
+        <ConviteInstalacao />
       <div>
         <h1 className="font-display text-2xl font-bold tracking-tight text-tinta">
           Sua conta nos últimos 30 dias
