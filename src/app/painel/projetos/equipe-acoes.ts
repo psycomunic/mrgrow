@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { contextoDeAcao, falha, fkDaOrganizacao, pertence, type Resultado } from "@/lib/acoes";
+import { contextoDeAcao, ehDaEquipe, falha, pertence, type Resultado } from "@/lib/acoes";
 
 export type { Resultado };
 
@@ -74,6 +74,11 @@ export async function adicionarAoProjeto(
   try {
     if (!(await pertence(db, "projetos", projetoId, sessao.organizacaoId))) {
       return { ok: false, demo: false, erro: "Projeto não encontrado." };
+    }
+    /* Sem isto, um id de perfil de outra organização entraria na equipe —
+       o `insert` só exige que o perfil exista, não que seja da casa. */
+    if (!perfilId || !(await ehDaEquipe(db, perfilId, sessao.organizacaoId))) {
+      return { ok: false, demo: false, erro: "Essa pessoa não está na equipe." };
     }
 
     const { error } = await db.from("equipe_projeto").insert({
@@ -218,7 +223,7 @@ export async function adicionarPasso(
 
     if (!projeto) return { ok: false, demo: false, erro: "Projeto não encontrado." };
 
-    if (responsavelId && !(await fkDaOrganizacao(db, "perfis", responsavelId, sessao.organizacaoId))) {
+    if (responsavelId && !(await ehDaEquipe(db, responsavelId, sessao.organizacaoId))) {
       return { ok: false, demo: false, erro: "Responsável não encontrado." };
     }
 

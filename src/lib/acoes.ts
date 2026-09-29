@@ -74,6 +74,33 @@ export async function pertence(
  * outra organização: o cartão desaparece do quadro e o histórico registra uma
  * etapa alheia.
  */
+/**
+ * Se a pessoa é da equipe desta organização.
+ *
+ * `perfis` não tem `organizacao_id` — o vínculo mora em
+ * `membros_organizacao`, porque a mesma pessoa pode pertencer a mais de
+ * uma organização. Usar `fkDaOrganizacao` aqui filtra por uma coluna que
+ * não existe e recusa todo mundo: foi o que fez "Responsável não
+ * encontrado" aparecer ao salvar um projeto com responsável válido.
+ */
+export async function ehDaEquipe(
+  db: Banco,
+  perfilId: string | null | undefined,
+  organizacaoId: string,
+): Promise<boolean> {
+  if (!perfilId) return true;
+
+  const { data } = await db
+    .from("membros_organizacao")
+    .select("usuario_id")
+    .eq("usuario_id", perfilId)
+    .eq("organizacao_id", organizacaoId)
+    .eq("ativo", true)
+    .maybeSingle();
+
+  return Boolean(data);
+}
+
 export async function fkDaOrganizacao(
   db: Banco,
   tabela: string,

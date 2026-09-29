@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { contextoDeAcao, falha, fkDaOrganizacao, pertence, type Resultado } from "@/lib/acoes";
+import { contextoDeAcao, ehDaEquipe, falha, fkDaOrganizacao, pertence, type Resultado } from "@/lib/acoes";
 import { STATUS_PROJETO } from "@/lib/rotulos";
 
 export type { Resultado };
@@ -59,7 +59,7 @@ export async function criarProjeto(d: DadosProjeto): Promise<Resultado> {
     if (!(await fkDaOrganizacao(db, "clientes", d.cliente_id, sessao.organizacaoId))) {
       return { ok: false, demo: false, erro: "Cliente não encontrado." };
     }
-    if (!(await fkDaOrganizacao(db, "perfis", d.responsavel_id, sessao.organizacaoId))) {
+    if (!(await ehDaEquipe(db, d.responsavel_id, sessao.organizacaoId))) {
       return { ok: false, demo: false, erro: "Responsável não encontrado." };
     }
 
@@ -92,7 +92,7 @@ export async function atualizarProjeto(id: string, d: DadosProjeto): Promise<Res
     if (!(await fkDaOrganizacao(db, "clientes", d.cliente_id, sessao.organizacaoId))) {
       return { ok: false, demo: false, erro: "Cliente não encontrado." };
     }
-    if (!(await fkDaOrganizacao(db, "perfis", d.responsavel_id, sessao.organizacaoId))) {
+    if (!(await ehDaEquipe(db, d.responsavel_id, sessao.organizacaoId))) {
       return { ok: false, demo: false, erro: "Responsável não encontrado." };
     }
 
