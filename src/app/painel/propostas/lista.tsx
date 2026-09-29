@@ -12,14 +12,15 @@ import { Construtor } from "./construtor";
 import { excluirProposta } from "./acoes";
 import type { Proposta } from "@/lib/propostas";
 
-const TOM: Record<string, "azul" | "alerta" | "sucesso" | "perigo" | "neutro"> = {
-  rascunho: "neutro",
-  enviada: "azul",
-  visualizada: "alerta",
-  aceita: "sucesso",
-  recusada: "perigo",
-  expirada: "neutro",
-};
+const TOM: Record<string, "azul" | "alerta" | "sucesso" | "perigo" | "neutro"> =
+  {
+    rascunho: "neutro",
+    enviada: "azul",
+    visualizada: "alerta",
+    aceita: "sucesso",
+    recusada: "perigo",
+    expirada: "neutro",
+  };
 
 const ROTULO: Record<string, string> = {
   rascunho: "Rascunho",
@@ -30,7 +31,11 @@ const ROTULO: Record<string, string> = {
   expirada: "Expirada",
 };
 
-export function ListaPropostas({ propostas: iniciais }: { propostas: Proposta[] }) {
+export function ListaPropostas({
+  propostas: iniciais,
+}: {
+  propostas: Proposta[];
+}) {
   const [propostas, setPropostas] = useState(iniciais);
   const [criando, setCriando] = useState(false);
   const [editando, setEditando] = useState<Proposta | null>(null);
@@ -38,19 +43,27 @@ export function ListaPropostas({ propostas: iniciais }: { propostas: Proposta[] 
   const [copiado, setCopiado] = useState<string | null>(null);
 
   const kpis = useMemo(() => {
-    const abertas = propostas.filter((p) => ["enviada", "visualizada"].includes(p.status));
-    const respondidas = propostas.filter((p) => ["aceita", "recusada"].includes(p.status));
+    const abertas = propostas.filter((p) =>
+      ["enviada", "visualizada"].includes(p.status),
+    );
+    const respondidas = propostas.filter((p) =>
+      ["aceita", "recusada"].includes(p.status),
+    );
     const aceitas = propostas.filter((p) => p.status === "aceita");
     return {
       abertas: abertas.length,
       valorAberto: abertas.reduce((s, p) => s + p.valor_mensal, 0),
-      taxa: respondidas.length ? (aceitas.length / respondidas.length) * 100 : 0,
+      taxa: respondidas.length
+        ? (aceitas.length / respondidas.length) * 100
+        : 0,
       ganho: aceitas.reduce((s, p) => s + p.valor_mensal, 0),
     };
   }, [propostas]);
 
   function endereco(token: string) {
-    return typeof window === "undefined" ? "" : `${window.location.origin}/proposta/${token}`;
+    return typeof window === "undefined"
+      ? ""
+      : `${window.location.origin}/proposta/${token}`;
   }
 
   async function copiar(token: string) {
@@ -60,12 +73,15 @@ export function ListaPropostas({ propostas: iniciais }: { propostas: Proposta[] 
       toast.success("Link copiado.");
       window.setTimeout(() => setCopiado(null), 2000);
     } catch {
-      toast.error("O navegador bloqueou a cópia. Abra o link e copie da barra.");
+      toast.error(
+        "O navegador bloqueou a cópia. Abra o link e copie da barra.",
+      );
     }
   }
 
   async function remover(p: Proposta) {
-    if (!confirm(`Excluir a proposta ${p.numero}? Isso não pode ser desfeito.`)) return;
+    if (!confirm(`Excluir a proposta ${p.numero}? Isso não pode ser desfeito.`))
+      return;
     const anterior = propostas;
     setPropostas((l) => l.filter((x) => x.id !== p.id));
     const r = await excluirProposta(p.id);
@@ -80,18 +96,30 @@ export function ListaPropostas({ propostas: iniciais }: { propostas: Proposta[] 
   return (
     <>
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Kpi rotulo="Em aberto"
-  dica="Propostas enviadas ou visualizadas que ainda não foram respondidas nem venceram." valor={numero(kpis.abertas)} detalhe="aguardando resposta" />
-        <Kpi rotulo="Valor em negociação"
-  dica="Soma mensal recorrente das propostas em aberto. Não inclui setup nem o total do contrato." valor={brl(kpis.valorAberto)} detalhe="recorrente mensal" />
+        <Kpi
+          rotulo="Em aberto"
+          dica="Propostas enviadas ou visualizadas que ainda não foram respondidas nem venceram."
+          valor={numero(kpis.abertas)}
+          detalhe="aguardando resposta"
+        />
+        <Kpi
+          rotulo="Valor em negociação"
+          dica="Soma mensal recorrente das propostas em aberto. Não inclui setup nem o total do contrato."
+          valor={brl(kpis.valorAberto)}
+          detalhe="recorrente mensal"
+        />
         <Kpi
           rotulo="Taxa de aceite"
           dica="Quantas das propostas respondidas viraram contrato. Propostas ainda em aberto não entram na conta."
           valor={percentual(kpis.taxa, 0)}
           detalhe="sobre as respondidas"
         />
-        <Kpi rotulo="Ganho fechado"
-  dica="Receita mensal das propostas aceitas." valor={brl(kpis.ganho)} detalhe="propostas aceitas" />
+        <Kpi
+          rotulo="Ganho fechado"
+          dica="Receita mensal das propostas aceitas."
+          valor={brl(kpis.ganho)}
+          detalhe="propostas aceitas"
+        />
       </section>
 
       <div className="flex justify-end">
@@ -106,13 +134,24 @@ export function ListaPropostas({ propostas: iniciais }: { propostas: Proposta[] 
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-mrg-500/40 bg-mrg-500/10 p-4">
           <Check className="size-5 shrink-0 text-acento" />
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-tinta">Proposta criada. O link é este:</p>
-            <p className="mt-0.5 truncate font-mono text-xs text-acento-forte">{endereco(linkNovo)}</p>
+            <p className="text-sm font-semibold text-tinta">
+              Proposta criada. O link é este:
+            </p>
+            <p className="mt-0.5 truncate font-mono text-xs text-acento-forte">
+              {endereco(linkNovo)}
+            </p>
           </div>
-          <Botao tamanho="sm" variante="contorno" onClick={() => copiar(linkNovo)}>
+          <Botao
+            tamanho="sm"
+            variante="contorno"
+            onClick={() => copiar(linkNovo)}
+          >
             <Copy className="size-4" /> Copiar
           </Botao>
-          <Botao tamanho="sm" onClick={() => window.open(endereco(linkNovo), "_blank")}>
+          <Botao
+            tamanho="sm"
+            onClick={() => window.open(endereco(linkNovo), "_blank")}
+          >
             <ExternalLink className="size-4" /> Abrir
           </Botao>
           <button
@@ -130,11 +169,15 @@ export function ListaPropostas({ propostas: iniciais }: { propostas: Proposta[] 
         </p>
       ) : (
         <Tabela>
-          <Cabecalhos colunas={["Número", "Título", "Valor", "Validade", "Status", ""]} />
+          <Cabecalhos
+            colunas={["Número", "Título", "Valor", "Validade", "Status", ""]}
+          />
           <tbody>
             {propostas.map((p) => (
               <Linha key={p.id}>
-                <Celula className="font-mono text-xs text-cinza">{p.numero}</Celula>
+                <Celula className="font-mono text-xs text-cinza">
+                  {p.numero}
+                </Celula>
                 <Celula className="text-tinta">
                   <span className="block font-medium">{p.titulo}</span>
                   {p.cliente_nome && (
@@ -143,13 +186,17 @@ export function ListaPropostas({ propostas: iniciais }: { propostas: Proposta[] 
                 </Celula>
                 <Celula className="font-medium text-tinta">
                   {brl(p.valor_mensal)}
-                  <span className="text-xs font-normal text-cinza-claro">/mês</span>
+                  <span className="text-xs font-normal text-cinza-claro">
+                    /mês
+                  </span>
                 </Celula>
                 <Celula className="text-cinza">
                   {p.validade ? dataCompleta(p.validade) : "—"}
                 </Celula>
                 <Celula>
-                  <Etiqueta tom={TOM[p.status] ?? "neutro"}>{ROTULO[p.status] ?? p.status}</Etiqueta>
+                  <Etiqueta tom={TOM[p.status] ?? "neutro"}>
+                    {ROTULO[p.status] ?? p.status}
+                  </Etiqueta>
                 </Celula>
                 <Celula>
                   <div className="flex items-center justify-end gap-1">
@@ -185,7 +232,10 @@ export function ListaPropostas({ propostas: iniciais }: { propostas: Proposta[] 
       )}
 
       {criando && (
-        <Construtor aoFechar={() => setCriando(false)} aoGerarLink={(t) => setLinkNovo(t)} />
+        <Construtor
+          aoFechar={() => setCriando(false)}
+          aoGerarLink={(t) => setLinkNovo(t)}
+        />
       )}
       {editando && (
         <Construtor

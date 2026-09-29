@@ -1,5 +1,8 @@
 import "server-only";
-import { criarClienteAdmin, criarClienteServidor } from "@/lib/supabase/servidor";
+import {
+  criarClienteAdmin,
+  criarClienteServidor,
+} from "@/lib/supabase/servidor";
 import { modoDemonstracao, registrarFalha } from "@/lib/dados";
 import { obterSessao } from "@/lib/sessao";
 import { DEMO_PROPOSTAS } from "@/lib/demo";
@@ -12,6 +15,44 @@ import { prazoValido, PRAZO_PADRAO } from "@/lib/rotulos";
  * um oráculo para strings arbitrárias vindas da URL.
  */
 export const TOKEN_VALIDO = /^[0-9a-f]{32}$/i;
+
+/** Um serviço escolhido para esta proposta, com o preço negociado. */
+export type ServicoEscolhido = { id: string; fee: number };
+
+/** Um bloco de escopo escrito à mão, quando o catálogo não cobre. */
+export type Frente = { frente: string; itens: string[] };
+
+/**
+ * O conteúdo narrativo da proposta.
+ *
+ * Mora no mesmo JSON de `condicoes` que já guardava os valores. É o
+ * caminho sem migração, e a coluna já era um saco de campos por decisão
+ * anterior — abrir uma tabela nova para texto que só esta tela lê seria
+ * cerimônia sem ganho.
+ *
+ * Tudo é opcional e tudo tem lista vazia como padrão: proposta gravada
+ * antes destes campos existirem continua abrindo, só com menos telas.
+ */
+export type Narrativa = {
+  /** O que foi encontrado na conta do cliente. Abre a argumentação. */
+  diagnostico: string[];
+  /** Serviços do catálogo, com o fee de cada um. */
+  servicos: ServicoEscolhido[];
+  /** Escopo em blocos, para o que o catálogo não cobre. */
+  frentes: Frente[];
+  /** Condições negociadas nesta proposta, acima das de sempre. */
+  condicoesExtras: string[];
+  /** O que acontece depois do sim. */
+  proximosPassos: string[];
+};
+
+export const NARRATIVA_VAZIA: Narrativa = {
+  diagnostico: [],
+  servicos: [],
+  frentes: [],
+  condicoesExtras: [],
+  proximosPassos: [],
+};
 
 export type Proposta = {
   id: string;
@@ -32,6 +73,7 @@ export type Proposta = {
   validade: string | null;
   criado_em: string;
   organizacao_id: string;
+  narrativa: Narrativa;
 };
 
 export type Lista = { propostas: Proposta[]; demo: boolean };
@@ -39,10 +81,51 @@ export type Lista = { propostas: Proposta[]; demo: boolean };
 /* O schema guarda um `total` só. A proposta da agência é sempre
    recorrente + setup, então os dois vivem em `condicoes` como JSON e o
    `total` fica com o recorrente, que é o que a lista ordena. */
+/** Aceita só string não vazia, e joga fora o resto do que vier no JSON. */
+function listaDeTexto(v: unknown): string[] {
+  return Array.isArray(v)
+    ? v.filter((x): x is string => typeof x === "string" && x.trim().length > 0)
+    : [];
+}
+
+function lerNarrativa(j: Record<string, unknown>): Narrativa {
+  const servicos = Array.isArray(j.servicos)
+    ? j.servicos
+        .filter(
+          (s): s is Record<string, unknown> =>
+            typeof s === "object" && s !== null,
+        )
+        .map((s) => ({ id: String(s.id ?? ""), fee: Number(s.fee ?? 0) }))
+        .filter((s) => s.id.length > 0)
+    : [];
+
+  const frentes = Array.isArray(j.frentes)
+    ? j.frentes
+        .filter(
+          (f): f is Record<string, unknown> =>
+            typeof f === "object" && f !== null,
+        )
+        .map((f) => ({
+          frente: String(f.frente ?? ""),
+          itens: listaDeTexto(f.itens),
+        }))
+        .filter((f) => f.frente.length > 0 && f.itens.length > 0)
+    : [];
+
+  return {
+    diagnostico: listaDeTexto(j.diagnostico),
+    servicos,
+    frentes,
+    condicoesExtras: listaDeTexto(j.condicoesExtras),
+    proximosPassos: listaDeTexto(j.proximosPassos),
+  };
+}
+
 function lerValores(condicoes: string | null) {
   try {
     const j = JSON.parse(condicoes ?? "{}");
     return {
+      narrativa: lerNarrativa(j),
       mensal: Number(j.mensal ?? 0),
       setup: Number(j.setup ?? 0),
       /* Proposta salva antes deste campo existir não tem `meses`, e cai no
@@ -51,12 +134,32 @@ function lerValores(condicoes: string | null) {
       condicoes: typeof j.texto === "string" ? j.texto : null,
     };
   } catch {
-    return { mensal: 0, setup: 0, meses: PRAZO_PADRAO, condicoes: condicoes };
+    /* Condição antiga, gravada como texto puro antes do JSON existir.
+       O texto continua valendo; a narrativa nasce vazia. */
+    return {
+      narrativa: NARRATIVA_VAZIA,
+      mensal: 0,
+      setup: 0,
+      meses: PRAZO_PADRAO,
+      condicoes: condicoes,
+    };
   }
 }
 
-export function escreverCondicoes(mensal: number, setup: number, texto: string, meses: number) {
-  return JSON.stringify({ mensal, setup, meses: prazoValido(meses), texto });
+export function escreverCondicoes(
+  mensal: number,
+  setup: number,
+  texto: string,
+  meses: number,
+  narrativa: Narrativa = NARRATIVA_VAZIA,
+) {
+  return JSON.stringify({
+    mensal,
+    setup,
+    meses: prazoValido(meses),
+    texto,
+    ...narrativa,
+  });
 }
 
 function demo(): Lista {
@@ -87,6 +190,37 @@ function demo(): Lista {
       total: p.mensal + p.setup,
       validade: p.validade,
       criado_em: new Date().toISOString(),
+      /* A demonstração carrega a proposta inteira, e não um esqueleto:
+         é por estes links que a agência confere o documento antes de
+         mandar o primeiro de verdade. Uma demo pela metade faria a
+         conferência passar por cima justamente das telas novas. */
+      narrativa: {
+        diagnostico: [
+          "A conta investe todo mês, mas ninguém sabe dizer quanto voltou. Não há rastreamento de conversão instalado — o que existe é o número que a própria plataforma declara.",
+          "O conteúdo da rede e o que vai para o anúncio são decididos em lugares diferentes, por pessoas diferentes. A marca fala uma coisa no feed e outra no criativo.",
+          "Não existe calendário. O post do dia é escolhido na véspera, e o mês termina sem ninguém saber o que foi testado.",
+          "A verba está concentrada em público frio. Quem já visitou o site e quem já comprou não recebem nada depois.",
+        ],
+        servicos: [
+          { id: "estrategia", fee: 0 },
+          { id: "social", fee: 0 },
+          { id: "meta", fee: 0 },
+          { id: "google", fee: 0 },
+          { id: "relatorio", fee: 0 },
+          { id: "implantacao", fee: p.setup },
+        ],
+        frentes: [],
+        condicoesExtras: [
+          `Contrato de ${PRAZO_PADRAO} meses. Depois disso, renovação mensal, sem multa para sair.`,
+        ],
+        proximosPassos: [
+          "Você responde no WhatsApp e a MR Grow envia o contrato para assinatura digital.",
+          "Kick off na mesma semana: acessos, tom de voz e as metas do primeiro trimestre.",
+          "Implantação do rastreamento e auditoria da conta, antes de subir campanha.",
+          "Primeiro calendário aprovado e campanhas no ar em até 15 dias do aceite.",
+          "Painel liberado no seu nome, com investimento e retorno atualizados sozinhos.",
+        ],
+      },
     })),
     demo: true,
   };
@@ -143,6 +277,7 @@ function daLinha(p: Linha): Proposta {
     validade: p.validade,
     criado_em: p.criado_em,
     organizacao_id: p.organizacao_id,
+    narrativa: v.narrativa,
   };
 }
 
@@ -170,7 +305,10 @@ export async function carregarPropostas(): Promise<Lista> {
       registrarFalha("carregarPropostas", error);
       return { propostas: [], demo: false };
     }
-    return { propostas: (data as unknown as Linha[]).map(daLinha), demo: false };
+    return {
+      propostas: (data as unknown as Linha[]).map(daLinha),
+      demo: false,
+    };
   } catch (e) {
     registrarFalha("carregarPropostas", e);
     return { propostas: [], demo: false };
@@ -181,7 +319,9 @@ export async function carregarPropostas(): Promise<Lista> {
  * Busca a proposta pelo token público. Sem sessão: é a rota que o cliente
  * abre. O token é aleatório de 16 bytes, gerado pelo banco.
  */
-export async function carregarPorToken(token: string): Promise<Proposta | null> {
+export async function carregarPorToken(
+  token: string,
+): Promise<Proposta | null> {
   if (modoDemonstracao()) {
     return demo().propostas.find((p) => p.token === token) ?? null;
   }
@@ -210,7 +350,10 @@ export async function carregarPorToken(token: string): Promise<Proposta | null> 
     if (proposta.status === "enviada") {
       await db
         .from("propostas")
-        .update({ status: "visualizada", visualizada_em: new Date().toISOString() })
+        .update({
+          status: "visualizada",
+          visualizada_em: new Date().toISOString(),
+        })
         .eq("id", proposta.id)
         .is("visualizada_em", null);
     }
@@ -241,7 +384,9 @@ export type MarcaAgencia = {
  * mesma da proposta — o token já provou que a pessoa pode ver este
  * documento, e daí sai a organização. Só campos que a proposta exibe.
  */
-export async function carregarMarcaPublica(organizacaoId: string): Promise<MarcaAgencia | null> {
+export async function carregarMarcaPublica(
+  organizacaoId: string,
+): Promise<MarcaAgencia | null> {
   if (modoDemonstracao() || organizacaoId === "demo") return null;
 
   try {
@@ -273,7 +418,9 @@ export async function carregarMarcaPublica(organizacaoId: string): Promise<Marca
       logo_url: l.logo_url,
       /* A cor entra em `style`; sem conferir o formato, o que estiver
          gravado vira valor de CSS na página aberta pelo cliente. */
-      cor: /^#[0-9a-f]{6}$/i.test(l.cor_primaria ?? "") ? (l.cor_primaria as string) : "#1668f5",
+      cor: /^#[0-9a-f]{6}$/i.test(l.cor_primaria ?? "")
+        ? (l.cor_primaria as string)
+        : "#1668f5",
       whatsapp: texto("whatsapp"),
       email: texto("email_contato"),
       site: texto("site"),

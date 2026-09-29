@@ -1,891 +1,625 @@
-/* Proposta comercial aberta por link.
-   CSS próprio, fora do Tailwind do painel: esta página é lida por quem
-   não tem conta, costuma ser impressa ou salva em PDF, e precisa se
-   sustentar sozinha. */
+/* ═══════════════════════════════════════════════════════════════════
+   A proposta comercial da MR Grow.
 
-.doc {
-  /* Capa e aceite: a "capa dura". Azul tão escuro que lê como preto, mas
-     que na tela ao lado do branco puxa para a marca. */
-  --capa: #080b12;
-  --capa-2: #0e1524;
+   Folha própria, fora do Tailwind do painel, por um motivo prático: a
+   proposta é o único documento que o cliente final abre, e ela precisa
+   ficar igual daqui a um ano mesmo que o painel mude de tema. Aqui os
+   valores são literais.
 
-  /* Miolo: papel. Branco levemente frio para não brigar com o azul. */
-  --papel: #fbfcfe;
-  --tinta: #0c1220;
-  --grafite: #59647a;
-  --fraca: #8b94a6;
-  --linha: #e6ebf3;
-  --linha-forte: #ccd6e6;
+   A estrutura é de apresentação que passa para o lado. A identidade é a
+   da MR Grow: azul #1668f5 sobre quase preto, Bricolage no título,
+   Newsreader na prosa e mono nos números.
+   ═══════════════════════════════════════════════════════════════════ */
 
-  /* Acento: sobrescrito pela cor da agência nas Configurações. */
+.pp {
+  --tinta: #04060b;
+  --tinta-2: #0b0f17;
   --azul: #1668f5;
-  --azul-fraco: #eef4ff;
+  --azul-claro: #5798ff;
+  --azul-forte: #0b4fd1;
+  --branco: #ffffff;
+  --neve: #c7cfdd;
+  --cinza: #8b95a8;
+  --fio: rgba(255, 255, 255, 0.1);
+  --fio-forte: rgba(87, 152, 255, 0.4);
 
-  --medida: 60ch;
-  --gutter: clamp(1.25rem, 5vw, 3rem);
+  /* Uma escala só, fluida, para os três tamanhos de texto que o
+     documento tem. `clamp` porque o mesmo deck é lido num telefone de
+     360px e num monitor de 27 polegadas, e ponto fixo perde nos dois. */
+  --mostro: clamp(2.6rem, 8.5vw, 5.2rem);
+  --titulo: clamp(1.85rem, 5vw, 3.1rem);
+  --guia: clamp(1rem, 2.5vw, 1.15rem);
 
-  overflow-x: clip;
-  background: var(--papel);
-  color: var(--tinta);
-  font-family: var(--fonte-prosa), Georgia, "Times New Roman", serif;
-  font-size: 17px;
-  line-height: 1.65;
+  color: var(--branco);
+  background: var(--tinta);
+  font-family: var(--fonte-prosa), Georgia, serif;
   -webkit-font-smoothing: antialiased;
 }
 
-.doc *,
-.doc *::before,
-.doc *::after {
+.pp *,
+.pp *::before,
+.pp *::after {
   box-sizing: border-box;
 }
 
-/* Filho de grade e de flex tem `min-width: auto`, ou seja, não encolhe
-   abaixo do próprio conteúdo. Numa tela de 390px isso empurra a página
-   inteira para o lado e o texto sai cortado à direita — sem barra de
-   rolagem visível, então parece corte de design, não estouro. */
-.miolo > *,
-.paginas > *,
-.livro__linhas > div > * {
-  min-width: 0;
-}
+/* ── Palco ───────────────────────────────────────────────────────── */
 
-/* Nome de cliente e endereço longos não têm onde quebrar. Cortar dentro
-   da palavra é feio; estourar a página é pior. */
-.prosa,
-.capa__ficha dd,
-.escopo li,
-.faq dd {
-  overflow-wrap: anywhere;
-}
-
-.doc :focus-visible {
-  outline: 2px solid var(--azul);
-  outline-offset: 3px;
-  border-radius: 3px;
-}
-
-/* ── Barra fixa ──────────────────────────────────────────────────── */
-
-.barra {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.7rem var(--gutter);
-  background: rgb(251 252 254 / 0.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--linha);
-  font-family: var(--fonte-dado), ui-monospace, monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.barra__num {
-  font-weight: 600;
-  color: var(--tinta);
-}
-
-.barra__sep {
-  width: 1px;
-  height: 0.9rem;
-  background: var(--linha-forte);
-}
-
-.barra__cli {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--grafite);
-}
-
-.barra__cta {
-  flex-shrink: 0;
-  padding: 0.45rem 0.9rem;
-  border: 0;
-  border-radius: 999px;
-  background: var(--azul);
-  color: #fff;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  transition: filter 0.15s;
-}
-
-.barra__cta:hover {
-  filter: brightness(1.1);
-}
-
-.barra__ok {
-  flex-shrink: 0;
-  color: #0f8a54;
-  font-weight: 600;
-}
-
-/* ── Capa ────────────────────────────────────────────────────────── */
-
-.capa {
+.pp-palco {
   position: relative;
-  background: var(--capa);
-  color: #fff;
+  height: 100dvh; /* e não 100vh: no celular, `vh` ignora a barra de
+                     endereço e o rodapé de cada slide fica atrás dela */
+  width: 100%;
   overflow: hidden;
 }
 
-/* Halo da cor da marca, canto superior direito. Um só, muito difuso:
-   é o que impede a capa de ser um retângulo preto. */
-.capa::before {
-  content: "";
+/* O cenário NÃO se move com os slides. Se cada slide levasse o próprio
+   brilho, ele passaria correndo junto e viraria efeito de carrossel. */
+.pp-cenario {
   position: absolute;
-  top: -30%;
-  right: -10%;
-  width: 60ch;
-  height: 60ch;
-  max-width: 120%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--azul) 40%, transparent), transparent 62%);
+  inset: 0;
+  z-index: 0;
   pointer-events: none;
 }
 
-.capa__conteudo {
-  position: relative;
-  max-width: 78rem;
-  margin: 0 auto;
-  padding: clamp(3rem, 9vw, 6.5rem) var(--gutter) clamp(2.5rem, 6vw, 4rem);
-}
-
-.capa__marcas {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  margin-bottom: clamp(3rem, 10vw, 6rem);
-}
-
-.capa__logo {
-  height: 2.25rem;
-  width: auto;
-  max-width: 11rem;
-  object-fit: contain;
-}
-
-/* Cruz desenhada em CSS em vez do caractere "+": o glifo muda de desenho
-   e de peso a cada fonte, e aqui ele é um sinal, não texto. */
-.capa__mais {
-  position: relative;
-  width: 0.85rem;
-  height: 0.85rem;
-  opacity: 0.45;
-}
-
-.capa__mais::before,
-.capa__mais::after {
-  content: "";
+.pp-grade {
   position: absolute;
-  inset: 50% 0 auto 0;
-  height: 1px;
-  background: currentColor;
+  inset: 0;
+  opacity: 0.5;
+  background-image:
+    linear-gradient(var(--fio) 1px, transparent 1px),
+    linear-gradient(90deg, var(--fio) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(
+    ellipse 80% 60% at 50% 40%,
+    #000 30%,
+    transparent 75%
+  );
 }
 
-.capa__mais::after {
-  inset: 0 50% 0 auto;
-  width: 1px;
-  height: auto;
+.pp-brilho {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
 }
 
-.capa__sigla {
-  display: grid;
-  place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border: 1px solid rgb(255 255 255 / 0.22);
-  border-radius: 50%;
-  font-family: var(--fonte-dado), monospace;
-  font-size: 0.8rem;
-  letter-spacing: 0.04em;
+.pp-brilho-azul {
+  right: -28%;
+  top: -32%;
+  height: 720px;
+  width: 720px;
+  background: radial-gradient(circle, rgba(22, 104, 245, 0.5), transparent 68%);
 }
 
-.capa__etiqueta {
-  margin: 0 0 1.25rem;
-  font-family: var(--fonte-dado), monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--azul) 55%, #fff);
+.pp-brilho-frio {
+  left: -26%;
+  bottom: -24%;
+  height: 640px;
+  width: 640px;
+  background: radial-gradient(
+    circle,
+    rgba(87, 152, 255, 0.24),
+    transparent 70%
+  );
 }
 
-.capa__titulo {
-  margin: 0 0 clamp(2.5rem, 7vw, 4rem);
-  max-width: 18ch;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: clamp(2.4rem, 7.5vw, 5rem);
-  font-weight: 600;
-  line-height: 1.02;
-  letter-spacing: -0.03em;
-  text-wrap: balance;
-}
-
-.capa__ficha {
-  display: grid;
-  gap: 1.5rem 2.5rem;
-  grid-template-columns: 1fr;
-  margin: 0;
-  padding-top: 1.75rem;
-  border-top: 1px solid rgb(255 255 255 / 0.14);
-}
-
-.capa__ficha dt {
-  font-family: var(--fonte-dado), monospace;
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgb(255 255 255 / 0.5);
-}
-
-.capa__ficha dd {
-  margin: 0.4rem 0 0;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: 1.02rem;
-  font-weight: 500;
-}
-
-.capa__ficha .venceu {
-  color: #ff8b8b;
-}
-
-@media (min-width: 34rem) {
-  .capa__ficha {
-    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-  }
-}
-
-/* ── Miolo ───────────────────────────────────────────────────────── */
-
-.miolo {
-  max-width: 78rem;
-  margin: 0 auto;
-  padding: clamp(3rem, 8vw, 5.5rem) var(--gutter);
-  display: grid;
-  gap: clamp(2rem, 6vw, 5rem);
-}
-
-@media (min-width: 62rem) {
-  .miolo {
-    grid-template-columns: 13rem 1fr;
-  }
-}
-
-/* Trilha lateral. Vira uma régua horizontal rolável no celular, porque
-   uma lista vertical de seis itens antes do conteúdo empurraria a
-   primeira frase para baixo da dobra. */
-.trilha {
-  position: sticky;
-  top: 3.2rem;
+/* O grão é o que separa "preto chapado" de superfície. */
+.pp-grao {
+  position: absolute;
+  inset: 0;
   z-index: 30;
-  align-self: start;
-  margin: 0 calc(var(--gutter) * -1);
-  padding: 0.5rem var(--gutter);
-  background: rgb(251 252 254 / 0.92);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--linha);
+  pointer-events: none;
+  opacity: 0.22;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23r)' opacity='.5'/%3E%3C/svg%3E");
+}
+
+/* ── Trilho ──────────────────────────────────────────────────────── */
+
+.pp-trilho {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  height: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  /* Sem isto, arrastar para o lado no primeiro slide dispara o "voltar"
+     do iOS e a pessoa perde a proposta no meio da leitura. */
+  overscroll-behavior-x: contain;
   scrollbar-width: none;
 }
 
-.trilha::-webkit-scrollbar {
+.pp-trilho::-webkit-scrollbar,
+.pp-trilho > section::-webkit-scrollbar {
   display: none;
 }
 
-.trilha ol {
-  display: flex;
-  gap: 1.25rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.pp-trilho > section {
+  height: 100%;
+  width: 100%;
+  flex: none;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  overflow-y: auto; /* cada slide rola sozinho: slide que não cabe num
+                       telefone pequeno é regra, não exceção */
+  overflow-x: hidden;
+  scrollbar-width: none;
 }
 
-.trilha a {
+.pp-quadro {
+  margin: 0 auto;
+  display: flex;
+  min-height: 100%;
+  width: 100%;
+  max-width: 1120px;
+  flex-direction: column;
+  padding: 3.5rem 1.5rem 7rem;
+}
+
+@media (min-width: 640px) {
+  .pp-quadro {
+    padding: 5rem 2.5rem 8rem;
+  }
+}
+
+/* ── Gabarito do slide ───────────────────────────────────────────── */
+
+.pp-slide {
+  display: flex;
+  /* `flex: 1`, e nao `min-height: 100%`: a porcentagem se resolveria
+     contra um pai que so tem `min-height`, e ali ela vira `auto` — foi
+     por isso que a capa "centrada" nascia colada no topo. */
+  flex: 1;
+  width: 100%;
+  flex-direction: column;
+  gap: 1.75rem;
+  justify-content: flex-start;
+}
+
+.pp-slide[data-centrado] {
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .pp-slide {
+    gap: 2.25rem;
+  }
+}
+
+.pp-cabeca {
+  flex: none;
+}
+
+/* O corpo leva `min-height: 0` porque, sem isso, um filho com rolagem
+   própria estoura a grade em vez de rolar. É o padrão do flex, e é o
+   erro que faz o fim de uma lista longa não existir no telefone. */
+.pp-corpo {
+  min-height: 0;
+  flex: 1;
+}
+
+.pp-rotulo {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.3rem 0;
-  font-family: var(--fonte-dado), monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.02em;
-  color: var(--fraca);
-  text-decoration: none;
-  white-space: nowrap;
-  transition: color 0.15s;
-}
-
-.trilha a:hover {
-  color: var(--tinta);
-}
-
-.trilha a[aria-current] {
-  color: var(--azul);
-  font-weight: 600;
-}
-
-.trilha__n {
-  font-size: 0.62rem;
-  opacity: 0.6;
-}
-
-@media (min-width: 62rem) {
-  .trilha {
-    position: sticky;
-    top: 6rem;
-    margin: 0;
-    padding: 0;
-    background: none;
-    backdrop-filter: none;
-    border: 0;
-    border-left: 1px solid var(--linha);
-  }
-
-  .trilha ol {
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .trilha a {
-    padding: 0.6rem 0 0.6rem 1.1rem;
-    margin-left: -1px;
-    border-left: 2px solid transparent;
-  }
-
-  .trilha a[aria-current] {
-    border-left-color: var(--azul);
-  }
-}
-
-.paginas {
-  min-width: 0;
-  display: grid;
-  gap: clamp(3.5rem, 9vw, 6rem);
-}
-
-.secao {
-  scroll-margin-top: 7rem;
-}
-
-.cabeca {
-  display: flex;
-  align-items: baseline;
-  gap: 0.9rem;
-  margin-bottom: 1.75rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--linha);
-}
-
-.cabeca__n {
-  font-family: var(--fonte-dado), monospace;
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: var(--azul);
-}
-
-.cabeca h2 {
+  gap: 0.75rem;
   margin: 0;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: clamp(1.5rem, 3.6vw, 2.1rem);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  font-family: var(--fonte-dado), ui-monospace, monospace;
+  font-size: clamp(0.72rem, 2.4vw, 0.8rem);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--azul-claro);
 }
 
-.prosa {
-  max-width: var(--medida);
-}
-
-.prosa p {
-  margin: 0 0 1.1rem;
-  font-size: 1.12rem;
-  color: #26314a;
-}
-
-.prosa p:last-child {
-  margin-bottom: 0;
-}
-
-.chamada {
-  max-width: var(--medida);
-  margin: 0 0 1.75rem;
-  font-size: 1.12rem;
-  font-style: italic;
-  color: var(--grafite);
-}
-
-/* ── Escopo ──────────────────────────────────────────────────────── */
-
-.escopo {
-  display: grid;
-  gap: 0.15rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-@media (min-width: 46rem) {
-  .escopo {
-    grid-template-columns: 1fr 1fr;
-    gap: 0.15rem 2rem;
-  }
-}
-
-.escopo li {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.8rem;
-  padding: 0.85rem 0;
-  border-bottom: 1px solid var(--linha);
-  font-size: 1rem;
-  line-height: 1.45;
-}
-
-.escopo__check {
-  flex-shrink: 0;
-  width: 1.05rem;
-  height: 1.05rem;
-  margin-top: 0.22rem;
-  color: var(--azul);
-}
-
-/* ── Fases ───────────────────────────────────────────────────────── */
-
-.fases {
-  display: grid;
-  gap: 1px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  background: var(--linha);
-  border: 1px solid var(--linha);
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-@media (min-width: 52rem) {
-  .fases {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.fases li {
-  padding: 1.5rem;
-  background: #fff;
-}
-
-.fases__quando {
+.pp-rotulo::before {
+  content: "";
   display: block;
-  margin-bottom: 0.9rem;
-  font-family: var(--fonte-dado), monospace;
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--azul);
+  height: 1px;
+  width: 1.75rem;
+  flex: none;
+  background: var(--azul);
 }
 
-.fases h3 {
-  margin: 0 0 0.55rem;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: 1.12rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.fases p {
-  margin: 0;
-  font-size: 0.97rem;
-  line-height: 1.55;
-  color: var(--grafite);
-}
-
-/* ── Investimento: o livro-razão ─────────────────────────────────── */
-
-.livro {
-  border: 1px solid var(--linha-forte);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.livro__bloco {
-  padding: clamp(1.25rem, 3.5vw, 2rem);
-  background: #fff;
-}
-
-/* O segundo bloco é visivelmente outro: fundo recuado e borda dupla no
-   topo marcam que este dinheiro sai por outro caminho. */
-.livro__bloco--fora {
-  border-top: 1px solid var(--linha-forte);
-  background: var(--azul-fraco);
-}
-
-.livro__titulo {
-  margin: 0 0 1.25rem;
-  font-family: var(--fonte-dado), monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--grafite);
-}
-
-.livro__nota {
-  max-width: 52ch;
-  margin: -0.6rem 0 1.25rem;
-  font-size: 0.97rem;
-  line-height: 1.55;
-  color: #2c3852;
-}
-
-.livro__linhas {
-  margin: 0;
-}
-
-.livro__linhas > div {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1.5rem;
-  padding: 0.7rem 0;
-  border-bottom: 1px dotted var(--linha-forte);
-}
-
-.livro__linhas > div:last-child {
-  border-bottom: 0;
-  padding-bottom: 0;
-}
-
-.livro__linhas dt {
-  font-size: 1rem;
-  color: var(--tinta);
-}
-
-.livro__linhas dd {
-  margin: 0;
-  font-family: var(--fonte-dado), monospace;
-  font-variant-numeric: tabular-nums;
-  font-size: 1.05rem;
-  font-weight: 500;
-  text-align: right;
-}
-
-@media (min-width: 26rem) {
-  .livro__linhas dd {
-    white-space: nowrap;
+@media (min-width: 640px) {
+  .pp-rotulo::before {
+    width: 2.5rem;
   }
 }
 
-.livro__linhas dd small {
-  margin-left: 0.4rem;
-  font-size: 0.72rem;
-  font-weight: 400;
-  color: var(--fraca);
-}
-
-/* A soma do contrato: o número que a pessoa leva para a conversa com o
-   sócio. Ganha peso, régua sólida acima e a cor da marca. */
-.livro__soma {
-  margin-top: 0.4rem;
-  padding-top: 1.1rem !important;
-  border-top: 1px solid var(--tinta);
-  border-bottom: 0 !important;
-}
-
-.livro__soma dt {
+.pp-titulo {
+  margin: 1rem 0 0;
+  max-width: 17ch;
   font-family: var(--fonte-display), system-ui, sans-serif;
-  font-weight: 600;
+  font-size: var(--titulo);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
 }
 
-.livro__soma dd {
-  font-size: clamp(1.4rem, 4vw, 1.9rem);
-  font-weight: 600;
-  color: var(--azul);
-}
-
-.livro__aberto {
-  font-style: italic;
-  font-family: var(--fonte-prosa), serif !important;
-  font-weight: 400 !important;
-  color: var(--grafite);
-}
-
-.condicoes {
-  max-width: var(--medida);
+.pp-mostro {
   margin: 1.5rem 0 0;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: var(--grafite);
-}
-
-/* ── Perguntas ───────────────────────────────────────────────────── */
-
-.faq {
-  margin: 0;
-  border-top: 1px solid var(--linha);
-}
-
-.faq > div {
-  padding: 1.5rem 0;
-  border-bottom: 1px solid var(--linha);
-}
-
-@media (min-width: 52rem) {
-  .faq > div {
-    display: grid;
-    grid-template-columns: 19rem 1fr;
-    gap: 2.5rem;
-  }
-}
-
-.faq dt {
+  max-width: 14ch;
   font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  text-wrap: balance;
+  font-size: var(--mostro);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.045em;
 }
 
-.faq dd {
-  margin: 0.5rem 0 0;
-  max-width: var(--medida);
-  font-size: 1rem;
-  line-height: 1.6;
-  color: var(--grafite);
+/* A última palavra do título em azul. É a batida do documento: repetida
+   em toda tela, ela é o que faz doze slides parecerem um documento só. */
+.pp-eco {
+  color: var(--azul-claro);
 }
 
-@media (min-width: 52rem) {
-  .faq dd {
-    margin-top: 0;
+.pp-apoio {
+  margin: 1rem 0 0;
+  max-width: 54ch;
+  font-size: var(--guia);
+  line-height: 1.65;
+  color: var(--neve);
+}
+
+/* ── Blocos ──────────────────────────────────────────────────────── */
+
+.pp-bloco {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid var(--fio);
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.055),
+    rgba(255, 255, 255, 0.015)
+  );
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .pp-bloco {
+    padding: 1.5rem;
   }
 }
 
-/* ── Aceite ──────────────────────────────────────────────────────── */
-
-.aceite {
-  position: relative;
-  background: var(--capa);
-  color: #fff;
-  overflow: hidden;
-}
-
-.aceite::before {
+/* O fio de luz na aresta de cima: é o detalhe que faz o cartão parecer
+   iluminado por cima em vez de recortado. */
+.pp-bloco::before {
   content: "";
   position: absolute;
-  bottom: -40%;
-  left: -10%;
-  width: 55ch;
-  height: 55ch;
-  max-width: 120%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--azul) 34%, transparent), transparent 62%);
+  inset-inline: 1.5rem;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
+}
+
+.pp-bloco[data-destaque] {
+  border-color: var(--fio-forte);
+  box-shadow: 0 24px 60px -30px rgba(22, 104, 245, 0.65);
+}
+
+/* ── Tipografia de apoio ─────────────────────────────────────────── */
+
+.pp-mono {
+  font-family: var(--fonte-dado), ui-monospace, monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--cinza);
+}
+
+.pp-num {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--fonte-display), system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.pp-marcador {
+  display: flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: rgba(22, 104, 245, 0.16);
+  font-family: var(--fonte-dado), ui-monospace, monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--azul-claro);
+}
+
+/* ── Arranjos que se repetem ─────────────────────────────────────── */
+
+/* Bloco com marcador à esquerda e texto à direita. */
+.pp-linha {
+  display: flex;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .pp-linha {
+    gap: 1.25rem;
+  }
+}
+
+/* Lista de entregas. O marcador é um traço azul, e não bolinha: bolinha
+   em lista dentro de cartão vira ruído no telefone. */
+.pp-itens {
+  margin: 0.875rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.625rem;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--neve);
+}
+
+.pp-itens > li {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.pp-itens > li::before {
+  content: "—";
+  flex: none;
+  color: var(--azul-claro);
+}
+
+/* O que não entra usa o mesmo desenho, em cinza: mesma importância
+   visual, tom diferente. */
+.pp-itens[data-fora] {
+  color: var(--cinza);
+}
+
+.pp-itens[data-fora] > li::before {
+  content: "×";
+  color: var(--cinza);
+}
+
+/* Serviço: promessa à esquerda, entregas à direita. Numa coluna só no
+   telefone, porque duas colunas de 160px não são duas colunas. */
+.pp-duas {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .pp-duas {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 3rem;
+  }
+}
+
+/* A conta. `auto-fit` porque a proposta pode ter dois cartões ou três,
+   conforme exista implantação. */
+.pp-conta {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+/* ── Controles ───────────────────────────────────────────────────── */
+
+.pp-topo,
+.pp-controles {
+  position: absolute;
+  inset-inline: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   pointer-events: none;
 }
 
-.aceite__conteudo {
-  position: relative;
-  max-width: 78rem;
-  margin: 0 auto;
-  padding: clamp(3.5rem, 9vw, 6rem) var(--gutter) clamp(2rem, 5vw, 3rem);
+.pp-topo {
+  top: 0;
+  padding: 1.25rem 1.5rem 0;
 }
 
-.aceite__etiqueta {
-  margin: 0 0 1rem;
-  font-family: var(--fonte-dado), monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--azul) 55%, #fff);
+.pp-controles {
+  bottom: 0;
+  padding: 3.5rem 1.25rem max(1.1rem, env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--tinta) 22%, transparent);
 }
 
-.aceite__titulo {
-  margin: 0 0 1.25rem;
-  max-width: 16ch;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: clamp(2rem, 6vw, 3.4rem);
-  font-weight: 600;
-  line-height: 1.04;
-  letter-spacing: -0.03em;
+@media (min-width: 640px) {
+  .pp-topo {
+    padding: 1.25rem 2.5rem 0;
+  }
+  .pp-controles {
+    padding-inline: 2rem;
+  }
 }
 
-.aceite__texto {
-  max-width: 46ch;
-  margin: 0 0 2rem;
-  font-size: 1.08rem;
-  color: rgb(255 255 255 / 0.72);
+.pp-progresso {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  z-index: 20;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.aceite__forma label {
+.pp-progresso > span {
   display: block;
-  margin-bottom: 0.6rem;
-  font-family: var(--fonte-dado), monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgb(255 255 255 / 0.55);
-}
-
-.aceite__campo {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  max-width: 34rem;
-}
-
-.aceite__campo input {
-  flex: 1 1 14rem;
-  min-width: 0;
-  padding: 0.95rem 1.1rem;
-  border: 1px solid rgb(255 255 255 / 0.2);
-  border-radius: 8px;
-  background: rgb(255 255 255 / 0.06);
-  color: #fff;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: 1rem;
-}
-
-.aceite__campo input::placeholder {
-  color: rgb(255 255 255 / 0.35);
-}
-
-.aceite__campo input:focus {
-  border-color: var(--azul);
-  background: rgb(255 255 255 / 0.1);
-  outline: none;
-}
-
-.aceite__campo button {
-  flex: 0 0 auto;
-  padding: 0.95rem 1.6rem;
-  border: 0;
-  border-radius: 8px;
+  height: 100%;
   background: var(--azul);
-  color: #fff;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
+  transition: width 0.3s ease;
+}
+
+.pp-botao {
+  pointer-events: auto;
+  display: flex;
+  height: 3rem;
+  width: 3rem;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid var(--fio);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--branco);
+  font-size: 1.1rem;
   cursor: pointer;
-  transition: filter 0.15s;
+  backdrop-filter: blur(8px);
+  transition: background-color 0.2s;
 }
 
-.aceite__campo button:hover:not(:disabled) {
-  filter: brightness(1.12);
+.pp-botao:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
 }
 
-.aceite__campo button:disabled {
-  opacity: 0.55;
-  cursor: progress;
+.pp-botao:disabled {
+  opacity: 0.2;
+  cursor: default;
 }
 
-.aceite__ajuda {
-  margin: 1rem 0 0;
-  font-size: 0.95rem;
-  color: rgb(255 255 255 / 0.5);
-}
-
-.aceite__ajuda a {
-  color: color-mix(in srgb, var(--azul) 50%, #fff);
-}
-
-.aceite__ok {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 1rem 1.4rem;
-  border: 1px solid rgb(45 200 130 / 0.4);
-  border-radius: 8px;
-  background: rgb(45 200 130 / 0.12);
-  color: #7ff0bd;
-  font-size: 1.02rem;
-}
-
-.aceite__vencida p {
-  max-width: 46ch;
-  margin: 0 0 1.5rem;
-  font-size: 1.08rem;
-  color: rgb(255 255 255 / 0.72);
-}
-
-.aceite__zap {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.9rem 1.5rem;
-  border-radius: 8px;
+.pp-botao[data-principal] {
+  border-color: transparent;
   background: var(--azul);
-  color: #fff;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-weight: 600;
-  text-decoration: none;
+  box-shadow: 0 10px 30px -10px rgba(22, 104, 245, 0.9);
 }
 
-.rodape {
+.pp-botao[data-principal]:hover:not(:disabled) {
+  background: var(--azul-forte);
+}
+
+.pp-botao[data-principal]:disabled {
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: none;
+}
+
+.pp-pontos {
+  pointer-events: auto;
+  display: none;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .pp-pontos {
+    display: flex;
+  }
+  .pp-contador-mob {
+    display: none;
+  }
+}
+
+.pp-ponto {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1.5rem;
-  justify-content: space-between;
-  margin-top: clamp(3rem, 8vw, 5rem);
-  padding-top: 1.5rem;
-  border-top: 1px solid rgb(255 255 255 / 0.12);
-  font-family: var(--fonte-dado), monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.04em;
-  color: rgb(255 255 255 / 0.4);
+  height: 2.75rem;
+  width: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.pp-ponto > span {
+  display: block;
+  height: 0.5rem;
+  width: 0.5rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.25);
+  transition: all 0.3s;
+}
+
+.pp-ponto[aria-current] > span {
+  width: 2rem;
+  background: var(--azul);
+}
+
+/* ── Chamada ─────────────────────────────────────────────────────── */
+
+.pp-cta {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--azul);
+  padding: 1rem 2.25rem;
+  font-family: var(--fonte-display), system-ui, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--branco);
+  text-decoration: none;
+  box-shadow: 0 18px 50px -18px rgba(22, 104, 245, 0.95);
+  transition: background-color 0.2s;
+}
+
+.pp-cta:hover {
+  background: var(--azul-forte);
+}
+
+@media (min-width: 640px) {
+  .pp-cta {
+    width: auto;
+  }
+}
+
+/* O aviso de que a tela continua abaixo. Sem ele, quem não sabe que há
+   mais desliza para o lado e perde metade do que estava escrito. */
+@media (max-width: 767px) {
+  .pp-trilho > section[data-tem-mais]::after {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 118px;
+    height: 56px;
+    pointer-events: none;
+    z-index: 15;
+    background: linear-gradient(to top, var(--tinta) 12%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-trilho {
+    scroll-behavior: auto;
+  }
+  .pp-progresso > span,
+  .pp-ponto > span {
+    transition: none;
+  }
 }
 
 /* ── Impressão ───────────────────────────────────────────────────── */
 
 @media print {
-  .barra,
-  .trilha,
-  .aceite__forma,
-  .aceite__zap {
+  .pp-palco {
+    height: auto;
+    overflow: visible;
+  }
+  .pp-cenario,
+  .pp-grao,
+  .pp-topo,
+  .pp-controles,
+  .pp-progresso {
     display: none;
   }
-
-  .doc {
-    font-size: 11pt;
-  }
-
-  .capa,
-  .aceite {
-    background: #fff;
-    color: #000;
-  }
-
-  .capa::before,
-  .aceite::before {
-    display: none;
-  }
-
-  .capa__etiqueta,
-  .aceite__etiqueta,
-  .capa__ficha dt,
-  .rodape {
-    color: #555;
-  }
-
-  .capa__ficha {
-    border-top-color: #bbb;
-  }
-
-  .miolo {
+  .pp-trilho {
     display: block;
+    height: auto;
+    overflow: visible;
   }
-
-  .secao {
-    break-inside: avoid;
+  .pp-trilho > section {
+    height: auto;
+    width: auto;
+    overflow: visible;
+    break-after: page;
   }
-
-  .livro {
-    break-inside: avoid;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .doc * {
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
+  .pp-quadro {
+    padding: 2rem 0;
   }
 }

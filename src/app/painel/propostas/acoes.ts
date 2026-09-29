@@ -4,11 +4,22 @@ import { revalidatePath } from "next/cache";
 import { criarClienteAdmin } from "@/lib/supabase/servidor";
 import { modoDemonstracao } from "@/lib/dados";
 import { contextoDeAcao, falha, type Banco } from "@/lib/acoes";
-import { escreverCondicoes, TOKEN_VALIDO } from "@/lib/propostas";
+import {
+  escreverCondicoes,
+  NARRATIVA_VAZIA,
+  TOKEN_VALIDO,
+} from "@/lib/propostas";
+import type { Narrativa } from "@/lib/propostas";
+import { fichaDoServico } from "@/lib/servicos-proposta";
 import { hoje } from "@/lib/tempo";
 import { PRAZOS_CONTRATO } from "@/lib/rotulos";
 
-export type Resultado = { ok: boolean; demo: boolean; token?: string; erro?: string };
+export type Resultado = {
+  ok: boolean;
+  demo: boolean;
+  token?: string;
+  erro?: string;
+};
 
 export type DadosProposta = {
   titulo: string;
@@ -21,6 +32,13 @@ export type DadosProposta = {
   valor_setup: number;
   meses_contrato: number;
   validade: string | null;
+  /* As telas novas do deck. Uma linha por item nos textos; a action é que
+     quebra, para o formulário não ter que carregar array. */
+  diagnostico: string;
+  proximos_passos: string;
+  condicoes_extras: string;
+  /** Ids do catálogo, e o fee de cada um quando negociado item a item. */
+  servicos: { id: string; fee: number }[];
 };
 
 function validar(d: DadosProposta): string | null {
@@ -30,19 +48,57 @@ function validar(d: DadosProposta): string | null {
   if (d.cliente_logo_url && !/^https:\/\//i.test(d.cliente_logo_url)) {
     return "O logo precisa ser uma URL https.";
   }
-  if (!Number.isFinite(d.valor_mensal) || d.valor_mensal < 0) return "Valor mensal inválido.";
-  if (!Number.isFinite(d.valor_setup) || d.valor_setup < 0) return "Valor de setup inválido.";
-  if (d.valor_mensal + d.valor_setup <= 0) return "A proposta precisa de um valor.";
-  if (d.valor_mensal > 10_000_000 || d.valor_setup > 10_000_000) return "Valor fora da faixa.";
+  if (!Number.isFinite(d.valor_mensal) || d.valor_mensal < 0)
+    return "Valor mensal inválido.";
+  if (!Number.isFinite(d.valor_setup) || d.valor_setup < 0)
+    return "Valor de setup inválido.";
+  if (d.valor_mensal + d.valor_setup <= 0)
+    return "A proposta precisa de um valor.";
+  if (d.valor_mensal > 10_000_000 || d.valor_setup > 10_000_000)
+    return "Valor fora da faixa.";
   if (!d.escopo.trim()) return "Descreva ao menos um item do escopo.";
   if (d.escopo.length > 8000) return "O escopo ficou longo demais.";
-  if (d.validade && !/^\d{4}-\d{2}-\d{2}$/.test(d.validade)) return "Data de validade inválida.";
+  if (d.validade && !/^\d{4}-\d{2}-\d{2}$/.test(d.validade))
+    return "Data de validade inválida.";
+  /* Id de serviço que não existe no catálogo sumiria em silêncio na hora de
+     desenhar o deck: a proposta abriria sem a tela daquele serviço, e
+     ninguém descobriria antes do cliente. */
+  const invalido = d.servicos.find((x) => !fichaDoServico(x.id));
+  if (invalido) return `Serviço desconhecido: ${invalido.id}.`;
+  if (d.servicos.some((x) => !Number.isFinite(x.fee) || x.fee < 0)) {
+    return "Valor de serviço inválido.";
+  }
+  for (const [campo, valor] of [
+    ["diagnóstico", d.diagnostico],
+    ["próximos passos", d.proximos_passos],
+    ["condições negociadas", d.condicoes_extras],
+  ] as const) {
+    if (valor.length > 8000) return `O texto de ${campo} ficou longo demais.`;
+  }
   /* Conferido aqui e não só no `select` da tela: a action é chamável direto,
      e um prazo inventado multiplicaria o contrato por qualquer número. */
   if (!(PRAZOS_CONTRATO as readonly number[]).includes(d.meses_contrato)) {
     return "Prazo de contrato inválido.";
   }
   return null;
+}
+
+/** Uma linha por item, sem as vazias. */
+function linhas(texto: string): string[] {
+  return texto
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+}
+
+function narrativaDe(d: DadosProposta): Narrativa {
+  return {
+    ...NARRATIVA_VAZIA,
+    diagnostico: linhas(d.diagnostico),
+    proximosPassos: linhas(d.proximos_passos),
+    condicoesExtras: linhas(d.condicoes_extras),
+    servicos: d.servicos.filter((x) => fichaDoServico(x.id)),
+  };
 }
 
 function paraBanco(d: DadosProposta) {
@@ -57,6 +113,7 @@ function paraBanco(d: DadosProposta) {
       d.valor_setup,
       d.condicoes.trim(),
       d.meses_contrato,
+      narrativaDe(d),
     ),
     /* Primeiro ciclo: recorrente + setup. Antes só o mensal ia para `total`,
        e todo relatório financeiro subestimava o contrato pelo valor do setup. */
@@ -73,7 +130,11 @@ function paraBanco(d: DadosProposta) {
  * quando a contagem volta para um número já usado. Por isso a criação tenta
  * de novo com o número seguinte em vez de devolver erro ao usuário.
  */
-async function proximoNumero(db: Banco, organizacaoId: string, tentativa: number) {
+async function proximoNumero(
+  db: Banco,
+  organizacaoId: string,
+  tentativa: number,
+) {
   const ano = new Date().getFullYear();
   const { data } = await db
     .from("propostas")
@@ -84,7 +145,9 @@ async function proximoNumero(db: Banco, organizacaoId: string, tentativa: number
     .limit(1)
     .maybeSingle();
 
-  const ultimo = Number((data as { numero?: string } | null)?.numero?.split("-").pop() ?? 0);
+  const ultimo = Number(
+    (data as { numero?: string } | null)?.numero?.split("-").pop() ?? 0,
+  );
   return `PRP-${ano}-${String(ultimo + 1 + tentativa).padStart(3, "0")}`;
 }
 
@@ -97,7 +160,8 @@ export async function criarProposta(d: DadosProposta): Promise<Resultado> {
 
   const ctx = await contextoDeAcao("propostas", "criar");
   if (ctx.estado === "demo") return { ok: true, demo: true, token: "demo-1" };
-  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
+  if (ctx.estado === "negado")
+    return { ok: false, demo: false, erro: ctx.erro };
   const { sessao, db } = ctx;
 
   try {
@@ -117,26 +181,39 @@ export async function criarProposta(d: DadosProposta): Promise<Resultado> {
 
       if (!error && data) {
         revalidatePath("/painel/propostas");
-        return { ok: true, demo: false, token: (data as { token_publico: string }).token_publico };
+        return {
+          ok: true,
+          demo: false,
+          token: (data as { token_publico: string }).token_publico,
+        };
       }
 
       const codigo = (error as { code?: string } | null)?.code;
-      if (codigo !== CONFLITO) return falha("criarProposta", error, "Não foi possível criar.");
+      if (codigo !== CONFLITO)
+        return falha("criarProposta", error, "Não foi possível criar.");
     }
 
-    return falha("criarProposta", "numeração esgotou as tentativas", "Não foi possível criar.");
+    return falha(
+      "criarProposta",
+      "numeração esgotou as tentativas",
+      "Não foi possível criar.",
+    );
   } catch (e) {
     return falha("criarProposta", e, "Não foi possível criar.");
   }
 }
 
-export async function atualizarProposta(id: string, d: DadosProposta): Promise<Resultado> {
+export async function atualizarProposta(
+  id: string,
+  d: DadosProposta,
+): Promise<Resultado> {
   const erro = validar(d);
   if (erro) return { ok: false, demo: false, erro };
 
   const ctx = await contextoDeAcao("propostas", "editar");
   if (ctx.estado === "demo") return { ok: true, demo: true };
-  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
+  if (ctx.estado === "negado")
+    return { ok: false, demo: false, erro: ctx.erro };
   const { sessao, db } = ctx;
 
   try {
@@ -147,8 +224,10 @@ export async function atualizarProposta(id: string, d: DadosProposta): Promise<R
       .eq("organizacao_id", sessao.organizacaoId)
       .select("id");
 
-    if (error) return falha("atualizarProposta", error, "Não foi possível salvar.");
-    if (!data?.length) return { ok: false, demo: false, erro: "Proposta não encontrada." };
+    if (error)
+      return falha("atualizarProposta", error, "Não foi possível salvar.");
+    if (!data?.length)
+      return { ok: false, demo: false, erro: "Proposta não encontrada." };
     revalidatePath("/painel/propostas");
     return { ok: true, demo: false };
   } catch (e) {
@@ -159,7 +238,8 @@ export async function atualizarProposta(id: string, d: DadosProposta): Promise<R
 export async function excluirProposta(id: string): Promise<Resultado> {
   const ctx = await contextoDeAcao("propostas", "excluir");
   if (ctx.estado === "demo") return { ok: true, demo: true };
-  if (ctx.estado === "negado") return { ok: false, demo: false, erro: ctx.erro };
+  if (ctx.estado === "negado")
+    return { ok: false, demo: false, erro: ctx.erro };
   const { sessao, db } = ctx;
 
   try {
@@ -170,8 +250,10 @@ export async function excluirProposta(id: string): Promise<Resultado> {
       .eq("organizacao_id", sessao.organizacaoId)
       .select("id");
 
-    if (error) return falha("excluirProposta", error, "Não foi possível excluir.");
-    if (!data?.length) return { ok: false, demo: false, erro: "Proposta não encontrada." };
+    if (error)
+      return falha("excluirProposta", error, "Não foi possível excluir.");
+    if (!data?.length)
+      return { ok: false, demo: false, erro: "Proposta não encontrada." };
     revalidatePath("/painel/propostas");
     return { ok: true, demo: false };
   } catch (e) {
@@ -189,13 +271,19 @@ export async function excluirProposta(id: string): Promise<Resultado> {
  * silêncio. Aqui o service role grava, o token é o que autoriza, e o número
  * de linhas afetadas é conferido.
  */
-export async function aceitarProposta(token: string, nome: string): Promise<Resultado> {
+export async function aceitarProposta(
+  token: string,
+  nome: string,
+): Promise<Resultado> {
   const assinatura = nome.trim();
-  if (!assinatura) return { ok: false, demo: false, erro: "Escreva o seu nome para aceitar." };
-  if (assinatura.length > 120) return { ok: false, demo: false, erro: "Nome longo demais." };
+  if (!assinatura)
+    return { ok: false, demo: false, erro: "Escreva o seu nome para aceitar." };
+  if (assinatura.length > 120)
+    return { ok: false, demo: false, erro: "Nome longo demais." };
 
   if (modoDemonstracao()) return { ok: true, demo: true };
-  if (!TOKEN_VALIDO.test(token)) return { ok: false, demo: false, erro: "Link inválido." };
+  if (!TOKEN_VALIDO.test(token))
+    return { ok: false, demo: false, erro: "Link inválido." };
 
   try {
     const db = criarClienteAdmin();
@@ -211,7 +299,12 @@ export async function aceitarProposta(token: string, nome: string): Promise<Resu
       .or(`validade.is.null,validade.gte.${hoje()}`)
       .select("id");
 
-    if (error) return falha("aceitarProposta", error, "Não foi possível registrar o aceite.");
+    if (error)
+      return falha(
+        "aceitarProposta",
+        error,
+        "Não foi possível registrar o aceite.",
+      );
     if (!data?.length) {
       return {
         ok: false,
