@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Sem conexão · MR Grow</title>
+    <style>
+      /* Estilo embutido: esta página precisa abrir sem rede, e folha
+         externa é exatamente o que não chega quando não há rede. */
+      :root { color-scheme: dark; }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 1.5rem;
+        background: #080b12;
+        color: #f4f6fa;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        text-align: center;
+      }
+      .caixa { max-width: 26rem; }
+      img { width: 96px; height: auto; margin-bottom: 1.5rem; }
+      h1 { margin: 0 0 0.75rem; font-size: 1.35rem; letter-spacing: -0.02em; }
+      p { margin: 0; color: #9aa3b2; line-height: 1.6; font-size: 0.95rem; }
+      button {
+        margin-top: 1.75rem;
+        padding: 0.75rem 1.5rem;
+        border: 0;
+        border-radius: 999px;
+        background: #1668f5;
+        color: #fff;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="caixa">
+      <img src="/icone-192.png" alt="MR Grow" />
+      <h1>Sem conexão</h1>
+      <p>
+        A plataforma precisa de internet para buscar os números. Assim que a conexão voltar, é só
+        tentar de novo — nada do que você fez foi perdido.
+      </p>
+      <button onclick="location.reload()">Tentar de novo</button>
+    </div>
+  </body>
+</html>

@@ -20,6 +20,7 @@ import { GraficoArea, LegendaGrafico, type SerieGrafico } from "@/components/pai
 import { GraficoBarras } from "@/components/painel/grafico-barras";
 import { AvisoDemo, AvisoFalha } from "@/components/painel/aviso-demo";
 import { Banner } from "@/components/painel/banner";
+import { ConviteInstalacao } from "@/components/painel/instalar";
 import { Etiqueta } from "@/components/ui/etiqueta";
 import { BotaoLink } from "@/components/ui/botao";
 import { exigirEquipe } from "@/lib/sessao";
@@ -316,6 +317,9 @@ export default async function PaginaVisao({
       />
 
       <div className="space-y-4 p-5 sm:p-8">
+        {/* O convite fica no topo da primeira tela: é onde a pessoa chega
+            ao recarregar, e onde ela repara em algo novo. */}
+        <ConviteInstalacao />
         {demo && <AvisoDemo />}
         {metricas.falhou && <AvisoFalha o_que="as métricas das contas conectadas" />}
 
