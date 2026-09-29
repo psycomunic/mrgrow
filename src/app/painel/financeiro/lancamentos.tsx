@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle, Check, Download, Pencil, Plus, Scale, TrendingDown, TrendingUp, Trash2, X,
 } from "lucide-react";
@@ -115,7 +115,26 @@ export function Lancamentos({
      e ninguém rola 410 linhas: procura. */
   const [mostrando, setMostrando] = useState(PAGINA);
   const [criando, setCriando] = useState(false);
+  /* O financeiro é uma tela longa, e o botão de lançar mora no meio dela.
+     Quem está conferindo a tabela lá embaixo teria que voltar ao topo só
+     para achá-lo. O flutuante entra quando o de cima sai de vista — nunca
+     os dois ao mesmo tempo, que seria a mesma ação pedida duas vezes. */
+  const ancora = useRef<HTMLDivElement>(null);
+  const [lancarLonge, setLancarLonge] = useState(false);
   const [editando, setEditando] = useState<Lancamento | null>(null);
+
+  useEffect(() => {
+    const alvo = ancora.current;
+    if (!alvo) return;
+    const observador = new IntersectionObserver(
+      ([entrada]) => setLancarLonge(!entrada.isIntersecting),
+      /* A margem negativa desconta o cabeçalho fixo: sem ela o botão
+         conta como visível enquanto está escondido atrás dele. */
+      { rootMargin: "-72px 0px 0px 0px" },
+    );
+    observador.observe(alvo);
+    return () => observador.disconnect();
+  }, []);
   /* Baixa é irreversível pela tela: uma vez pago, só editando o lançamento
      se volta atrás. E a linha inteira do mês vizinho fica a um pixel de
      distância, então o clique errado acontece. */
@@ -481,10 +500,10 @@ export function Lancamentos({
         </section>
       )}
 
-      <section className="space-y-4">
+      <section className="space-y-4 pb-20">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-display text-base font-bold text-tinta">Lançamentos</h2>
-          <div className="flex items-center gap-2">
+          <div ref={ancora} className="flex items-center gap-2">
             <button
               type="button"
               onClick={exportar}
@@ -608,6 +627,30 @@ export function Lancamentos({
           </button>
         )}
       </section>
+
+      {/* Escondido, não desmontado: assim entra e sai com transição, e o
+          `aria-hidden` com `tabIndex={-1}` impede que o teclado e o leitor
+          de tela alcancem um botão que ninguém está vendo. */}
+      <div
+        aria-hidden={!lancarLonge}
+        className={cn(
+          "fixed right-5 z-40 transition-all duration-200 motion-reduce:transition-none",
+          lancarLonge ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0",
+        )}
+        style={{ bottom: "calc(1.25rem + env(safe-area-inset-bottom))" }}
+      >
+        <Botao
+          onClick={() => setCriando(true)}
+          tabIndex={lancarLonge ? undefined : -1}
+          className="h-13 rounded-full px-5 shadow-[0_12px_32px_-10px_rgba(22,104,245,.8)] max-sm:w-13 max-sm:px-0"
+        >
+          <Plus className="size-5" />
+          {/* No celular vira só o ícone: um rótulo inteiro ali cobriria a
+              tabela que a pessoa está lendo. O texto continua para quem
+              navega por leitor de tela. */}
+          <span className="max-sm:sr-only">Novo lançamento</span>
+        </Botao>
+      </div>
 
       {baixando && (
         <ConfirmarBaixa
