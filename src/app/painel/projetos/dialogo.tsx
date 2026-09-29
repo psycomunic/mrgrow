@@ -7,6 +7,7 @@ import { Sobreposicao } from "@/components/ui/sobreposicao";
 import { AreaTexto, Campo, Entrada, Selecao } from "@/components/ui/campo";
 import { STATUS_PROJETO } from "@/lib/rotulos";
 import { useProjetos } from "./contexto";
+import { EquipeEPassos } from "./equipe-passos";
 import type { DadosProjeto } from "./acoes";
 import type { Projeto } from "@/lib/projetos";
 
@@ -17,6 +18,7 @@ const VAZIO: DadosProjeto = {
   progresso: 0,
   prazo: null,
   cliente_id: null,
+  responsavel_id: null,
 };
 
 function doProjeto(p: Projeto): DadosProjeto {
@@ -27,6 +29,7 @@ function doProjeto(p: Projeto): DadosProjeto {
     progresso: p.progresso,
     prazo: p.prazo,
     cliente_id: p.cliente_id,
+    responsavel_id: p.responsavel_id,
   };
 }
 
@@ -37,7 +40,7 @@ export function DialogoProjeto({
   aoFechar: () => void;
   projeto?: Projeto;
 }) {
-  const { clientes, criar, editar } = useProjetos();
+  const { clientes, pessoas, criar, editar } = useProjetos();
   const idBase = useId();
 
   const [dados, setDados] = useState<DadosProjeto>(() => (projeto ? doProjeto(projeto) : VAZIO));
@@ -142,6 +145,20 @@ export function DialogoProjeto({
               </Campo>
             </div>
 
+            <Campo rotulo="Responsável pelo projeto" dica="Quem responde pelo todo">
+              <Selecao
+                value={dados.responsavel_id ?? ""}
+                onChange={(e) => setDados((d) => ({ ...d, responsavel_id: e.target.value || null }))}
+              >
+                <option value="">Sem responsável definido</option>
+                {pessoas.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.nome}
+                  </option>
+                ))}
+              </Selecao>
+            </Campo>
+
             <div className="grid gap-4 sm:grid-cols-2">
               <Campo rotulo="Situação">
                 <Selecao
@@ -173,6 +190,26 @@ export function DialogoProjeto({
                 />
               </Campo>
             </div>
+
+            {/* Equipe e passos penduram no id do projeto: num que ainda não
+                existe não há onde pendurá-los. Quem cria salva primeiro e
+                reabre — o que também evita montar a equipe inteira e
+                perder tudo se o salvamento falhar. */}
+            {projeto ? (
+              <div className="border-t border-borda pt-5">
+                <EquipeEPassos
+                  projetoId={projeto.id}
+                  pessoas={pessoas}
+                  responsavelPrincipal={
+                    pessoas.find((p) => p.id === dados.responsavel_id)?.nome ?? null
+                  }
+                />
+              </div>
+            ) : (
+              <p className="rounded-md border border-dashed border-borda p-3 text-[13px] text-cinza">
+                Salve o projeto para montar a equipe por frente e escrever os próximos passos.
+              </p>
+            )}
 
             {erro && <p className="text-xs text-perigo">{erro}</p>}
           </div>

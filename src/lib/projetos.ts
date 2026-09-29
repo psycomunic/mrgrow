@@ -14,6 +14,7 @@ export type Projeto = {
   cliente: string | null;
   cliente_id: string | null;
   responsavel: string | null;
+  responsavel_id: string | null;
 };
 
 export type Portfolio = { projetos: Projeto[]; demo: boolean };
@@ -30,6 +31,7 @@ function demo(): Portfolio {
       cliente: p.cliente,
       cliente_id: null,
       responsavel: p.responsavel,
+      responsavel_id: null,
     })),
     demo: true,
   };
@@ -45,6 +47,7 @@ type Linha = {
   progresso: number | null;
   prazo: string | null;
   cliente_id: string | null;
+  responsavel_id: string | null;
   clientes: { nome: string } | { nome: string }[] | null;
   perfis: { nome_completo: string | null } | { nome_completo: string | null }[] | null;
 };
@@ -65,7 +68,7 @@ export async function carregarProjetos(): Promise<Portfolio> {
     const { data, error } = await db
       .from("projetos")
       .select(
-        "id, nome, descricao, status, progresso, prazo, cliente_id, clientes(nome), perfis:responsavel_id(nome_completo)",
+        "id, nome, descricao, status, progresso, prazo, cliente_id, responsavel_id, clientes(nome), perfis:responsavel_id(nome_completo)",
       )
       .eq("organizacao_id", sessao.organizacaoId)
       /* Concluído no fim: o que está em execução é o que precisa de atenção.
@@ -90,6 +93,7 @@ export async function carregarProjetos(): Promise<Portfolio> {
         cliente: um(p.clientes)?.nome ?? null,
         cliente_id: p.cliente_id,
         responsavel: um(p.perfis)?.nome_completo ?? null,
+        responsavel_id: p.responsavel_id ?? null,
       })),
       demo: false,
     };

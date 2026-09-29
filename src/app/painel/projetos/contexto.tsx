@@ -16,6 +16,8 @@ export type OpcaoCliente = { id: string; nome: string };
 type Contexto = {
   projetos: Projeto[];
   clientes: OpcaoCliente[];
+  /** Equipe da organização, para escolher responsável e frentes. */
+  pessoas: { id: string; nome: string }[];
   demo: boolean;
   salvando: boolean;
   criar: (d: DadosProjeto) => Promise<boolean>;
@@ -37,11 +39,13 @@ let sequencia = 0;
 export function ProjetosProvider({
   projetosIniciais,
   clientes,
+  pessoas,
   demo,
   children,
 }: {
   projetosIniciais: Projeto[];
   clientes: OpcaoCliente[];
+  pessoas: { id: string; nome: string }[];
   demo: boolean;
   children: React.ReactNode;
 }) {
@@ -70,6 +74,7 @@ export function ProjetosProvider({
           cliente: cliente?.nome ?? null,
           cliente_id: d.cliente_id,
           responsavel: null,
+          responsavel_id: d.responsavel_id,
         },
         ...l,
       ]);
@@ -161,8 +166,8 @@ export function ProjetosProvider({
   );
 
   const valor = useMemo<Contexto>(
-    () => ({ projetos, clientes, demo, salvando, criar, editar, ajustar, excluir }),
-    [projetos, clientes, demo, salvando, criar, editar, ajustar, excluir],
+    () => ({ projetos, clientes, pessoas, demo, salvando, criar, editar, ajustar, excluir }),
+    [projetos, clientes, pessoas, demo, salvando, criar, editar, ajustar, excluir],
   );
 
   return <Ctx.Provider value={valor}>{children}</Ctx.Provider>;

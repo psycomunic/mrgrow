@@ -6,19 +6,26 @@ import { AcaoNovoProjeto, Lista } from "./lista";
 import { exigirPermissao } from "@/lib/sessao";
 import { carregarProjetos } from "@/lib/projetos";
 import { listarClientesParaSelecao } from "@/lib/clientes";
+import { listarEquipeParaSelecao } from "@/lib/equipe";
 
 export const metadata: Metadata = { title: "Projetos" };
 
 export default async function PaginaProjetos() {
   await exigirPermissao("projetos");
 
-  const [{ projetos, demo }, clientes] = await Promise.all([
+  const [{ projetos, demo }, clientes, pessoas] = await Promise.all([
     carregarProjetos(),
     listarClientesParaSelecao(),
+    listarEquipeParaSelecao(),
   ]);
 
   return (
-    <ProjetosProvider projetosIniciais={projetos} clientes={clientes} demo={demo}>
+    <ProjetosProvider
+      projetosIniciais={projetos}
+      clientes={clientes}
+      pessoas={pessoas}
+      demo={demo}
+    >
       <Topo
         titulo="Projetos"
         descricao="Entregas por cliente, com prazo e progresso. Arraste a barra para atualizar."

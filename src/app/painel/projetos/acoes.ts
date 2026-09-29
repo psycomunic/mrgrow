@@ -13,6 +13,9 @@ export type DadosProjeto = {
   progresso: number;
   prazo: string | null;
   cliente_id: string | null;
+  /* Quem responde pelo projeto inteiro. A equipe por frente vive em
+     `equipe_projeto`; aqui é o nome que se cobra quando algo atrasa. */
+  responsavel_id: string | null;
 };
 
 const STATUS = STATUS_PROJETO.lista.map((s) => s.valor);
@@ -39,6 +42,7 @@ function paraBanco(d: DadosProjeto) {
     progresso: d.status === "concluido" ? 100 : d.progresso,
     prazo: d.prazo || null,
     cliente_id: d.cliente_id || null,
+    responsavel_id: d.responsavel_id || null,
   };
 }
 
@@ -55,11 +59,16 @@ export async function criarProjeto(d: DadosProjeto): Promise<Resultado> {
     if (!(await fkDaOrganizacao(db, "clientes", d.cliente_id, sessao.organizacaoId))) {
       return { ok: false, demo: false, erro: "Cliente não encontrado." };
     }
+    if (!(await fkDaOrganizacao(db, "perfis", d.responsavel_id, sessao.organizacaoId))) {
+      return { ok: false, demo: false, erro: "Responsável não encontrado." };
+    }
 
     const { error } = await db.from("projetos").insert({
       organizacao_id: sessao.organizacaoId,
-      responsavel_id: sessao.usuarioId,
       ...paraBanco(d),
+      /* Sem escolha explícita, quem cria responde — é melhor que ninguém,
+         e some do relatório de projeto sem dono. */
+      responsavel_id: d.responsavel_id || sessao.usuarioId,
     });
 
     if (error) return falha("criarProjeto", error, "Não foi possível criar o projeto.");
@@ -82,6 +91,9 @@ export async function atualizarProjeto(id: string, d: DadosProjeto): Promise<Res
   try {
     if (!(await fkDaOrganizacao(db, "clientes", d.cliente_id, sessao.organizacaoId))) {
       return { ok: false, demo: false, erro: "Cliente não encontrado." };
+    }
+    if (!(await fkDaOrganizacao(db, "perfis", d.responsavel_id, sessao.organizacaoId))) {
+      return { ok: false, demo: false, erro: "Responsável não encontrado." };
     }
 
     const { data, error } = await db
