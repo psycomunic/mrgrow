@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { registrarFalha } from "@/lib/dados";
 import { contextoDeAcao, falha, pertence, type Banco, type Resultado } from "@/lib/acoes";
 import { ROTULO_PAPEL, type Papel } from "@/lib/papeis";
 import { criarClienteAdmin } from "@/lib/supabase/servidor";
@@ -8,7 +9,7 @@ import { criarClienteAdmin } from "@/lib/supabase/servidor";
 export type { Resultado };
 
 /** O convite não é enviado por e-mail: quem convida copia o link e manda. */
-export type ResultadoConvite = Resultado & { link?: string };
+export type ResultadoConvite = Resultado & { link?: string; aviso?: string | null };
 
 const PAPEIS = Object.keys(ROTULO_PAPEL) as Papel[];
 const EMAIL = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
@@ -166,6 +167,39 @@ export async function reativarMembro(membroId: string): Promise<Resultado> {
  * O token é a credencial, então ele só aparece para quem administra a equipe
  * (a RLS de `convites` exige `e_gestor`).
  */
+/**
+ * Manda o e-mail de convite e devolve um aviso quando não deu.
+ *
+ * Nunca derruba o convite: a linha em `convites` já existe e o link
+ * funciona de qualquer jeito, então falha de e-mail vira aviso na tela —
+ * "copie o link e mande você mesmo" — e não erro que apaga o trabalho.
+ *
+ * Quem já tem conta cai no `already registered` do Auth. Não é problema:
+ * essa pessoa não precisa criar senha, só entrar e aceitar. O aviso diz
+ * isso em vez de fingir que o e-mail saiu.
+ */
+async function enviarConvitePorEmail(email: string, destino: string): Promise<string | null> {
+  try {
+    const admin = criarClienteAdmin();
+    const site = (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/+$/, "");
+    if (!site) return "Convite criado, mas o endereço do site não está configurado — copie o link.";
+
+    const { error } = await admin.auth.admin.inviteUserByEmail(email, {
+      redirectTo: `${site}${destino}`,
+    });
+    if (!error) return null;
+
+    if (/already|registered|exists/i.test(error.message ?? "")) {
+      return "Essa pessoa já tem conta na plataforma — mande o link para ela entrar e aceitar.";
+    }
+    registrarFalha("enviarConvitePorEmail", error);
+    return "Convite criado, mas o e-mail não saiu. Copie o link e mande você mesmo.";
+  } catch (e) {
+    registrarFalha("enviarConvitePorEmail", e);
+    return "Convite criado, mas o e-mail não saiu. Copie o link e mande você mesmo.";
+  }
+}
+
 export async function convidarMembro(email: string, papel: string): Promise<ResultadoConvite> {
   const alvo = email.trim().toLowerCase();
   if (!EMAIL.test(alvo) || alvo.length > 160) {
@@ -231,8 +265,22 @@ export async function convidarMembro(email: string, papel: string): Promise<Resu
       return falha("convidarMembro", error, "Não foi possível gerar o convite.");
     }
 
+    const token = (data as { token: string }).token;
+    const destino = `/convite/${token}`;
+
+    /* O convite precisa chegar por e-mail — e, para quem ainda não tem
+       conta, precisa criar o acesso e pedir uma senha. Isso é exatamente
+       o que o `inviteUserByEmail` do Auth faz: cria o usuário sem senha,
+       manda o modelo "Você foi convidado" pelo SMTP configurado e, depois
+       que a pessoa escolhe a senha, devolve ela em `redirectTo`.
+
+       Antes nada disso acontecia: a ação só gravava a linha em `convites`
+       e devolvia um link para `/entrar?convite=…`, que a tela de login
+       ignora. Quem recebia o link via a tela de login e mais nada. */
+    const aviso = await enviarConvitePorEmail(alvo, destino);
+
     revalidatePath("/painel/equipe");
-    return { ok: true, demo: false, link: `/entrar?convite=${(data as { token: string }).token}` };
+    return { ok: true, demo: false, link: destino, aviso };
   } catch (e) {
     return falha("convidarMembro", e, "Não foi possível gerar o convite.");
   }

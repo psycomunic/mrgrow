@@ -143,13 +143,24 @@ export function EquipeProvider({
         id: `local-${Date.now()}`,
         email: email.trim().toLowerCase(),
         papel,
-        token: link.split("=")[1] ?? "",
+        /* O link agora é `/convite/TOKEN`; antes era `?convite=TOKEN` e o
+           token saía de um `split("=")`. */
+        token: link.split("/").pop() ?? "",
         expiraEm: emDias(7),
         criadoEm: hoje(),
       },
       ...l,
     ]);
-    toast.success(r.demo ? "Convite gerado (não salvo: modo demonstração)." : "Convite gerado.");
+    if (r.demo) {
+      toast.success("Convite gerado (não salvo: modo demonstração).");
+    } else if (r.aviso) {
+      /* Aviso e não erro: o convite existe e o link funciona. O que falhou
+         foi só a entrega, e quem convidou precisa saber para mandar o link
+         por conta própria em vez de esperar um e-mail que não vem. */
+      toast.warning(r.aviso, { duration: 8000 });
+    } else {
+      toast.success(`Convite enviado para ${email.trim().toLowerCase()}.`);
+    }
     return link;
   }, []);
 
