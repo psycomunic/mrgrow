@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { exigirEquipe } from "@/lib/sessao";
 import { pode } from "@/lib/papeis";
 import { cookieDoEstado, estadoValido } from "@/lib/oauth";
+import { origemPublica } from "@/lib/endereco";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { cifrar } from "@/lib/cripto";
 import { trocarCodigoPorToken, tokenLongaDuracao, listarContasDeAnuncio } from "@/lib/integracoes/meta";
@@ -10,7 +11,10 @@ export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
   const sessao = await exigirEquipe();
-  const { searchParams, origin } = request.nextUrl;
+  const { searchParams } = request.nextUrl;
+  /* Não `nextUrl.origin`: atrás do proxy ele devolve 0.0.0.0:3000, e o
+     retorno do OAuth cairia num endereço que não existe. */
+  const origin = origemPublica(request);
 
   if (!pode(sessao.papel, "integracoes", "editar")) {
     return NextResponse.redirect(`${origin}/painel/integracoes?erro=sem_permissao`);

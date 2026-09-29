@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { exigirEquipe } from "@/lib/sessao";
 import { pode } from "@/lib/papeis";
 import { cookieDoEstado, gerarEstado, OPCOES_COOKIE } from "@/lib/oauth";
+import { urlDoApp } from "@/lib/endereco";
 import { urlAutorizacaoGoogle } from "@/lib/integracoes/google";
 
 export const runtime = "nodejs";
@@ -14,9 +15,7 @@ export async function GET(request: NextRequest) {
      o token da própria agência (o upsert usa `conta_externa_id: "me"`). */
   const sessao = await exigirEquipe();
   if (!pode(sessao.papel, "integracoes", "editar")) {
-    return NextResponse.redirect(
-      new URL("/painel/integracoes?erro=sem_permissao", request.nextUrl.origin),
-    );
+    return NextResponse.redirect(urlDoApp(request, "/painel/integracoes?erro=sem_permissao"));
   }
 
   const estado = gerarEstado(sessao.organizacaoId);

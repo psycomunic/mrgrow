@@ -1,4 +1,5 @@
 import { NextResponse, after, type NextRequest } from "next/server";
+import { origemPublica } from "@/lib/endereco";
 import { z } from "zod";
 import { criarClienteAdmin } from "@/lib/supabase/servidor";
 import { dispararGatilho } from "@/lib/automacoes";
@@ -137,7 +138,7 @@ export async function POST(request: NextRequest) {
        assim que a resposta sai, e o disparo com `void` morria pelo caminho de
        forma intermitente — o lead entrava e ninguém era avisado. */
     const userAgent = request.headers.get("user-agent") ?? undefined;
-    const urlOrigem = `${request.nextUrl.origin}${dados.pagina}`;
+    const urlOrigem = `${origemPublica(request)}${dados.pagina}`;
 
     after(async () => {
       try {
