@@ -71,11 +71,35 @@ export const obterSessao = cache(async (): Promise<Sessao | null> => {
   };
 });
 
+/**
+ * O usuário autenticado, sem exigir vínculo com organização.
+ *
+ * Existe para separar dois estados que o resto do código confundia: quem
+ * não entrou, e quem entrou mas ainda não pertence a nenhuma
+ * organização. Tratar os dois como "sem sessão" produzia um laço — o
+ * middleware via o usuário e mandava do login para o painel, o painel não
+ * via vínculo e mandava de volta para o login.
+ */
+export const obterUsuario = cache(async (): Promise<{ id: string; email: string | null } | null> => {
+  if (modoDemonstracao()) return { id: "demo", email: SESSAO_DEMO.email };
+
+  const supabase = await criarClienteServidor();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user ? { id: user.id, email: user.email ?? null } : null;
+});
+
 /** Exige sessão; redireciona para o login quando não houver. */
 export async function exigirSessao(): Promise<Sessao> {
   const sessao = await obterSessao();
-  if (!sessao) redirect("/entrar");
-  return sessao;
+  if (sessao) return sessao;
+
+  /* Autenticado mas sem organização: mandar para o login aqui criava o
+     laço, porque o middleware devolve quem tem sessão do login para o
+     painel. A pessoa existe — o que falta é o convite ser aceito. */
+  const usuario = await obterUsuario();
+  redirect(usuario ? "/sem-acesso" : "/entrar");
 }
 
 /** Exige que o usuário seja da equipe (bloqueia papel "cliente" no painel). */

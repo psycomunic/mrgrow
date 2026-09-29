@@ -1,6 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { atualizarSessao } from "@/lib/supabase/middleware";
 
+/* `/sem-acesso` fica de fora das duas listas de propósito: é a única
+   página que quem está autenticado sem organização consegue abrir, e
+   pôr ela em qualquer uma das listas recria o laço. */
 const ROTAS_PRIVADAS = ["/painel", "/portal"];
 const ROTAS_AUTH = ["/entrar", "/cadastro", "/recuperar-senha"];
 
