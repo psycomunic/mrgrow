@@ -9,6 +9,9 @@ export type Papel =
   | "gestor"
   | "comercial"
   | "marketing"
+  | "web_design"
+  | "social_media"
+  | "editor_video"
   | "operador"
   | "financeiro"
   | "cliente";
@@ -19,6 +22,9 @@ export const ROTULO_PAPEL: Record<Papel, string> = {
   gestor: "Gestor",
   comercial: "Comercial",
   marketing: "Marketing",
+  web_design: "Web design",
+  social_media: "Social media",
+  editor_video: "Editor de vídeo",
   operador: "Operador",
   financeiro: "Financeiro",
   cliente: "Cliente",
@@ -75,6 +81,31 @@ export const MATRIZ: Record<Papel, Partial<Record<Recurso, Acao[]>>> = {
     projetos: TUDO, tarefas: TUDO, metricas: LEITURA,
     integracoes: EDICAO, automacoes: EDICAO, relatorios: TUDO,
   },
+  /* Os três papéis de produção dividem o mesmo território: entregam o
+     que foi vendido. Nenhum abre o funil, o financeiro ou as
+     configurações — antes todos caíam em 'operador', que abre o CRM. */
+
+  /* Web design constrói: página, site, landing. Manda no próprio projeto
+     porque é ele quem sabe o que falta para a página ir ao ar. */
+  web_design: {
+    visao: LEITURA, clientes: LEITURA,
+    projetos: TUDO, tarefas: TUDO, relatorios: LEITURA,
+  },
+
+  /* Social media precisa ver métrica: é o único jeito de saber qual post
+     rendeu e repetir o que funcionou. */
+  social_media: {
+    visao: LEITURA, clientes: LEITURA,
+    projetos: EDICAO, tarefas: TUDO, metricas: LEITURA, relatorios: LEITURA,
+  },
+
+  /* O editor recebe demanda e entrega corte. Não precisa de métrica nem
+     de relatório — precisa saber de quem é o vídeo e para quando. */
+  editor_video: {
+    visao: LEITURA, clientes: LEITURA,
+    projetos: EDICAO, tarefas: TUDO,
+  },
+
   operador: {
     visao: LEITURA, crm: EDICAO, clientes: LEITURA, propostas: LEITURA,
     projetos: EDICAO, tarefas: TUDO, metricas: LEITURA, relatorios: LEITURA,
