@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
+import { urlDoApp } from "@/lib/endereco";
 
 /**
  * O destino vem da query (`?proximo=`). O prefixo de origem já impedia
@@ -17,16 +18,16 @@ function destinoSeguro(proximo: string | null) {
 }
 
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = request.nextUrl;
+  const { searchParams } = request.nextUrl;
   const code = searchParams.get("code");
   const proximo = destinoSeguro(searchParams.get("proximo"));
 
   if (code) {
     const supabase = await criarClienteServidor();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) return NextResponse.redirect(`${origin}${proximo}`);
+    if (!error) return NextResponse.redirect(urlDoApp(request, proximo));
     console.error("[auth callback] troca de código falhou", error);
   }
 
-  return NextResponse.redirect(`${origin}/entrar?erro=link_invalido`);
+  return NextResponse.redirect(urlDoApp(request, "/entrar?erro=link_invalido"));
 }
