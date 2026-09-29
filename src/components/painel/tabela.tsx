@@ -54,8 +54,23 @@ export function Linha({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function Celula({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <td className={cn("px-4 py-3.5 align-middle text-grafite", className)}>{children}</td>;
+export function Celula({
+  children,
+  className,
+  colSpan,
+}: {
+  children?: React.ReactNode;
+  className?: string;
+  colSpan?: number;
+}) {
+  return (
+    <td
+      className={cn("px-4 py-3.5 align-middle text-grafite", className)}
+      colSpan={colSpan}
+    >
+      {children}
+    </td>
+  );
 }
 
 /**
@@ -85,7 +100,13 @@ export function CelulaTexto({
   );
 }
 
-export function Vazio({ mensagem, acao }: { mensagem: string; acao?: React.ReactNode }) {
+export function Vazio({
+  mensagem,
+  acao,
+}: {
+  mensagem: string;
+  acao?: React.ReactNode;
+}) {
   return (
     <div className="cartao grid place-items-center gap-3 rounded-lg p-12 text-center">
       <p className="max-w-sm text-sm text-cinza">{mensagem}</p>
