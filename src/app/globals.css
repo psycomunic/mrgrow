@@ -63,6 +63,14 @@
   --color-acento: #5798ff;
   --color-acento-forte: #8dbdff;
 
+  /* Fundo do item selecionado no menu e na busca. Existe em token pela
+     mesma razão do `acento`: quem ocupava o lugar era o `mrg-50`
+     (#eef5ff), um tom da escala feita para tinta sobre branco. Sobre a
+     superfície escura ele virava uma pastilha branca com texto azul
+     claro em cima — 1,76:1, abaixo de qualquer mínimo legível. Este
+     dá 5,2:1 com o `acento-forte`. */
+  --color-selecao: #23426f;
+
   /* Paleta dos gráficos. Vive em token porque muda com o tema: a mesma
      linha precisa de tom claro sobre preto e de tom escuro sobre branco.
      Onde é atributo de SVG (`stroke="..."`) o `var()` não resolve, então
@@ -172,6 +180,9 @@
 
   --color-acento: #0b4fd1;
   --color-acento-forte: #0b3fa6;
+
+  /* Aqui o azul claríssimo é o certo: o texto por cima é escuro. */
+  --color-selecao: #eef5ff;
 
   --color-grafico-1: #1668f5;
   --color-grafico-2: #067a55;

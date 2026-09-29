@@ -77,14 +77,14 @@ export function BarraLateral({
                       className={cn(
                         "relative flex items-center gap-3 rounded-sm px-3 py-2 text-sm transition-colors foco-anel",
                         ativo(item.href)
-                          ? "bg-mrg-50 font-semibold text-acento-forte"
+                          ? "bg-selecao font-semibold text-acento-forte"
                           : "font-medium text-grafite hover:bg-nevoa hover:text-tinta",
                       )}
                     >
                       {ativo(item.href) && (
                         <span
                           aria-hidden
-                          className="absolute inset-y-1.5 left-0 w-1 rounded-full bg-mrg-500"
+                          className="absolute inset-y-1.5 left-0 w-1 rounded-full bg-selecao0"
                         />
                       )}
                       <Icone
@@ -114,7 +114,7 @@ export function BarraLateral({
             className={cn(
               "mb-1 flex items-center gap-3 rounded-sm px-3 py-2 text-sm transition-colors foco-anel",
               ativo(item.href)
-                ? "bg-mrg-50 font-semibold text-acento-forte"
+                ? "bg-selecao font-semibold text-acento-forte"
                 : "font-medium text-grafite hover:bg-nevoa hover:text-tinta",
             )}
           >
@@ -135,7 +135,7 @@ export function BarraLateral({
             className="foco-anel flex min-w-0 flex-1 items-center gap-3 rounded-sm"
             title="Abrir meu perfil"
           >
-            <span className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-mrg-500 text-xs font-bold text-white">
+            <span className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-selecao0 text-xs font-bold text-white">
               {avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={avatarUrl} alt="" className="size-full object-cover" />

@@ -116,7 +116,7 @@ export function Busca() {
                 onClick={() => ir(item.href)}
                 className={[
                   "flex w-full items-center gap-2.5 rounded-sm px-2.5 py-2 text-left text-sm transition-colors",
-                  i === foco ? "bg-mrg-50 text-acento-forte" : "text-grafite",
+                  i === foco ? "bg-selecao text-acento-forte" : "text-grafite",
                 ].join(" ")}
               >
                 <Icone nome={item.icone} className="size-4 shrink-0 text-cinza-claro" />
