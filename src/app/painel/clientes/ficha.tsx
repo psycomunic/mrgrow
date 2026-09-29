@@ -5,10 +5,16 @@ import {
   ArrowUpRight,
   Building2,
   CalendarDays,
+  Copy,
   ExternalLink,
   FileText,
+  Globe,
+  IdCard,
   Instagram,
+  Mail,
+  MessageCircle,
   Pencil,
+  Phone,
   Plug,
   StickyNote,
   Trash2,
@@ -314,33 +320,7 @@ export function FichaCliente({
                   </dl>
                 </section>
 
-                {(cliente.site || cliente.instagram) && (
-                  <section>
-                    <Titulo>Links</Titulo>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {cliente.site && (
-                        <a
-                          href={cliente.site}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="foco-anel inline-flex items-center gap-2 rounded-md border border-borda bg-nevoa px-3 py-2 text-sm text-grafite transition-colors hover:bg-nevoa-2 hover:text-acento"
-                        >
-                          <ExternalLink className="size-3.5" /> Site
-                        </a>
-                      )}
-                      {cliente.instagram && (
-                        <a
-                          href={`https://instagram.com/${cliente.instagram.replace("@", "")}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="foco-anel inline-flex items-center gap-2 rounded-md border border-borda bg-nevoa px-3 py-2 text-sm text-grafite transition-colors hover:bg-nevoa-2 hover:text-acento"
-                        >
-                          <Instagram className="size-3.5" /> {cliente.instagram}
-                        </a>
-                      )}
-                    </div>
-                  </section>
-                )}
+                <Contato cliente={cliente} />
 
                 <section>
                   <Titulo>Observações</Titulo>
@@ -679,3 +659,193 @@ function Linha({
 }
 
 export { TOM, ROTULO_STATUS, corSaude };
+
+/** Só os dígitos, com o 55 na frente: é o formato que o wa.me aceita. */
+function paraWhatsApp(telefone: string) {
+  const so = telefone.replace(/\D/g, "");
+  if (!so) return null;
+  return so.startsWith("55") ? so : `55${so}`;
+}
+
+type ItemContato = {
+  chave: string;
+  Icone: typeof Mail;
+  rotulo: string;
+  texto: string;
+  href: string | null;
+  externo: boolean;
+  tom: string;
+};
+
+/**
+ * Contato e presença da conta, cada um a um toque de distância.
+ *
+ * Antes eram dois botões — "Site" e o usuário do Instagram — e nada de
+ * telefone ou e-mail: quem precisava falar com o cliente saía da ficha,
+ * abria a agenda e procurava. O contato estava no banco desde a
+ * importação da planilha; era a carteira que não o carregava.
+ *
+ * Cada linha faz a coisa óbvia ao ser clicada: o WhatsApp abre a conversa,
+ * o e-mail abre o programa de e-mail, o telefone disca. O botão de copiar
+ * existe para quando a pessoa está no computador e vai usar o número no
+ * celular.
+ */
+function Contato({ cliente }: { cliente: ClienteCarteira }) {
+  const telefone = cliente.contato?.telefone ?? null;
+  const zap = telefone ? paraWhatsApp(telefone) : null;
+  const email = cliente.contato?.email ?? null;
+  const instagram = cliente.instagram ? cliente.instagram.replace(/^@/, "") : null;
+
+  const itens: ItemContato[] = [];
+
+  if (zap && telefone) {
+    itens.push({
+      chave: "zap",
+      Icone: MessageCircle,
+      rotulo: "WhatsApp",
+      texto: telefone,
+      href: `https://wa.me/${zap}`,
+      externo: true,
+      tom: "text-sucesso",
+    });
+  }
+  if (email) {
+    itens.push({
+      chave: "email",
+      Icone: Mail,
+      rotulo: "E-mail",
+      texto: email,
+      href: `mailto:${email}`,
+      externo: false,
+      tom: "text-acento",
+    });
+  }
+  if (telefone) {
+    itens.push({
+      chave: "tel",
+      Icone: Phone,
+      rotulo: "Telefone",
+      texto: telefone,
+      href: `tel:${telefone.replace(/\D/g, "")}`,
+      externo: false,
+      tom: "text-cinza",
+    });
+  }
+  if (instagram) {
+    itens.push({
+      chave: "insta",
+      Icone: Instagram,
+      rotulo: "Instagram",
+      texto: `@${instagram}`,
+      href: `https://instagram.com/${instagram}`,
+      externo: true,
+      tom: "text-perigo",
+    });
+  }
+  if (cliente.site) {
+    itens.push({
+      chave: "site",
+      Icone: Globe,
+      rotulo: "Site",
+      texto: cliente.site.replace(/^https?:\/\//, "").replace(/\/$/, ""),
+      href: cliente.site,
+      externo: true,
+      tom: "text-acento",
+    });
+  }
+  if (cliente.documento) {
+    itens.push({
+      chave: "doc",
+      Icone: IdCard,
+      rotulo: "CNPJ / CPF",
+      texto: cliente.documento,
+      href: null,
+      externo: false,
+      tom: "text-cinza",
+    });
+  }
+
+  return (
+    <section>
+      <Titulo>Contato</Titulo>
+
+      {cliente.contato && (
+        <div className="mt-3 flex items-center gap-3 rounded-md border border-borda bg-nevoa px-4 py-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-acento/12 text-sm font-semibold text-acento">
+            {iniciais(cliente.contato.nome)}
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-tinta">{cliente.contato.nome}</p>
+            <p className="truncate text-xs text-cinza">
+              {cliente.contato.cargo ?? "Contato principal"}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {itens.length > 0 ? (
+        <ul className="mt-2 divide-y divide-borda-fraca overflow-hidden rounded-md border border-borda">
+          {itens.map((i) => (
+            <li key={i.chave} className="group flex items-center gap-3 bg-carta px-4 py-2.5">
+              <i.Icone className={cn("size-4 shrink-0", i.tom)} aria-hidden />
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] text-cinza">{i.rotulo}</p>
+                {i.href ? (
+                  <a
+                    href={i.href}
+                    {...(i.externo ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    className="foco-anel block truncate text-sm font-medium text-tinta hover:text-acento hover:underline"
+                  >
+                    {i.texto}
+                  </a>
+                ) : (
+                  <p className="truncate text-sm font-medium text-tinta">{i.texto}</p>
+                )}
+              </div>
+              <BotaoCopiar texto={i.texto} rotulo={i.rotulo} />
+              {i.externo && i.href && (
+                <ExternalLink className="size-3.5 shrink-0 text-cinza-claro" aria-hidden />
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-3 rounded-md border border-dashed border-borda p-3.5 text-sm text-cinza">
+          Nenhum contato cadastrado nesta conta. Edite a ficha para adicionar.
+        </p>
+      )}
+    </section>
+  );
+}
+
+function BotaoCopiar({ texto, rotulo }: { texto: string; rotulo: string }) {
+  const [copiado, setCopiado] = useState(false);
+
+  return (
+    <button
+      type="button"
+      aria-label={`Copiar ${rotulo.toLowerCase()}`}
+      title="Copiar"
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(texto);
+          setCopiado(true);
+          toast.success(`${rotulo} copiado.`);
+          setTimeout(() => setCopiado(false), 1500);
+        } catch {
+          /* A área de transferência é bloqueada fora de HTTPS e sob algumas
+             políticas de navegador. Falhar calado seria pior. */
+          toast.error("O navegador não liberou a área de transferência.");
+        }
+      }}
+      className={cn(
+        "foco-anel shrink-0 rounded-sm p-1.5 transition-colors",
+        copiado
+          ? "text-sucesso"
+          : "text-cinza-claro opacity-0 hover:text-tinta group-hover:opacity-100 focus-visible:opacity-100",
+      )}
+    >
+      <Copy className="size-3.5" />
+    </button>
+  );
+}

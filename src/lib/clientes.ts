@@ -27,6 +27,13 @@ export type ClienteCarteira = {
   percentual_sobre_investimento: number;
   observacoes: string | null;
   gestor_trafego: string | null;
+  /** Contato principal da conta: quem a agência liga quando precisa. */
+  contato: {
+    nome: string;
+    email: string | null;
+    telefone: string | null;
+    cargo: string | null;
+  } | null;
 };
 
 export type Carteira = { clientes: ClienteCarteira[]; demo: boolean };
@@ -51,6 +58,7 @@ function carteiraDemo(): Carteira {
       percentual_sobre_investimento: c.percentual ?? 0,
       observacoes: c.observacoes ?? null,
       gestor_trafego: c.gestor_trafego ?? null,
+      contato: null,
       site: c.site ?? null,
       instagram: c.instagram ?? null,
       inicio_contrato: c.inicio_contrato ?? null,
@@ -67,6 +75,10 @@ type Linha = {
   segmento: string | null;
   status: string;
   fee_mensal: number | string | null;
+  contatos?:
+    | { nome: string; email: string | null; telefone: string | null; cargo: string | null }
+    | { nome: string; email: string | null; telefone: string | null; cargo: string | null }[]
+    | null;
   investimento_previsto: number | string | null;
   saude: number | null;
   nps: number | null;
@@ -96,7 +108,7 @@ export async function carregarCarteira(): Promise<Carteira> {
     const { data, error } = await db
       .from("clientes")
       .select(
-        "id, nome, slug, segmento, status, fee_mensal, investimento_previsto, saude, nps, site, instagram, inicio_contrato, fim_contrato, dia_vencimento, documento, percentual_sobre_investimento, observacoes, perfis:responsavel_id(nome_completo), gestor:gestor_trafego_id(nome_completo)",
+        "id, nome, slug, segmento, status, fee_mensal, investimento_previsto, saude, nps, site, instagram, inicio_contrato, fim_contrato, dia_vencimento, documento, percentual_sobre_investimento, observacoes, perfis:responsavel_id(nome_completo), gestor:gestor_trafego_id(nome_completo), contatos:contato_principal_id(nome, email, telefone, cargo)",
       )
       .eq("organizacao_id", sessao.organizacaoId)
       .order("nome", { ascending: true });
@@ -113,6 +125,10 @@ export async function carregarCarteira(): Promise<Carteira> {
     return {
       clientes: (data as unknown as Linha[]).map((c) => {
         const p = Array.isArray(c.perfis) ? c.perfis[0] : c.perfis;
+        /* O PostgREST devolve o vínculo como objeto ou como lista de um,
+           conforme a cardinalidade que ele infere da chave. Normalizar aqui
+           evita que cada tela trate os dois casos. */
+        const ct = Array.isArray(c.contatos) ? c.contatos[0] : c.contatos;
         return {
           id: c.id,
           nome: c.nome,
@@ -132,6 +148,14 @@ export async function carregarCarteira(): Promise<Carteira> {
           fim_contrato: c.fim_contrato,
           dia_vencimento: c.dia_vencimento ?? 10,
           responsavel: p?.nome_completo ?? null,
+          contato: ct
+            ? {
+                nome: ct.nome,
+                email: ct.email ?? null,
+                telefone: ct.telefone ?? null,
+                cargo: ct.cargo ?? null,
+              }
+            : null,
           documento: c.documento,
           percentual_sobre_investimento: Number(c.percentual_sobre_investimento ?? 0),
           observacoes: c.observacoes,
