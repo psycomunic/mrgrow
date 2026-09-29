@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  AlertTriangle, Check, Pencil, Plus, Scale, TrendingDown, TrendingUp, Trash2, X,
+  AlertTriangle, Check, Download, Pencil, Plus, Scale, TrendingDown, TrendingUp, Trash2, X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Botao } from "@/components/ui/botao";
@@ -13,9 +13,16 @@ import { Etiqueta } from "@/components/ui/etiqueta";
 import { Kpi } from "@/components/painel/kpi";
 import { GraficoArea } from "@/components/painel/grafico-area";
 import { Tabela, Cabecalhos, Linha, Celula } from "@/components/painel/tabela";
-import { brl, cn, dataCompleta, dataCurta, numero } from "@/lib/utils";
+import { brl, cn, dataCompleta, dataCurta, numero, slugificar } from "@/lib/utils";
 import { STATUS_LANCAMENTO } from "@/lib/rotulos";
-import { limitesDoMes, noPeriodo as emJanela, resumirFinanceiro } from "@/lib/resumo";
+import { noPeriodo as emJanela, resumirFinanceiro } from "@/lib/resumo";
+import {
+  BarraFiltros,
+  janelaDo,
+  PERIODOS,
+  RECORTE_PADRAO,
+  type Recorte,
+} from "./filtros";
 import { hoje } from "@/lib/tempo";
 import {
   criarLancamento,
@@ -42,18 +49,8 @@ const BARRA: Record<string, string> = {
  * O gráfico de fluxo continua olhando seis meses sempre, porque é a
  * comparação que ele existe para mostrar.
  */
-const PERIODOS = [
-  { v: "mes", r: "Este mês", meses: 1 },
-  { v: "trimestre", r: "Últimos 3 meses", meses: 3 },
-  { v: "tudo", r: "Tudo", meses: 0 },
-];
-
-const FILTROS = [
-  { v: "todos", r: "Todos" },
-  { v: "receita", r: "Receitas" },
-  { v: "despesa", r: "Despesas" },
-  { v: "atrasado", r: "Em atraso" },
-];
+/** De quantas em quantas linhas a tabela cresce. */
+const PAGINA = 40;
 
 function vazio(): DadosLancamento {
   return {
@@ -112,8 +109,11 @@ export function Lancamentos({
 }) {
   const [lancamentos, setLancamentos] = useState(iniciais);
   const [doServidor, setDoServidor] = useState(iniciais);
-  const [filtro, setFiltro] = useState("todos");
-  const [periodo, setPeriodo] = useState("mes");
+  const [recorte, setRecorte] = useState<Recorte>(RECORTE_PADRAO);
+  /* Quantas linhas a tabela mostra. Com 410 lançamentos, desenhar todos
+     de uma vez custava meio segundo de travada a cada troca de filtro —
+     e ninguém rola 410 linhas: procura. */
+  const [mostrando, setMostrando] = useState(PAGINA);
   const [criando, setCriando] = useState(false);
   const [editando, setEditando] = useState<Lancamento | null>(null);
   /* Baixa é irreversível pela tela: uma vez pago, só editando o lançamento
@@ -128,35 +128,78 @@ export function Lancamentos({
   }
 
   /* Corte do período em texto: comparar "2026-08-26" >= "2026-06-01" resolve
-     sem construir Date, e sem o risco de fuso que isso traria.
-     
-     Os dois lados são fechados. Só com o `>=`, "este mês" somava também
-     outubro e novembro e o cartão mostrava R$ 142.250 de receita num mês
-     de R$ 48.450 — as cobranças futuras já lançadas entravam na conta. */
-  const janela = useMemo(() => {
-    const meses = PERIODOS.find((x) => x.v === periodo)?.meses ?? 0;
-    if (!meses) return null;
-    const mesAtual = mesDe(hoje());
-    const [ano, mes] = mesAtual.split("-").map(Number);
-    const total = ano * 12 + (mes - 1) - (meses - 1);
-    const primeiro = `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, "0")}`;
-    return { de: limitesDoMes(primeiro).de, ate: limitesDoMes(mesAtual).ate };
-  }, [periodo]);
+     sem construir Date, e sem o risco de fuso que isso traria. Os dois
+     lados são fechados — foi a falta do limite superior que fazia "este
+     mês" somar outubro e novembro. */
+  const janela = useMemo(() => janelaDo(recorte, hoje()), [recorte]);
 
   const noPeriodo = useMemo(
     () => (janela ? lancamentos.filter((l) => emJanela(l, janela.de, janela.ate)) : lancamentos),
     [lancamentos, janela],
   );
 
-  const visiveis = useMemo(
-    () =>
-      noPeriodo.filter((l) =>
-        filtro === "todos" ? true : filtro === "atrasado" ? l.status === "atrasado" : l.tipo === filtro,
-      ),
-    [noPeriodo, filtro],
-  );
+  const visiveis = useMemo(() => {
+    const termo = slugificar(recorte.busca.trim());
 
-  const rotuloPeriodo = (PERIODOS.find((x) => x.v === periodo)?.r ?? "").toLowerCase();
+    const filtrados = noPeriodo.filter((l) => {
+      if (recorte.tipo !== "todos" && l.tipo !== recorte.tipo) return false;
+      if (recorte.status !== "todos" && l.status !== recorte.status) return false;
+      if (recorte.clienteId === "agencia" && l.cliente_id) return false;
+      if (
+        recorte.clienteId !== "todos" &&
+        recorte.clienteId !== "agencia" &&
+        l.cliente_id !== recorte.clienteId
+      )
+        return false;
+      if (recorte.categoriaId === "sem" && l.categoria_id) return false;
+      if (
+        recorte.categoriaId !== "todos" &&
+        recorte.categoriaId !== "sem" &&
+        l.categoria_id !== recorte.categoriaId
+      )
+        return false;
+      if (recorte.forma !== "todos" && l.forma_pagamento !== recorte.forma) return false;
+      if (termo) {
+        const alvo = slugificar(`${l.descricao} ${l.cliente ?? ""} ${l.categoria ?? ""}`);
+        if (!alvo.includes(termo)) return false;
+      }
+      return true;
+    });
+
+    const ordenado = [...filtrados];
+    switch (recorte.ordem) {
+      case "vencimento-asc":
+        ordenado.sort((a, b) => a.vencimento.localeCompare(b.vencimento));
+        break;
+      case "valor-desc":
+        ordenado.sort((a, b) => b.valor - a.valor);
+        break;
+      case "valor-asc":
+        ordenado.sort((a, b) => a.valor - b.valor);
+        break;
+      case "cliente":
+        ordenado.sort((a, b) =>
+          (a.cliente ?? "Agência").localeCompare(b.cliente ?? "Agência", "pt-BR"),
+        );
+        break;
+      default:
+        ordenado.sort((a, b) => b.vencimento.localeCompare(a.vencimento));
+    }
+    return ordenado;
+  }, [noPeriodo, recorte]);
+
+  /* Volta ao topo da paginação a cada troca de recorte: manter a página 4
+     depois de filtrar mostra uma tabela vazia num recorte que tem linhas. */
+  const assinatura = JSON.stringify(recorte);
+  const [ultimoRecorte, setUltimoRecorte] = useState(assinatura);
+  if (assinatura !== ultimoRecorte) {
+    setUltimoRecorte(assinatura);
+    setMostrando(PAGINA);
+  }
+
+  const naTela = visiveis.slice(0, mostrando);
+
+  const rotuloPeriodo = (PERIODOS.find((x) => x.v === recorte.periodo)?.r ?? "").toLowerCase();
 
   /* Fluxo dos ultimos 6 meses somado dos proprios lancamentos. Antes era
      uma constante inventada dentro do arquivo da pagina. */
@@ -186,17 +229,44 @@ export function Lancamentos({
      R$ 3.500 em três lugares diferentes. */
   const kpis = useMemo(
     () =>
-      resumirFinanceiro(noPeriodo, {
+      resumirFinanceiro(visiveis, {
         de: janela?.de ?? "0000-01-01",
         ate: janela?.ate ?? "9999-12-31",
         hoje: hoje(),
       }),
-    [noPeriodo, janela],
+    [visiveis, janela],
   );
+
+  /**
+   * Para onde o dinheiro sai, por categoria.
+   *
+   * A tela mostrava o total de despesas e parava aí. Com 76% do custo em
+   * equipe e o resto espalhado por oito rubricas, o total sozinho não diz
+   * onde mexer — e era justamente essa a pergunta de quem abre o
+   * financeiro depois de ver o resultado no vermelho.
+   */
+  const porCategoria = useMemo(() => {
+    const despesas = visiveis.filter((l) => l.tipo === "despesa" && l.status !== "cancelado");
+    const total = despesas.reduce((s, l) => s + l.valor, 0);
+    if (!total) return { total: 0, itens: [] as { nome: string; valor: number; parte: number }[] };
+
+    const mapa = new Map<string, number>();
+    for (const l of despesas) {
+      const k = l.categoria ?? "Sem categoria";
+      mapa.set(k, (mapa.get(k) ?? 0) + l.valor);
+    }
+
+    return {
+      total,
+      itens: [...mapa.entries()]
+        .map(([nome, valor]) => ({ nome, valor, parte: valor / total }))
+        .sort((a, b) => b.valor - a.valor),
+    };
+  }, [visiveis]);
 
   /* Recebiveis por situacao: onde o dinheiro a receber esta parado. */
   const recebiveis = useMemo(() => {
-    const receita = noPeriodo.filter((l) => l.tipo === "receita" && l.status !== "cancelado");
+    const receita = visiveis.filter((l) => l.tipo === "receita" && l.status !== "cancelado");
     const total = receita.reduce((s, l) => s + l.valor, 0) || 1;
     return (["pago", "pendente", "previsto", "atrasado"] as const)
       .map((s) => {
@@ -205,7 +275,7 @@ export function Lancamentos({
         return { status: s as string, valor, qtd: doStatus.length, parte: valor / total };
       })
       .filter((f) => f.qtd > 0);
-  }, [noPeriodo]);
+  }, [visiveis]);
 
   async function baixar(l: Lancamento) {
     setBaixando(null);
@@ -219,6 +289,52 @@ export function Lancamentos({
       return toast.error(r.erro ?? "Não foi possível dar baixa.");
     }
     toast.success(r.demo ? "Baixa registrada (não salva: demonstração)." : "Baixa registrada.");
+  }
+
+  /**
+   * Baixa o recorte visível em CSV.
+   *
+   * Exporta o que está filtrado, e não a tabela inteira: quem clica aqui
+   * acabou de montar um recorte e quer justamente ele — para mandar ao
+   * contador, conferir na planilha ou anexar num fechamento.
+   *
+   * Separador ponto e vírgula e BOM no começo porque o destino quase
+   * sempre é o Excel em português: com vírgula ele joga tudo numa coluna
+   * só, e sem o BOM os acentos chegam quebrados.
+   */
+  function exportar() {
+    const cabecalho = [
+      "Tipo", "Descrição", "Cliente", "Categoria", "Competência",
+      "Vencimento", "Status", "Valor", "Valor pago", "Forma", "Pago em",
+    ];
+    const campo = (v: string | number | null) => {
+      const t = String(v ?? "");
+      return /[";\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t;
+    };
+    const linhas = visiveis.map((l) =>
+      [
+        l.tipo === "receita" ? "Receita" : "Despesa",
+        l.descricao,
+        l.cliente ?? "Agência",
+        l.categoria ?? "",
+        l.competencia,
+        l.vencimento,
+        STATUS_LANCAMENTO.rotulo(l.status),
+        l.valor.toFixed(2).replace(".", ","),
+        (l.valor_pago ?? 0).toFixed(2).replace(".", ","),
+        l.forma_pagamento ? (ROTULO_FORMA[l.forma_pagamento] ?? l.forma_pagamento) : "",
+        l.pago_em ?? "",
+      ].map(campo).join(";"),
+    );
+
+    const csv = "\uFEFF" + [cabecalho.join(";"), ...linhas].join("\r\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `financeiro-${hoje()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`${visiveis.length} ${visiveis.length === 1 ? "lançamento exportado" : "lançamentos exportados"}.`);
   }
 
   async function remover(l: Lancamento) {
@@ -325,48 +441,73 @@ export function Lancamentos({
         </div>
       </section>
 
+      {porCategoria.itens.length > 0 && (
+        <section className="cartao p-5">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <div>
+              <h2 className="font-display text-base font-bold text-tinta">
+                Para onde vai o dinheiro
+              </h2>
+              <p className="mt-0.5 text-xs text-cinza">
+                Despesas do recorte, por categoria
+              </p>
+            </div>
+            <p className="font-display text-sm font-bold tabular-nums text-perigo">
+              {brl(porCategoria.total)}
+            </p>
+          </div>
+
+          <ul className="mt-4 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+            {porCategoria.itens.map((c) => (
+              <li key={c.nome}>
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="min-w-0 truncate text-[13px] text-grafite">{c.nome}</span>
+                  <span className="shrink-0 text-[13px] tabular-nums text-cinza">
+                    {brl(c.valor)}
+                    <span className="ml-2 inline-block w-9 text-right text-cinza-claro">
+                      {Math.round(c.parte * 100)}%
+                    </span>
+                  </span>
+                </div>
+                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-nevoa-2">
+                  <div
+                    className="h-full rounded-full bg-perigo"
+                    style={{ width: `${Math.max(c.parte * 100, 1)}%` }}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <section className="space-y-4">
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-display text-base font-bold text-tinta">Lançamentos</h2>
-
-          <div className="flex flex-wrap gap-1 rounded-full bg-nevoa p-0.5">
-            {PERIODOS.map((x) => (
-              <button
-                key={x.v}
-                onClick={() => setPeriodo(x.v)}
-                aria-pressed={periodo === x.v}
-                className={[
-                  "rounded-full px-3 py-1 text-xs font-medium transition-colors foco-anel",
-                  periodo === x.v ? "bg-carta text-tinta shadow-card" : "text-cinza hover:text-grafite",
-                ].join(" ")}
-              >
-                {x.r}
-              </button>
-            ))}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={exportar}
+              disabled={!visiveis.length}
+              className="foco-anel inline-flex h-9 items-center gap-1.5 rounded-sm border border-borda-forte bg-nevoa px-3 text-xs font-medium text-grafite transition-colors hover:bg-nevoa-2 hover:text-tinta disabled:opacity-40"
+            >
+              <Download className="size-4" />
+              Exportar
+            </button>
+            <Botao tamanho="sm" onClick={() => setCriando(true)}>
+              <Plus className="size-4" />
+              Novo lançamento
+            </Botao>
           </div>
-
-          <div className="flex flex-wrap gap-1">
-            {FILTROS.map((f) => (
-              <button
-                key={f.v}
-                onClick={() => setFiltro(f.v)}
-                aria-pressed={filtro === f.v}
-                className={[
-                  "rounded-full px-3 py-1.5 text-xs font-medium transition-colors foco-anel",
-                  filtro === f.v
-                    ? "bg-mrg-500 text-white"
-                    : "bg-carta text-cinza hover:text-grafite",
-                ].join(" ")}
-              >
-                {f.r}
-              </button>
-            ))}
-          </div>
-          <Botao tamanho="sm" className="ml-auto" onClick={() => setCriando(true)}>
-            <Plus className="size-4" />
-            Novo lançamento
-          </Botao>
         </div>
+
+        <BarraFiltros
+          recorte={recorte}
+          aoMudar={setRecorte}
+          clientes={clientes}
+          categorias={categorias}
+          encontrados={visiveis.length}
+        />
 
         {visiveis.length === 0 ? (
           <p className="cartao p-10 text-center text-sm text-cinza-claro">
@@ -374,9 +515,11 @@ export function Lancamentos({
           </p>
         ) : (
           <Tabela>
-            <Cabecalhos colunas={["Descrição", "Cliente", "Vencimento", "Status", "Valor", ""]} />
+            <Cabecalhos
+              colunas={["Descrição", "Cliente", "Categoria", "Vencimento", "Status", "Valor", ""]}
+            />
             <tbody>
-              {visiveis.map((l) => (
+              {naTela.map((l) => (
                 <Linha key={l.id}>
                   <Celula>
                     <div className="flex items-center gap-3">
@@ -397,6 +540,15 @@ export function Lancamentos({
                     </div>
                   </Celula>
                   <Celula className="text-cinza">{l.cliente ?? "Agência"}</Celula>
+                  <Celula className="text-cinza">
+                    {l.categoria ? (
+                      <span className="rounded-full bg-nevoa px-2 py-0.5 text-[11px]">
+                        {l.categoria}
+                      </span>
+                    ) : (
+                      <span className="text-cinza-claro">—</span>
+                    )}
+                  </Celula>
                   <Celula className="text-cinza">{dataCompleta(l.vencimento)}</Celula>
                   <Celula>
                     <Etiqueta tom={STATUS_LANCAMENTO.tom(l.status)}>
@@ -444,6 +596,16 @@ export function Lancamentos({
               ))}
             </tbody>
           </Tabela>
+        )}
+
+        {visiveis.length > naTela.length && (
+          <button
+            onClick={() => setMostrando((n) => n + PAGINA)}
+            className="foco-anel w-full rounded-md border border-borda py-2.5 text-xs font-semibold text-grafite transition-colors hover:border-borda-forte hover:text-tinta"
+          >
+            Mostrar mais {Math.min(PAGINA, visiveis.length - naTela.length)} de{" "}
+            {(visiveis.length - naTela.length).toLocaleString("pt-BR")} restantes
+          </button>
         )}
       </section>
 
