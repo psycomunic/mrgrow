@@ -29,6 +29,8 @@ export type DadosCliente = {
   contato_email: string;
   contato_telefone: string;
   contato_cargo: string;
+  /** Endereço público da logo, no balde `publico` do Storage. */
+  logo_url: string;
 };
 
 const STATUS = ["prospecto", "onboarding", "ativo", "pausado", "encerrado"];
@@ -72,6 +74,9 @@ function validar(d: DadosCliente): string | null {
 
   if (d.observacoes.length > 4000) return "As observações ficaram longas demais.";
 
+  if (d.logo_url.trim() && !/^https:\/\//i.test(d.logo_url.trim())) {
+    return "A logo precisa ser um endereço https.";
+  }
   if (d.contato_nome.trim().length > 120) return "O nome do contato ficou longo demais.";
   if (d.contato_email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.contato_email.trim())) {
     return "E-mail do contato inválido.";
@@ -187,6 +192,7 @@ export async function atualizarCliente(id: string, d: DadosCliente): Promise<Res
         documento: d.documento.trim() || null,
         site: endereco(d.site),
         instagram: usuarioInstagram(d.instagram),
+        logo_url: d.logo_url.trim() || null,
         fee_mensal: d.fee_mensal,
         investimento_previsto: d.investimento_previsto,
         percentual_sobre_investimento: d.percentual_sobre_investimento,
@@ -268,6 +274,7 @@ export async function criarCliente(d: DadosCliente): Promise<Resultado & { slug?
         documento: d.documento.trim() || null,
         site: endereco(d.site),
         instagram: usuarioInstagram(d.instagram),
+        logo_url: d.logo_url.trim() || null,
         fee_mensal: d.fee_mensal,
         investimento_previsto: d.investimento_previsto,
         percentual_sobre_investimento: d.percentual_sobre_investimento,

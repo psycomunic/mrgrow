@@ -27,6 +27,7 @@ import { Botao, BotaoLink } from "@/components/ui/botao";
 import { Sobreposicao } from "@/components/ui/sobreposicao";
 import { Etiqueta } from "@/components/ui/etiqueta";
 import { Campo, Entrada, AreaTexto, Selecao } from "@/components/ui/campo";
+import { EnvioArquivo, type ArquivoAnexado } from "@/components/painel/envio-arquivo";
 import { brl, cn, dataCompleta, iniciais, multiplo, numero, percentual } from "@/lib/utils";
 import { pode } from "@/lib/papeis";
 import { usePainel } from "../_componentes/sessao-cliente";
@@ -74,6 +75,7 @@ function daFicha(c: ClienteCarteira): DadosCliente {
     contato_email: c.contato?.email ?? "",
     contato_telefone: c.contato?.telefone ?? "",
     contato_cargo: c.contato?.cargo ?? "",
+    logo_url: c.logo_url ?? "",
     fee_mensal: c.fee_mensal,
     investimento_previsto: c.investimento_previsto,
     percentual_sobre_investimento: c.percentual_sobre_investimento,
@@ -164,9 +166,22 @@ export function FichaCliente({
         <header className="border-b border-borda px-6 py-5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">
-              <span className="font-display grid size-12 shrink-0 place-items-center rounded-md bg-gradient-to-br from-mrg-500/30 to-mrg-800/30 text-base font-bold text-acento-forte ring-1 ring-borda">
-                {iniciais(cliente.nome)}
-              </span>
+              {/* Logo quando existe, iniciais quando não. Não otimizada pelo
+                  Next de propósito: a origem é o Storage do cliente, e
+                  declarar cada domínio possível na configuração seria pior
+                  que servir a imagem como veio. */}
+              {cliente.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={cliente.logo_url}
+                  alt={`Logo de ${cliente.nome}`}
+                  className="size-12 shrink-0 rounded-md object-contain ring-1 ring-borda"
+                />
+              ) : (
+                <span className="font-display grid size-12 shrink-0 place-items-center rounded-md bg-gradient-to-br from-mrg-500/30 to-mrg-800/30 text-base font-bold text-acento-forte ring-1 ring-borda">
+                  {iniciais(cliente.nome)}
+                </span>
+              )}
               <div className="min-w-0">
                 <h2 className="font-display truncate text-2xl font-extrabold text-tinta">
                   {cliente.nome}
@@ -412,6 +427,14 @@ function Formulario({
   aoSalvar: (e: React.FormEvent) => void;
   aoCancelar: () => void;
 }) {
+  /* O arquivo vive aqui e não no cartão: é este formulário que o troca, e
+     o endereço final já está em `dados.logo_url`. */
+  const [logo, setLogo] = useState<ArquivoAnexado | null>(() =>
+    dados.logo_url
+      ? { id: null, nome: "Logo", caminho: "", mime: "image/*", tamanho: 0, url: dados.logo_url }
+      : null,
+  );
+
   /* Campo numérico vazio vira 0, e não NaN: `Number("")` é 0, mas
      `Number("abc")` não, e NaN atravessaria até o banco recusar. */
   const numerico = (v: string) => {
@@ -582,6 +605,23 @@ function Formulario({
               placeholder="nomedaempresa"
             />
           </Campo>
+
+          {/* A logo vai para o balde público: ela aparece na proposta e no
+              relatório que o cliente abre por link, onde não há sessão para
+              assinar um endereço temporário. */}
+          <EnvioArquivo
+            valor={logo}
+            aoMudar={(a) => {
+              setLogo(a);
+              setDados((d) => ({ ...d, logo_url: a?.url ?? "" }));
+            }}
+            escopo="marca"
+            recurso="clientes"
+            rotulo="Logo do cliente"
+            imagem
+            publico
+            dica="PNG, JPEG, WEBP ou SVG. Fundo transparente fica melhor."
+          />
 
           {/* O contato fica junto do resto: para quem cadastra, tudo isto
               é "o cliente". Que ele more noutra tabela é detalhe do banco. */}

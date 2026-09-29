@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Botao, BotaoLink } from "@/components/ui/botao";
 import { AreaTexto, Campo, Entrada, Selecao } from "@/components/ui/campo";
+import { EnvioArquivo, type ArquivoAnexado } from "@/components/painel/envio-arquivo";
 import { criarCliente, type DadosCliente } from "../acoes";
 
 const STATUS: { v: string; r: string }[] = [
@@ -39,6 +40,7 @@ function vazio(): DadosCliente {
     contato_email: "",
     contato_telefone: "",
     contato_cargo: "",
+    logo_url: "",
   };
 }
 
@@ -47,6 +49,7 @@ export function FormularioNovoCliente() {
   const [d, setD] = useState<DadosCliente>(vazio);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  const [logo, setLogo] = useState<ArquivoAnexado | null>(null);
 
   const texto =
     (chave: keyof DadosCliente) =>
@@ -231,6 +234,21 @@ export function FormularioNovoCliente() {
             <Entrada value={d.instagram} onChange={texto("instagram")} placeholder="nomedaempresa" />
           </Campo>
         </div>
+
+        <EnvioArquivo
+          valor={logo}
+          aoMudar={(a) => {
+            setLogo(a);
+            setD((x) => ({ ...x, logo_url: a?.url ?? "" }));
+            setErro(null);
+          }}
+          escopo="marca"
+          recurso="clientes"
+          rotulo="Logo do cliente"
+          imagem
+          publico
+          dica="Opcional — PNG, JPEG, WEBP ou SVG."
+        />
 
         <Campo rotulo="Observações" dica="O que a equipe precisa saber desta conta">
           <AreaTexto

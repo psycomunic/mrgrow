@@ -169,9 +169,18 @@ export function ListaClientes({
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-md bg-gradient-to-br from-mrg-500/30 to-mrg-800/30 font-display text-sm font-bold text-acento-forte ring-1 ring-borda">
-                    {iniciais(c.nome)}
-                  </span>
+                  {c.logo_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={c.logo_url}
+                      alt={`Logo de ${c.nome}`}
+                      className="size-10 shrink-0 rounded-md object-contain ring-1 ring-borda"
+                    />
+                  ) : (
+                    <span className="grid size-10 shrink-0 place-items-center rounded-md bg-gradient-to-br from-mrg-500/30 to-mrg-800/30 font-display text-sm font-bold text-acento-forte ring-1 ring-borda">
+                      {iniciais(c.nome)}
+                    </span>
+                  )}
                   <div className="min-w-0">
                     <h3 className="truncate font-semibold text-tinta group-hover:text-acento-forte">
                       {c.nome}

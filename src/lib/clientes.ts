@@ -18,6 +18,7 @@ export type ClienteCarteira = {
   roas: number;
   site: string | null;
   instagram: string | null;
+  logo_url: string | null;
   inicio_contrato: string | null;
   fim_contrato: string | null;
   dia_vencimento: number;
@@ -61,6 +62,7 @@ function carteiraDemo(): Carteira {
       contato: null,
       site: c.site ?? null,
       instagram: c.instagram ?? null,
+      logo_url: null,
       inicio_contrato: c.inicio_contrato ?? null,
       fim_contrato: c.fim_contrato ?? null,
     })),
@@ -75,6 +77,7 @@ type Linha = {
   segmento: string | null;
   status: string;
   fee_mensal: number | string | null;
+  logo_url?: string | null;
   contatos?:
     | { nome: string; email: string | null; telefone: string | null; cargo: string | null }
     | { nome: string; email: string | null; telefone: string | null; cargo: string | null }[]
@@ -108,7 +111,7 @@ export async function carregarCarteira(): Promise<Carteira> {
     const { data, error } = await db
       .from("clientes")
       .select(
-        "id, nome, slug, segmento, status, fee_mensal, investimento_previsto, saude, nps, site, instagram, inicio_contrato, fim_contrato, dia_vencimento, documento, percentual_sobre_investimento, observacoes, perfis:responsavel_id(nome_completo), gestor:gestor_trafego_id(nome_completo), contatos:contato_principal_id(nome, email, telefone, cargo)",
+        "id, nome, slug, segmento, status, logo_url, fee_mensal, investimento_previsto, saude, nps, site, instagram, inicio_contrato, fim_contrato, dia_vencimento, documento, percentual_sobre_investimento, observacoes, perfis:responsavel_id(nome_completo), gestor:gestor_trafego_id(nome_completo), contatos:contato_principal_id(nome, email, telefone, cargo)",
       )
       .eq("organizacao_id", sessao.organizacaoId)
       .order("nome", { ascending: true });
@@ -144,6 +147,7 @@ export async function carregarCarteira(): Promise<Carteira> {
           roas: 0,
           site: c.site,
           instagram: c.instagram,
+          logo_url: c.logo_url ?? null,
           inicio_contrato: c.inicio_contrato,
           fim_contrato: c.fim_contrato,
           dia_vencimento: c.dia_vencimento ?? 10,
