@@ -36,7 +36,7 @@ export default async function PaginaRecebimentos({
   const p = await searchParams;
   const mes = p.mes && /^\d{4}-\d{2}$/.test(p.mes) ? p.mes : competencia();
 
-  const { linhas: todas, historico, demo } = await carregarRecebimentos(mes);
+  const { linhas: todas, resumo, historico, demo } = await carregarRecebimentos(mes);
 
   /* O recorte vem da visão geral: clicar em "em atraso" lá tem de abrir a
      lista já filtrada aqui, senão a pessoa chega numa tela cheia e precisa
@@ -47,14 +47,11 @@ export default async function PaginaRecebimentos({
   const linhas = recorte ? todas.filter((l) => l.situacao === recorte) : todas;
   const podeEditar = pode(sessao.papel, "financeiro", "editar");
 
-  /* Os quatro números somam o mês inteiro mesmo com recorte ativo: eles são
-     o contexto de onde a lista filtrada saiu. Se encolhessem junto, "em
-     atraso" passaria a dizer 100% do previsto, que é verdade só dentro do
-     próprio filtro e mentira sobre o mês. */
-  const previsto = todas.reduce((s, l) => s + l.valor, 0);
-  const recebido = todas.filter((l) => l.situacao === "pago").reduce((s, l) => s + l.valor, 0);
+  /* Os quatro números vêm do resumo, a mesma função que alimenta a visão
+     geral e o financeiro, e somam o mês inteiro mesmo com recorte ativo:
+     se encolhessem junto, "em atraso" diria 100% do previsto — verdade
+     dentro do filtro, mentira sobre o mês. */
   const atrasadas = todas.filter((l) => l.situacao === "atrasado");
-  const emAtraso = atrasadas.reduce((s, l) => s + l.valor, 0);
 
   /* Últimos doze meses: o suficiente para ver sazonalidade sem espremer as
      barras a ponto de não dar para comparar duas. */
@@ -81,30 +78,30 @@ export default async function PaginaRecebimentos({
           <Kpi
             rotulo="Previsto no mês"
             dica="Soma das mensalidades que vencem neste mês, geradas a partir do contrato de cada cliente."
-            valor={brl(previsto)}
-            detalhe={`${numero(todas.length)} ${todas.length === 1 ? "cobrança" : "cobranças"}`}
+            valor={brl(resumo.previsto)}
+            detalhe={`${numero(resumo.cobrancas)} ${resumo.cobrancas === 1 ? "cobrança" : "cobranças"}`}
           />
           <Kpi
             rotulo="Recebido"
             dica="Quanto já foi confirmado com o check. Enquanto ninguém marca, a cobrança continua contando como em aberto."
-            valor={brl(recebido)}
+            valor={brl(resumo.recebido)}
             tom="menta"
-            detalhe={`${numero(divisao(recebido, previsto) * 100)}% do previsto`}
+            detalhe={`${numero(divisao(resumo.recebido, resumo.previsto) * 100)}% do previsto`}
           />
           <Kpi
             rotulo="A receber"
             dica="O que falta entrar até o fim do mês, incluindo o que já venceu."
-            valor={brl(previsto - recebido)}
-            detalhe={`${numero(emAberto)} em aberto`}
+            valor={brl(resumo.aReceber)}
+            detalhe={`${numero(todas.length - (todas.length - emAberto))} em aberto`}
           />
           <Kpi
             rotulo="Em atraso"
             dica="Cobranças cujo vencimento já passou e ninguém marcou como paga. É aqui que a inadimplência aparece antes de virar problema."
-            valor={brl(emAtraso)}
-            tom={atrasadas.length ? "rosa" : "menta"}
+            valor={brl(resumo.atrasado)}
+            tom={resumo.qtdAtrasada ? "rosa" : "menta"}
             detalhe={
-              atrasadas.length
-                ? `${numero(atrasadas.length)} ${atrasadas.length === 1 ? "cobrança vencida" : "cobranças vencidas"}`
+              resumo.qtdAtrasada
+                ? `${numero(resumo.qtdAtrasada)} ${resumo.qtdAtrasada === 1 ? "cobrança vencida" : "cobranças vencidas"}`
                 : "nenhuma vencida"
             }
           />
@@ -117,7 +114,7 @@ export default async function PaginaRecebimentos({
           atrasado: atrasadas.length,
         }} />
 
-        <Grade linhas={linhas} competencia={mes} podeEditar={podeEditar} />
+        <Grade linhas={linhas} podeEditar={podeEditar} />
 
         {serie.length > 1 && (
           <section className="cartao rounded-lg p-5">

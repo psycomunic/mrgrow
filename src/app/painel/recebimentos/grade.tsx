@@ -18,11 +18,9 @@ const SITUACAO = {
 
 export function Grade({
   linhas,
-  competencia,
   podeEditar,
 }: {
   linhas: Recebimento[];
-  competencia: string;
   podeEditar: boolean;
 }) {
   const router = useRouter();
@@ -36,7 +34,7 @@ export function Grade({
     linhas,
     (atual, chave: string) =>
       atual.map((l) =>
-        `${l.clienteId}|${l.id ?? ""}` === chave
+        l.id === chave
           ? { ...l, situacao: l.situacao === "pago" ? ("previsto" as const) : ("pago" as const) }
           : l,
       ),
@@ -44,19 +42,14 @@ export function Grade({
 
   function alternar(l: Recebimento) {
     if (!podeEditar) return;
-    const chave = `${l.clienteId}|${l.id ?? ""}`;
+    const chave = l.id;
 
     iniciar(async () => {
       aplicar(chave);
+      /* A linha sempre existe no banco agora — a tela lê lançamento, não
+         gera cobrança a partir do contrato. Marcar é só mudar o status. */
       const r =
-        l.situacao === "pago" && l.id
-          ? await desmarcarRecebido(l.id)
-          : await marcarRecebido(l.id, {
-              clienteId: l.clienteId,
-              competencia,
-              valor: l.valor,
-              vencimento: l.vencimento,
-            });
+        l.situacao === "pago" ? await desmarcarRecebido(l.id) : await marcarRecebido(l.id);
 
       if (r.ok) {
         router.refresh();
@@ -96,7 +89,7 @@ export function Grade({
 
             return (
               <tr
-                key={`${l.clienteId}|${l.id ?? ""}`}
+                key={l.id}
                 className="border-b border-borda-fraca last:border-0 hover:bg-nevoa/60"
               >
                 <td className="px-4 py-2.5">

@@ -15,6 +15,7 @@ import { GraficoArea } from "@/components/painel/grafico-area";
 import { Tabela, Cabecalhos, Linha, Celula } from "@/components/painel/tabela";
 import { brl, cn, dataCompleta, dataCurta, numero } from "@/lib/utils";
 import { STATUS_LANCAMENTO } from "@/lib/rotulos";
+import { limitesDoMes, noPeriodo as emJanela, resumirFinanceiro } from "@/lib/resumo";
 import { hoje } from "@/lib/tempo";
 import {
   criarLancamento,
@@ -127,15 +128,25 @@ export function Lancamentos({
   }
 
   /* Corte do período em texto: comparar "2026-08-26" >= "2026-06-01" resolve
-     sem construir Date, e sem o risco de fuso que isso traria. */
-  const noPeriodo = useMemo(() => {
+     sem construir Date, e sem o risco de fuso que isso traria.
+     
+     Os dois lados são fechados. Só com o `>=`, "este mês" somava também
+     outubro e novembro e o cartão mostrava R$ 142.250 de receita num mês
+     de R$ 48.450 — as cobranças futuras já lançadas entravam na conta. */
+  const janela = useMemo(() => {
     const meses = PERIODOS.find((x) => x.v === periodo)?.meses ?? 0;
-    if (!meses) return lancamentos;
-    const [ano, mes] = hoje().split("-").map(Number);
+    if (!meses) return null;
+    const mesAtual = mesDe(hoje());
+    const [ano, mes] = mesAtual.split("-").map(Number);
     const total = ano * 12 + (mes - 1) - (meses - 1);
-    const corte = `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, "0")}-01`;
-    return lancamentos.filter((l) => l.vencimento >= corte);
-  }, [lancamentos, periodo]);
+    const primeiro = `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, "0")}`;
+    return { de: limitesDoMes(primeiro).de, ate: limitesDoMes(mesAtual).ate };
+  }, [periodo]);
+
+  const noPeriodo = useMemo(
+    () => (janela ? lancamentos.filter((l) => emJanela(l, janela.de, janela.ate)) : lancamentos),
+    [lancamentos, janela],
+  );
 
   const visiveis = useMemo(
     () =>
@@ -170,20 +181,18 @@ export function Lancamentos({
     return meses;
   }, [lancamentos]);
 
-  const kpis = useMemo(() => {
-    const vivos = noPeriodo.filter((l) => l.status !== "cancelado");
-    const soma = (xs: Lancamento[]) => xs.reduce((s, l) => s + l.valor, 0);
-    const receita = vivos.filter((l) => l.tipo === "receita");
-    const despesa = vivos.filter((l) => l.tipo === "despesa");
-    const atrasadas = receita.filter((l) => l.status === "atrasado");
-    return {
-      receita: soma(receita),
-      despesa: soma(despesa),
-      resultado: soma(receita) - soma(despesa),
-      atrasado: soma(atrasadas),
-      qtdAtrasada: atrasadas.length,
-    };
-  }, [noPeriodo]);
+  /* Mesma função da visão geral e dos recebimentos. Antes cada tela tinha
+     a sua conta, e "em atraso" aparecia como R$ 12.650, R$ 8.500 e
+     R$ 3.500 em três lugares diferentes. */
+  const kpis = useMemo(
+    () =>
+      resumirFinanceiro(noPeriodo, {
+        de: janela?.de ?? "0000-01-01",
+        ate: janela?.ate ?? "9999-12-31",
+        hoje: hoje(),
+      }),
+    [noPeriodo, janela],
+  );
 
   /* Recebiveis por situacao: onde o dinheiro a receber esta parado. */
   const recebiveis = useMemo(() => {
@@ -227,28 +236,33 @@ export function Lancamentos({
   return (
     <>
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {/* O cartão mostra o recebido, com o previsto embaixo. Antes só o
+            previsto aparecia, e "receitas" de um mês com inadimplência
+            dizia um número que ninguém tinha em conta. */}
         <Kpi
-          rotulo={`Receitas · ${rotuloPeriodo}`}
-          dica="Tudo que entrou ou está previsto entrar no período, já descontados os cancelados."
-          valor={brl(kpis.receita)}
+          rotulo={`Recebido · ${rotuloPeriodo}`}
+          dica="O que entrou de fato no período. O previsto, logo abaixo, é o total das cobranças — pagas ou não."
+          valor={brl(kpis.recebido)}
           tom="menta"
           icone={<TrendingUp />}
+          detalhe={`${brl(kpis.previsto)} previstos · ${numero(kpis.cobrancas)} ${kpis.cobrancas === 1 ? "cobrança" : "cobranças"}`}
           serie={fluxo.map((m) => m.receitas)}
         />
         <Kpi
           rotulo={`Despesas · ${rotuloPeriodo}`}
           dica="Tudo que a agência pagou ou vai pagar no período: equipe, ferramentas, escritório e impostos."
-          valor={brl(kpis.despesa)}
+          valor={brl(kpis.despesas)}
           tom="rosa"
           icone={<TrendingDown />}
           serie={fluxo.map((m) => m.despesas)}
         />
         <Kpi
           rotulo={kpis.resultado >= 0 ? "Resultado, no azul" : "Resultado, no vermelho"}
-          dica="Receitas menos despesas. É o que sobra da operação antes de retiradas extras."
+          dica="Recebido menos despesas: dinheiro que existe, não promessa. A linha de baixo mostra o mesmo mês se todo mundo pagar."
           valor={brl(kpis.resultado)}
-          tom="azul"
+          tom={kpis.resultado >= 0 ? "azul" : "rosa"}
           icone={<Scale />}
+          detalhe={`${brl(kpis.resultadoPrevisto)} se todos pagarem`}
           serie={fluxo.map((m) => m.receitas - m.despesas)}
         />
         <Kpi

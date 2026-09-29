@@ -12,6 +12,7 @@
     "build:webpack": "next build --webpack",
     "start": "next start",
     "lint": "eslint .",
+    "test": "node --test \"src/**/*.test.ts\"",
     "typecheck": "tsc --noEmit",
     "db:push": "supabase db push",
     "db:reset": "supabase db reset",

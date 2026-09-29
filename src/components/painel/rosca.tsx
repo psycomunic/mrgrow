@@ -109,13 +109,13 @@ export function Rosca({
               <span className="min-w-0 flex-1 truncate text-grafite group-hover:text-tinta">
                 {a.rotulo}
               </span>
-              <span className="shrink-0 text-right tabular-nums">
-                <span className="text-cinza">{a.formatado ?? ""}</span>
-                {/* O percentual sempre aparece, mesmo quando há valor
-                    formatado: sozinho, "R$ 33.100,00" não diz se é metade
-                    ou um terço da carteira — e é essa a pergunta que
-                    alguém faz olhando para uma rosca. */}
-                <span className="ml-2 inline-block w-9 text-cinza-claro">
+              {/* Valor e percentual separados por um ponto e por cor. Colados
+                  só por margem, "12" e "86%" liam como "1286%" — foi o que
+                  apareceu na tela quando as fatias eram contagem. */}
+              <span className="flex shrink-0 items-baseline gap-1.5 tabular-nums">
+                {a.formatado && <span className="text-cinza">{a.formatado}</span>}
+                {a.formatado && <span className="text-cinza-claro/60">·</span>}
+                <span className="inline-block w-9 text-right text-cinza-claro">
                   {Math.round(a.fracao * 100)}%
                 </span>
               </span>

@@ -2,69 +2,81 @@ import "server-only";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { modoDemonstracao, registrarFalha } from "@/lib/dados";
 import { obterSessao } from "@/lib/sessao";
-import { contratado } from "@/lib/rotulos";
 import { hoje } from "@/lib/tempo";
+import {
+  atrasado,
+  limitesDoMes,
+  porMes,
+  resumirFinanceiro,
+  type MesResumo,
+  type Movimento,
+  type ResumoFinanceiro,
+} from "@/lib/resumo";
 
 /**
  * A régua de cobrança do mês.
  *
- * Nasce da planilha que a agência usava: uma linha por cliente, com um
- * check quando o dinheiro entra. A diferença é de onde vem a linha. Na
- * planilha alguém digitava os previstos todo mês, e em mês corrido
- * ninguém digita — foi assim que meses inteiros ficaram sem registro e o
- * "Total Previsto" passou a mentir.
+ * Lê os lançamentos de receita, e não os contratos. A primeira versão
+ * gerava a linha a partir do fee de cada cliente contratado, e isso
+ * produzia três erros que só apareceram com dado real: cobrava Repro
+ * Premium em setembro, sendo que o contrato dela começa em outubro;
+ * perdia as cobranças avulsas e as segundas parcelas do mesmo cliente no
+ * mês; e ignorava quem está como prospecto mas já pagou. Além de discordar
+ * do Financeiro, que lia a tabela certa.
  *
- * Aqui o previsto sai do contrato: todo cliente contratado gera a linha
- * dele, exista ou não lançamento no banco. Marcar como recebido é que
- * grava. Enquanto ninguém marca, a linha continua aparecendo — e cobrança
- * esquecida fica visível em vez de sumir.
+ * O preço de ler o lançamento é que alguém precisa criá-lo. Em troca, o
+ * que a tela mostra é o que existe — e é o mesmo número em toda parte.
  */
 export type Recebimento = {
-  /** Nulo enquanto é só previsão: ainda não virou linha no banco. */
-  id: string | null;
-  clienteId: string;
+  id: string;
+  clienteId: string | null;
   cliente: string;
-  slug: string;
+  slug: string | null;
+  descricao: string;
   valor: number;
   vencimento: string;
-  /** `previsto` | `pago` | `atrasado` */
   situacao: "previsto" | "pago" | "atrasado";
   pagoEm: string | null;
   /** Dias de atraso; zero quando em dia ou já pago. */
   atraso: number;
 };
 
-export type MesResumo = { competencia: string; previsto: number; recebido: number };
-
 export type Recebimentos = {
   competencia: string;
   linhas: Recebimento[];
+  resumo: ResumoFinanceiro;
   historico: MesResumo[];
   demo: boolean;
 };
 
-type LinhaCliente = { id: string; nome: string; slug: string; status: string; fee_mensal: number | string; dia_vencimento: number };
-type LinhaLanc = { id: string; cliente_id: string | null; valor: number | string; valor_pago: number | string; status: string; vencimento: string; pago_em: string | null; competencia: string };
-
-/** Primeiro dia da competência, no formato que a coluna `date` guarda. */
-function primeiroDia(comp: string) {
-  return `${comp}-01`;
-}
-
-/** O dia do vencimento dentro do mês pedido, sem estourar fevereiro. */
-function vencimentoNoMes(comp: string, dia: number) {
-  const [ano, mes] = comp.split("-").map(Number);
-  const ultimo = new Date(ano, mes, 0).getDate();
-  return `${comp}-${String(Math.min(dia, ultimo)).padStart(2, "0")}`;
-}
+type Linha = {
+  id: string;
+  tipo: string;
+  cliente_id: string | null;
+  descricao: string;
+  valor: number | string;
+  valor_pago: number | string | null;
+  status: string;
+  vencimento: string;
+  clientes: { nome: string; slug: string } | { nome: string; slug: string }[] | null;
+};
 
 function diasEntre(de: string, ate: string) {
-  const ms = new Date(ate + "T00:00:00").getTime() - new Date(de + "T00:00:00").getTime();
+  const ms = new Date(`${ate}T00:00:00Z`).getTime() - new Date(`${de}T00:00:00Z`).getTime();
   return Math.max(0, Math.round(ms / 86_400_000));
 }
 
 function vazio(comp: string, demo: boolean): Recebimentos {
-  return { competencia: comp, linhas: [], historico: [], demo };
+  return {
+    competencia: comp,
+    linhas: [],
+    resumo: {
+      previsto: 0, recebido: 0, aReceber: 0, atrasado: 0, qtdAtrasada: 0,
+      despesas: 0, resultado: 0, resultadoPrevisto: 0, cobrancas: 0,
+    },
+    historico: [],
+    demo,
+  };
 }
 
 export async function carregarRecebimentos(comp: string): Promise<Recebimentos> {
@@ -76,99 +88,86 @@ export async function carregarRecebimentos(comp: string): Promise<Recebimentos> 
 
     const db = await criarClienteServidor();
     const org = sessao.organizacaoId;
+    const { de, ate } = limitesDoMes(comp);
+    const dia = hoje();
 
-    /* Em paralelo: são consultas independentes, e em série elas somariam a
-       latência de todas — a régua abre a cada troca de mês. */
-    const [clientesR, lancR, histR] = await Promise.all([
-      db
-        .from("clientes")
-        .select("id, nome, slug, status, fee_mensal, dia_vencimento")
-        .eq("organizacao_id", org)
-        .order("nome"),
+    /* Duas consultas em paralelo: a do mês, que vira a lista, e a série
+       inteira de receitas, que vira o gráfico. São independentes e em
+       série somariam a latência das duas. */
+    const [doMes, serie] = await Promise.all([
       db
         .from("lancamentos")
-        .select("id, cliente_id, valor, valor_pago, status, vencimento, pago_em, competencia")
+        .select("id, tipo, cliente_id, descricao, valor, valor_pago, status, vencimento, clientes:cliente_id(nome, slug)")
         .eq("organizacao_id", org)
-        .eq("tipo", "receita")
-        .eq("competencia", primeiroDia(comp)),
+        .gte("vencimento", de)
+        .lte("vencimento", ate)
+        .order("vencimento"),
       db
         .from("lancamentos")
-        .select("valor, valor_pago, status, competencia")
+        .select("tipo, status, valor, valor_pago, vencimento")
         .eq("organizacao_id", org)
-        .eq("tipo", "receita")
-        .order("competencia"),
+        .eq("tipo", "receita"),
     ]);
 
-    if (clientesR.error) {
-      registrarFalha("carregarRecebimentos", clientesR.error);
+    if (doMes.error) {
+      registrarFalha("carregarRecebimentos", doMes.error);
       return vazio(comp, false);
     }
 
-    const clientes = (clientesR.data ?? []) as unknown as LinhaCliente[];
-    const lancs = (lancR.data ?? []) as unknown as LinhaLanc[];
-    const porCliente = new Map(lancs.filter((l) => l.cliente_id).map((l) => [l.cliente_id as string, l]));
+    const linhasMes = (doMes.data ?? []) as unknown as Linha[];
 
-    const dia = hoje();
-    const linhas: Recebimento[] = [];
+    /* O resumo precisa das despesas do mês também, então recebe tudo o que
+       venceu no período — é ele quem separa receita de despesa. */
+    const movimentos: Movimento[] = linhasMes.map((l) => ({
+      tipo: l.tipo,
+      status: l.status,
+      valor: Number(l.valor ?? 0),
+      valor_pago: l.valor_pago === null ? null : Number(l.valor_pago),
+      vencimento: l.vencimento,
+    }));
 
-    for (const c of clientes) {
-      if (!contratado(c.status)) continue;
-      const fee = Number(c.fee_mensal ?? 0);
-      const l = porCliente.get(c.id);
-      if (!l && fee <= 0) continue;
+    const linhas: Recebimento[] = linhasMes
+      .filter((l) => l.tipo === "receita" && l.status !== "cancelado")
+      .map((l) => {
+        const c = Array.isArray(l.clientes) ? l.clientes[0] : l.clientes;
+        const valor = Number(l.valor ?? 0);
+        const m: Movimento = { tipo: "receita", status: l.status, valor, vencimento: l.vencimento };
+        const pago = l.status === "pago";
+        const vencida = atrasado(m, dia);
 
-      const venc = l?.vencimento ?? vencimentoNoMes(comp, c.dia_vencimento);
-      const pago = l?.status === "pago";
-      const atraso = pago ? 0 : venc < dia ? diasEntre(venc, dia) : 0;
+        return {
+          id: l.id,
+          clienteId: l.cliente_id,
+          cliente: c?.nome ?? "Avulso",
+          slug: c?.slug ?? null,
+          descricao: l.descricao,
+          valor,
+          vencimento: l.vencimento,
+          situacao: pago ? "pago" : vencida ? "atrasado" : "previsto",
+          pagoEm: pago ? l.vencimento : null,
+          atraso: vencida ? diasEntre(l.vencimento, dia) : 0,
+        } satisfies Recebimento;
+      })
+      .sort(
+        (a, b) =>
+          a.vencimento.localeCompare(b.vencimento) || a.cliente.localeCompare(b.cliente, "pt-BR"),
+      );
 
-      linhas.push({
-        id: l?.id ?? null,
-        clienteId: c.id,
-        cliente: c.nome,
-        slug: c.slug,
-        valor: l ? Number(l.valor ?? 0) : fee,
-        vencimento: venc,
-        situacao: pago ? "pago" : atraso > 0 ? "atrasado" : "previsto",
-        pagoEm: l?.pago_em ?? null,
-        atraso,
-      });
-    }
-
-    /* Lançamento de receita sem cliente — entrada avulsa, venda pontual —
-       também é dinheiro do mês e não pode sumir da régua. */
-    for (const l of lancs) {
-      if (l.cliente_id) continue;
-      const pago = l.status === "pago";
-      const atraso = pago ? 0 : l.vencimento < dia ? diasEntre(l.vencimento, dia) : 0;
-      linhas.push({
-        id: l.id,
-        clienteId: "",
-        cliente: "Avulso",
-        slug: "",
+    const historico = porMes(
+      ((serie.data ?? []) as unknown as Movimento[]).map((l) => ({
+        tipo: "receita",
+        status: l.status,
         valor: Number(l.valor ?? 0),
+        valor_pago: l.valor_pago === null ? null : Number(l.valor_pago),
         vencimento: l.vencimento,
-        situacao: pago ? "pago" : atraso > 0 ? "atrasado" : "previsto",
-        pagoEm: l.pago_em,
-        atraso,
-      });
-    }
-
-    linhas.sort((a, b) => a.vencimento.localeCompare(b.vencimento) || a.cliente.localeCompare(b.cliente, "pt-BR"));
-
-    /* Histórico por competência, para o gráfico de previsto contra recebido. */
-    const mapa = new Map<string, MesResumo>();
-    for (const l of (histR.data ?? []) as unknown as LinhaLanc[]) {
-      const k = String(l.competencia).slice(0, 7);
-      const m = mapa.get(k) ?? { competencia: k, previsto: 0, recebido: 0 };
-      m.previsto += Number(l.valor ?? 0);
-      if (l.status === "pago") m.recebido += Number(l.valor_pago ?? l.valor ?? 0);
-      mapa.set(k, m);
-    }
+      })),
+    );
 
     return {
       competencia: comp,
       linhas,
-      historico: [...mapa.values()].sort((a, b) => a.competencia.localeCompare(b.competencia)),
+      resumo: resumirFinanceiro(movimentos, { de, ate, hoje: dia }),
+      historico,
       demo: false,
     };
   } catch (e) {

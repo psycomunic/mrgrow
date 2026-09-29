@@ -28,11 +28,11 @@ import { carregarDiagnostico, diasNoIntervalo } from "@/lib/diagnostico";
 import { tracado } from "@/lib/metricas";
 import { carregarCarteira, listarClientesParaSelecao } from "@/lib/clientes";
 import { carregarFunil } from "@/lib/crm";
-import { carregarFinanceiro } from "@/lib/financeiro";
 import { carregarTarefas } from "@/lib/tarefas";
 import { carregarRecebimentos } from "@/lib/recebimentos";
 import { PRIORIDADE, STATUS_CLIENTE, STATUS_TAREFA, contratado, somarMrr } from "@/lib/rotulos";
 import { competencia, hoje } from "@/lib/tempo";
+import { resumirFinanceiro } from "@/lib/resumo";
 import { brl, cn, dataCurta, divisao, multiplo, numero, percentual } from "@/lib/utils";
 
 const SERIES: SerieGrafico[] = [
@@ -97,11 +97,10 @@ export default async function PaginaVisao({
 
   /* Tudo em paralelo: são consultas independentes e em série elas somariam
      a latência de todas. */
-  const [metricas, carteira, funil, financeiro, quadro, opcoes, recebimentos] = await Promise.all([
+  const [metricas, carteira, funil, quadro, opcoes, recebimentos] = await Promise.all([
     carregarDiagnostico({ de, ate, clienteId, provedor: null }),
     carregarCarteira(),
     carregarFunil(),
-    verFinanceiro ? carregarFinanceiro() : Promise.resolve({ lancamentos: [], demo: false }),
     carregarTarefas(),
     listarClientesParaSelecao(),
     carregarRecebimentos(competencia()),
@@ -128,9 +127,6 @@ export default async function PaginaVisao({
   const daCarteira = clienteId
     ? carteira.clientes.filter((cl) => cl.id === clienteId)
     : carteira.clientes;
-  const lancamentos = clienteId
-    ? financeiro.lancamentos.filter((l) => l.cliente_id === clienteId)
-    : financeiro.lancamentos;
   const tarefas = clienteId
     ? quadro.tarefas.filter((tf) => tf.cliente_id === clienteId)
     : quadro.tarefas;
@@ -145,9 +141,22 @@ export default async function PaginaVisao({
   const cobrancas = clienteId
     ? recebimentos.linhas.filter((l) => l.clienteId === clienteId)
     : recebimentos.linhas;
-  const previstoMes = cobrancas.reduce((s, l) => s + l.valor, 0);
-  const recebidoMes = cobrancas.filter((l) => l.situacao === "pago").reduce((s, l) => s + l.valor, 0);
-  const vencidas = cobrancas.filter((l) => l.situacao === "atrasado");
+
+  /* Com um cliente escolhido a conta é refeita sobre as linhas dele; sem
+     filtro, vale o resumo — a mesma função que o financeiro usa. */
+  const caixaMes = clienteId
+    ? resumirFinanceiro(
+        cobrancas.map((l) => ({
+          tipo: "receita",
+          status: l.situacao === "pago" ? "pago" : "pendente",
+          valor: l.valor,
+          vencimento: l.vencimento,
+        })),
+        { de: `${competencia()}-01`, ate: `${competencia()}-31`, hoje: hoje() },
+      )
+    : recebimentos.resumo;
+
+  const previstoMes = caixaMes.previsto;
 
   /* Últimos doze meses do par previsto/recebido: é o gráfico que a equipe
      já conhece da planilha, e o que dá para ler sazonalidade sem espremer
@@ -158,33 +167,43 @@ export default async function PaginaVisao({
     recebido: m.recebido,
   }));
 
-  /* Adimplência da carteira: quantas cobranças do mês estão em dia contra
-     quantas venceram sem pagamento. */
-  const emDia = cobrancas.length - vencidas.length;
-  const adimplencia: FatiaRosca[] = cobrancas.length
-    ? [
-        {
-          rotulo: "Em dia",
-          valor: emDia,
-          cor: "var(--color-sucesso)",
-          formatado: numero(emDia),
-          href: `/painel/recebimentos?mes=${competencia()}&situacao=previsto`,
-        },
-        {
-          rotulo: "Atrasado",
-          valor: vencidas.length,
-          cor: "var(--color-perigo)",
-          formatado: numero(vencidas.length),
-          href: `/painel/recebimentos?mes=${competencia()}&situacao=atrasado`,
-        },
-      ].filter((f) => f.valor > 0)
-    : [];
+  /* Adimplência em dinheiro, e as três fatias somando o previsto do mês.
+     Antes eram contagens de cobrança dentro de uma rosca cujo centro
+     mostrava reais: as fatias não fechavam com o total e o percentual ao
+     lado de cada uma não queria dizer nada. */
+  const aVencer = caixaMes.aReceber - caixaMes.atrasado;
+  const adimplencia: FatiaRosca[] = [
+    {
+      rotulo: "Recebido",
+      valor: caixaMes.recebido,
+      cor: "var(--color-sucesso)",
+      formatado: brl(caixaMes.recebido),
+      href: `/painel/recebimentos?mes=${competencia()}&situacao=pago`,
+    },
+    {
+      rotulo: "A vencer",
+      valor: Math.max(0, aVencer),
+      cor: "var(--color-acento)",
+      formatado: brl(Math.max(0, aVencer)),
+      href: `/painel/recebimentos?mes=${competencia()}&situacao=previsto`,
+    },
+    {
+      rotulo: "Atrasado",
+      valor: caixaMes.atrasado,
+      cor: "var(--color-perigo)",
+      formatado: brl(caixaMes.atrasado),
+      href: `/painel/recebimentos?mes=${competencia()}&situacao=atrasado`,
+    },
+  ].filter((f) => f.valor > 0);
 
   /* Distribuição da carteira por estágio do contrato. A planilha fazia
      isto agrupando pelo WhatsApp do contato, o que produzia uma fatia por
      cliente e não dizia nada; aqui o corte é o estágio, que é a pergunta
      que a rosca responde. */
-  const porStatus: FatiaRosca[] = ["ativo", "onboarding", "prospecto", "pausado"]
+  /* Só o que está contratado. Prospecto ficava dentro das fatias mas fora
+     do total do miolo, então os percentuais eram calculados sobre R$ 49.100
+     enquanto o centro dizia R$ 44.600 — e não fechavam. */
+  const porStatus: FatiaRosca[] = ["ativo", "onboarding"]
     .map((st, i) => {
       const doStatus = daCarteira.filter((cl) => cl.status === st);
       const soma = doStatus.reduce((acc, cl) => acc + cl.fee_mensal, 0);
@@ -197,6 +216,10 @@ export default async function PaginaVisao({
       };
     })
     .filter((f) => f.valor > 0);
+
+  const emNegociacao = daCarteira
+    .filter((cl) => cl.status === "prospecto")
+    .reduce((acc, cl) => acc + cl.fee_mensal, 0);
 
   /* Prazo médio de contrato, em meses corridos desde o início. A planilha
      mostrava o prazo contratado (sempre 6); este diz quanto o cliente
@@ -244,15 +267,13 @@ export default async function PaginaVisao({
     });
 
   /* ── Caixa ────────────────────────────────────────────────────── */
-  const mesAtual = competencia();
-  const receitas = lancamentos.filter((l) => l.tipo === "receita");
-  const aReceber = receitas
-    .filter((l) => ["pendente", "previsto"].includes(l.status) && l.vencimento.startsWith(mesAtual))
-    .reduce((s, l) => s + l.valor, 0);
-  const emAtraso = receitas
-    .filter((l) => l.status === "atrasado")
-    .reduce((s, l) => s + l.valor, 0);
-  const cobranca = aReceber + emAtraso;
+  /* Tudo sai do mesmo resumo. O "em atraso" antes somava vencido de
+     qualquer data — inclusive cobrança de cliente encerrado de meses
+     atrás — e a base do percentual era `aReceber + emAtraso`, que não é o
+     previsto de mês nenhum. Daí os "100% da cobrança do mês". */
+  const aReceber = caixaMes.aReceber;
+  const emAtraso = caixaMes.atrasado;
+  const cobranca = caixaMes.previsto;
 
   /* ── Operação ─────────────────────────────────────────────────── */
   const dia = hoje();
@@ -556,14 +577,14 @@ export default async function PaginaVisao({
           <div className="cartao flex flex-col rounded-lg p-5">
             <h2 className="font-display text-sm font-bold text-tinta">Cobrança do mês</h2>
             <p className="mt-0.5 text-xs text-cinza">
-              {numero(cobrancas.length)} {cobrancas.length === 1 ? "cobrança" : "cobranças"} ·{" "}
+              {numero(caixaMes.cobrancas)} {caixaMes.cobrancas === 1 ? "cobrança" : "cobranças"} ·{" "}
               {brl(previstoMes)} previstos
             </p>
             <div className="mt-4 flex-1">
               <Rosca
                 fatias={adimplencia}
-                centro={brl(recebidoMes)}
-                rotuloCentro="recebido"
+                centro={brl(previstoMes)}
+                rotuloCentro="previsto no mês"
                 vazio="Nenhuma cobrança neste mês."
               />
             </div>
@@ -592,6 +613,22 @@ export default async function PaginaVisao({
                 vazio="Nenhum cliente cadastrado."
               />
             </div>
+
+            {/* Prospecto fora da rosca: ainda não é receita contratada, e
+                dentro dela fazia os percentuais não fecharem com o total. */}
+            {emNegociacao > 0 && (
+              <Link
+                href="/painel/clientes?status=prospecto"
+                className="foco-anel group mt-4 flex items-center justify-between gap-3 rounded-md border border-borda border-dashed px-3 py-2.5 transition-colors hover:border-borda-forte hover:bg-nevoa"
+              >
+                <span className="text-[13px] text-cinza group-hover:text-tinta">
+                  Em negociação, fora do MRR
+                </span>
+                <span className="text-[13px] font-semibold tabular-nums text-grafite">
+                  {brl(emNegociacao)}
+                </span>
+              </Link>
+            )}
           </div>
 
           <div className="cartao flex flex-col rounded-lg p-5">
