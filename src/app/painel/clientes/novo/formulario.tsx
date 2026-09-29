@@ -35,6 +35,10 @@ function vazio(): DadosCliente {
     saude: 80,
     nps: null,
     observacoes: "",
+    contato_nome: "",
+    contato_email: "",
+    contato_telefone: "",
+    contato_cargo: "",
   };
 }
 
@@ -171,6 +175,46 @@ export function FormularioNovoCliente() {
               type="date"
               value={d.inicio_contrato ?? ""}
               onChange={(e) => setD((x) => ({ ...x, inicio_contrato: e.target.value || null }))}
+            />
+          </Campo>
+        </div>
+      </div>
+
+      <div className="space-y-4 border-t border-borda pt-6">
+        <h2 className="font-display text-sm font-bold text-tinta">Contato principal</h2>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Campo rotulo="Nome de quem responde" dica="Opcional">
+            <Entrada
+              value={d.contato_nome}
+              onChange={texto("contato_nome")}
+              placeholder="Ex.: Rafael Dantas"
+            />
+          </Campo>
+          <Campo rotulo="Cargo" dica="Opcional">
+            <Entrada
+              value={d.contato_cargo}
+              onChange={texto("contato_cargo")}
+              placeholder="Sócio, gerente de marketing…"
+            />
+          </Campo>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Campo rotulo="WhatsApp / telefone" dica="Vira botão de conversa na ficha">
+            <Entrada
+              value={d.contato_telefone}
+              onChange={texto("contato_telefone")}
+              placeholder="(21) 98888-7777"
+              inputMode="tel"
+            />
+          </Campo>
+          <Campo rotulo="E-mail do contato" dica="Opcional">
+            <Entrada
+              type="email"
+              value={d.contato_email}
+              onChange={texto("contato_email")}
+              placeholder="contato@empresa.com.br"
             />
           </Campo>
         </div>

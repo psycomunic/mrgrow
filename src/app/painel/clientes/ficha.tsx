@@ -70,6 +70,10 @@ function daFicha(c: ClienteCarteira): DadosCliente {
     documento: c.documento ?? "",
     site: c.site ?? "",
     instagram: c.instagram ?? "",
+    contato_nome: c.contato?.nome ?? "",
+    contato_email: c.contato?.email ?? "",
+    contato_telefone: c.contato?.telefone ?? "",
+    contato_cargo: c.contato?.cargo ?? "",
     fee_mensal: c.fee_mensal,
     investimento_previsto: c.investimento_previsto,
     percentual_sobre_investimento: c.percentual_sobre_investimento,
@@ -578,6 +582,50 @@ function Formulario({
               placeholder="nomedaempresa"
             />
           </Campo>
+
+          {/* O contato fica junto do resto: para quem cadastra, tudo isto
+              é "o cliente". Que ele more noutra tabela é detalhe do banco. */}
+          <div className="border-t border-borda pt-4">
+            <p className="mb-3 text-xs font-semibold tracking-wide text-cinza uppercase">
+              Contato principal
+            </p>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Campo rotulo="Nome de quem responde">
+                <Entrada
+                  value={dados.contato_nome}
+                  onChange={(e) => setDados((d) => ({ ...d, contato_nome: e.target.value }))}
+                  placeholder="Ex.: Rafael Dantas"
+                />
+              </Campo>
+              <Campo rotulo="Cargo" dica="Opcional">
+                <Entrada
+                  value={dados.contato_cargo}
+                  onChange={(e) => setDados((d) => ({ ...d, contato_cargo: e.target.value }))}
+                  placeholder="Sócio, gerente de marketing…"
+                />
+              </Campo>
+            </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <Campo rotulo="WhatsApp / telefone" dica="Vira botão de conversa na ficha">
+                <Entrada
+                  value={dados.contato_telefone}
+                  onChange={(e) => setDados((d) => ({ ...d, contato_telefone: e.target.value }))}
+                  placeholder="(21) 98888-7777"
+                  inputMode="tel"
+                />
+              </Campo>
+              <Campo rotulo="E-mail">
+                <Entrada
+                  type="email"
+                  value={dados.contato_email}
+                  onChange={(e) => setDados((d) => ({ ...d, contato_email: e.target.value }))}
+                  placeholder="contato@empresa.com.br"
+                />
+              </Campo>
+            </div>
+          </div>
 
           <Campo rotulo="Observações" dica="O que a equipe precisa lembrar desta conta">
             <AreaTexto

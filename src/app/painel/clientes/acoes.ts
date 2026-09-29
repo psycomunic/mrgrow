@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { contextoDeAcao, falha, pertence, type Resultado } from "@/lib/acoes";
+import { contextoDeAcao, falha, type Banco, type Resultado } from "@/lib/acoes";
 
 export type { Resultado };
 
@@ -22,6 +22,13 @@ export type DadosCliente = {
   saude: number;
   nps: number | null;
   observacoes: string;
+  /* Contato principal da conta. Vive na tabela `contatos` e é ligado pelo
+     `contato_principal_id`; a ficha edita os dois de uma vez porque, para
+     quem cadastra, é tudo "o cliente". */
+  contato_nome: string;
+  contato_email: string;
+  contato_telefone: string;
+  contato_cargo: string;
 };
 
 const STATUS = ["prospecto", "onboarding", "ativo", "pausado", "encerrado"];
@@ -64,6 +71,17 @@ function validar(d: DadosCliente): string | null {
   }
 
   if (d.observacoes.length > 4000) return "As observações ficaram longas demais.";
+
+  if (d.contato_nome.trim().length > 120) return "O nome do contato ficou longo demais.";
+  if (d.contato_email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.contato_email.trim())) {
+    return "E-mail do contato inválido.";
+  }
+  if (d.contato_telefone.trim().length > 40) return "Telefone do contato inválido.";
+  /* Sem nome não há contato: e-mail e telefone soltos não dizem com quem
+     se está falando, e a ficha mostraria um cartão sem título. */
+  if (!d.contato_nome.trim() && (d.contato_email.trim() || d.contato_telefone.trim())) {
+    return "Informe o nome do contato.";
+  }
   return null;
 }
 
@@ -84,6 +102,52 @@ function endereco(v: string) {
   return /^https?:\/\//i.test(limpo) ? limpo : `https://${limpo}`;
 }
 
+/**
+ * Grava o contato principal e devolve o id para o cliente apontar.
+ *
+ * Atualiza o contato que já existe em vez de criar outro: quem corrige um
+ * telefone errado não quer dois contatos com o mesmo nome, e o histórico
+ * do CRM aponta para o registro antigo.
+ *
+ * Nome em branco desliga o vínculo sem apagar o registro — o contato pode
+ * estar em um negócio do funil, e apagar deixaria aquele negócio órfão.
+ */
+async function salvarContato(
+  db: Banco,
+  organizacaoId: string,
+  contatoAtualId: string | null,
+  empresa: string,
+  d: DadosCliente,
+): Promise<string | null> {
+  const nome = d.contato_nome.trim();
+  if (!nome) return null;
+
+  const campos = {
+    nome,
+    email: d.contato_email.trim() || null,
+    telefone: d.contato_telefone.trim() || null,
+    cargo: d.contato_cargo.trim() || null,
+    empresa,
+  };
+
+  if (contatoAtualId) {
+    await db
+      .from("contatos")
+      .update(campos)
+      .eq("id", contatoAtualId)
+      .eq("organizacao_id", organizacaoId);
+    return contatoAtualId;
+  }
+
+  const { data } = await db
+    .from("contatos")
+    .insert({ organizacao_id: organizacaoId, ...campos })
+    .select("id")
+    .single();
+
+  return (data as { id: string } | null)?.id ?? null;
+}
+
 export async function atualizarCliente(id: string, d: DadosCliente): Promise<Resultado> {
   const erro = validar(d);
   if (erro) return { ok: false, demo: false, erro };
@@ -96,13 +160,27 @@ export async function atualizarCliente(id: string, d: DadosCliente): Promise<Res
   const { sessao, db } = ctx;
 
   try {
-    if (!(await pertence(db, "clientes", id, sessao.organizacaoId))) {
-      return { ok: false, demo: false, erro: "Cliente não encontrado." };
-    }
+    const { data: atual } = await db
+      .from("clientes")
+      .select("contato_principal_id")
+      .eq("id", id)
+      .eq("organizacao_id", sessao.organizacaoId)
+      .maybeSingle();
+
+    if (!atual) return { ok: false, demo: false, erro: "Cliente não encontrado." };
+
+    const contatoId = await salvarContato(
+      db,
+      sessao.organizacaoId,
+      (atual as { contato_principal_id: string | null }).contato_principal_id,
+      d.nome.trim(),
+      d,
+    );
 
     const { error } = await db
       .from("clientes")
       .update({
+        contato_principal_id: contatoId,
         nome: d.nome.trim(),
         segmento: d.segmento.trim() || null,
         status: d.status,
@@ -176,10 +254,13 @@ export async function criarCliente(d: DadosCliente): Promise<Resultado & { slug?
     let slug = base;
     for (let i = 2; ocupados.has(slug); i++) slug = `${base}-${i}`;
 
+    const contatoId = await salvarContato(db, sessao.organizacaoId, null, d.nome.trim(), d);
+
     const { data, error } = await db
       .from("clientes")
       .insert({
         organizacao_id: sessao.organizacaoId,
+        contato_principal_id: contatoId,
         slug,
         nome: d.nome.trim(),
         segmento: d.segmento.trim() || null,
