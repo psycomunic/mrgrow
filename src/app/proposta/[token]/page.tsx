@@ -299,7 +299,7 @@ export default async function PaginaProposta({
 
         {/* ── 7. Método G.R.O.W. ──────────────────────────────────── */}
         <Tela rotulo="Método G.R.O.W." className="pp-t-grow">
-          <Foto src={FOTO("notebook.webp")} posicao="center" prof={-2.5} className="pp-grow-foto" />
+          <Foto src={FOTO("carro.webp")} posicao="center" prof={-2.5} className="pp-grow-foto" />
           <div className="pp-veu pp-veu-esq" />
           <div className="pp-conteudo pp-meio">
             <p className="pp-sobretitulo" data-revela="" style={ordem(0)}>
@@ -560,7 +560,7 @@ export default async function PaginaProposta({
         {/* ── 13. Plano selecionado ───────────────────────────────── */}
         <Tela rotulo="Plano selecionado" className="pp-t-escolhido">
           <div className="pp-escolhido-foto">
-            <Foto src={FOTO("carro.webp")} posicao="center 70%" prof={-2} />
+            <Foto src={FOTO("notebook.webp")} posicao="center 70%" prof={-2} />
             <div className="pp-escolhido-titulo">
               <Linha i={0}>Entrega da</Linha>
               <Linha i={1}>assessoria</Linha>

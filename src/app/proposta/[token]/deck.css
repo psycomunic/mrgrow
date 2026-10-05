@@ -2093,16 +2093,25 @@
   justify-content: center;
   background: var(--branco);
   color: #050505;
-  padding: 5rem clamp(1.5rem, 4vw, 4.5rem) 7rem;
+  /* Topo e rodapé iguais: com 5rem em cima e 7rem embaixo, o
+     `justify-content: center` empurrava tudo para cima e sobrava um
+     vazio grande no pé da coluna. */
+  padding: 4.5rem clamp(1.5rem, 4vw, 4.5rem);
+  gap: 0.25rem;
 }
 
 .pp-escolhido-nome {
   font-family: var(--f-titulo), Impact, sans-serif;
   font-weight: 400;
-  font-size: clamp(2.6rem, 5vw, 4.8rem);
-  line-height: 0.95;
+  /* Menor e mais justo que antes. O 0.22em foi desenhado para "GROW
+     PRO", de oito letras; num nome de cliente comprido ele abria a
+     palavra até ela atravessar a coluna e encostar na borda. O
+     `min()` com a contagem de letras segura os dois casos. */
+  font-size: clamp(2rem, min(4.2vw, 3.4rem), 3.4rem);
+  line-height: 1;
   text-transform: uppercase;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.08em;
+  overflow-wrap: anywhere;
   color: var(--azul-real);
 }
 
@@ -2413,6 +2422,14 @@
   width: auto;
 }
 
+/* A marca inteira é 9 para 1: na altura da lâmpada ela ficaria com
+   180px de largura e dominaria o cabeçalho, então entra mais baixa. */
+.pp-topo-vetor {
+  display: block;
+  height: 0.95rem;
+  width: auto;
+}
+
 .pp-topo-logo {
   display: block;
   height: 30px;
@@ -2600,6 +2617,112 @@
 }
 
 /* ── Movimento reduzido: tudo parado, tudo visível ───────────────── */
+
+
+/* ── Correções do ponto B ────────────────────────────────────────── */
+
+/* O chat tinha altura livre e seis mensagens empilhadas: no notebook ele
+   passava da borda de baixo da tela e a última bolha era cortada. Agora
+   tem altura fixa e as mensagens encostam embaixo, como num aparelho de
+   verdade — as antigas saem por cima conforme as novas chegam. */
+.pp-chat-corpo {
+  min-height: 0;
+  height: clamp(13rem, 30vh, 16.5rem);
+  justify-content: flex-end;
+  overflow: hidden;
+}
+
+/* A hora dentro da bolha, como no aplicativo. Não é enfeite: é o que
+   faz a peça parecer uma conversa real em vez de um desenho de
+   conversa. */
+.pp-msg {
+  position: relative;
+  padding-right: 2.9rem;
+}
+
+.pp-msg::after {
+  content: attr(data-hora);
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.35rem;
+  font-size: 0.58rem;
+  letter-spacing: 0.02em;
+  color: rgba(233, 237, 239, 0.45);
+}
+
+/* Os dois tiques de entregue, só no que a loja mandou. */
+.pp-msg[data-lado="loja"]::before {
+  content: "✓✓";
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.3rem;
+  font-size: 0.5rem;
+  letter-spacing: -0.12em;
+  color: #53bdeb;
+  transform: translateX(0.1rem);
+}
+
+.pp-msg[data-lado="loja"]::after {
+  right: 1.35rem;
+}
+
+/* O aviso de novo lead saía 1,2rem para fora do navegador, pela direita
+   — bem onde mora o título "Página de vendas". Ele passava por cima do
+   texto em tela cheia. Dentro da janela ele continua chamando atenção e
+   fica mais realista: o aviso nasce no site, não ao lado dele. */
+.pp-site-toast {
+  right: 0.6rem;
+  top: 2.6rem;
+}
+
+/* Os dois blocos param de se encostar: a peça nunca passa da metade da
+   coluna, e o texto fica com o resto. */
+.pp-pontob-item {
+  align-items: center;
+  gap: clamp(1rem, 2vw, 1.75rem);
+}
+
+@media (min-width: 1024px) {
+  .pp-pontob-grade {
+    gap: clamp(2rem, 5vw, 5rem);
+  }
+}
+
+
+/* ── Telas baixas: notebook de 13 a 14 polegadas ─────────────────── */
+/*
+   Quase tudo no deck é dimensionado em `vw`, que não encolhe quando o
+   que falta é ALTURA. Num notebook de 768px de altura o título continuava
+   do tamanho de um monitor grande e encostava na lista logo abaixo — foi
+   a sobreposição relatada. Aqui a tipografia cede o que precisa, e só
+   nessas alturas.
+*/
+@media (max-height: 820px) {
+  .pp-titulo-tela {
+    font-size: clamp(1.9rem, 3.9vw, 3.4rem);
+  }
+  .pp-t-dna .pp-titulo-tela {
+    font-size: clamp(2.1rem, 5vw, 4.4rem);
+  }
+  .pp-canais {
+    margin-top: 2rem;
+    gap: 1.25rem;
+  }
+  .pp-canais b {
+    font-size: clamp(1.2rem, 2vw, 1.6rem);
+  }
+  .pp-canais > li {
+    grid-template-columns: clamp(3rem, 4.6vw, 3.8rem) 1fr;
+    font-size: clamp(0.86rem, 1.1vw, 0.98rem);
+    line-height: 1.45;
+  }
+  .pp-pontob-grade {
+    margin-top: 1.25rem;
+  }
+  .pp-escolhido-texto {
+    padding-block: 2.5rem;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .pp-palco[data-mov] [data-revela],

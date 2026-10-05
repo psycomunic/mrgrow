@@ -240,7 +240,7 @@ export function ConversaWhats({ marca }: { marca: string }) {
         </span>
       </div>
       <div className="pp-chat-corpo">
-        <p className="pp-msg" data-lado="cliente" style={ordem(0)}>
+        <p className="pp-msg" data-lado="cliente" data-hora="14:31" style={ordem(0)}>
           Oi! Vi o anúncio de vocês. Ainda tem horário essa semana?
         </p>
         <p className="pp-digitando" style={ordem(1)}>
@@ -248,13 +248,13 @@ export function ConversaWhats({ marca }: { marca: string }) {
           <span />
           <span />
         </p>
-        <p className="pp-msg" data-lado="loja" style={ordem(2)}>
+        <p className="pp-msg" data-lado="loja" data-hora="14:32" style={ordem(2)}>
           Tem sim! Quinta às 15h ou sexta às 10h. Qual fica melhor?
         </p>
-        <p className="pp-msg" data-lado="cliente" style={ordem(3)}>
+        <p className="pp-msg" data-lado="cliente" data-hora="14:33" style={ordem(3)}>
           Quinta às 15h, pode confirmar.
         </p>
-        <p className="pp-msg" data-lado="loja" style={ordem(4)}>
+        <p className="pp-msg" data-lado="loja" data-hora="14:33" style={ordem(4)}>
           Confirmado! Te mando o endereço por aqui.
         </p>
         <p className="pp-chat-selo" style={ordem(5)}>

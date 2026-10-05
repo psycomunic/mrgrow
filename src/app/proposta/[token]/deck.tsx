@@ -3,6 +3,8 @@
 import { Children, useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Lampada } from "./slide";
+import { Logotipo } from "@/components/marca";
+import { MARCA } from "@/lib/marca";
 
 /**
  * A proposta como apresentação que passa para o lado.
@@ -272,8 +274,17 @@ export function Deck({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={logo} alt={marca} className="pp-topo-logo" />
         ) : (
+          /* A marca inteira, e não só a lâmpada. A lâmpada sozinha não
+             identifica ninguém: num documento que o cliente encaminha
+             para o sócio, o cabeçalho é a única assinatura que viaja
+             junto. A lâmpada fica para quem não é a MR Grow, onde a
+             única coisa certa é o nome escrito. */
           <span className="pp-topo-marca" aria-label={marca}>
-            <Lampada className="pp-topo-lampada" />
+            {marca === MARCA.nome ? (
+              <Logotipo className="pp-topo-vetor" />
+            ) : (
+              <Lampada className="pp-topo-lampada" />
+            )}
           </span>
         )}
         <p className="pp-topo-arroba">{arroba}</p>
