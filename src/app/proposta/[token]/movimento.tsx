@@ -3,20 +3,21 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Valor que sobe do zero até o número final quando a tela dele aparece.
+ * Número que sobe do zero até o valor final quando a tela dele aparece.
  *
- * O número é renderizado inteiro no servidor: sem JavaScript, ou com
- * movimento reduzido, a pessoa vê o valor certo de cara. A contagem só
- * começa depois que o componente monta e a tela fica visível, e roda uma
- * vez. Proposta que recontaria o preço toda vez que a pessoa volta ao
- * slide pareceria truque; contar uma vez parece apresentação.
+ * O valor é renderizado inteiro no servidor: sem JavaScript, ou com
+ * movimento reduzido, a pessoa vê o número certo de cara. A contagem roda
+ * uma vez. Recontar toda vez que a pessoa volta à tela pareceria truque;
+ * contar uma vez parece apresentação.
  */
 export function Contador({
   valor,
   duracao = 1600,
+  moeda = false,
 }: {
   valor: number;
   duracao?: number;
+  moeda?: boolean;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [mostrado, setMostrado] = useState(valor);
@@ -62,81 +63,60 @@ export function Contador({
 
   return (
     <span ref={ref}>
-      {mostrado.toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: mostrado % 1 === 0 ? 0 : 2,
-      })}
+      {moeda
+        ? mostrado.toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+            minimumFractionDigits: 0,
+            maximumFractionDigits: mostrado % 1 === 0 ? 0 : 2,
+          })
+        : mostrado.toLocaleString("pt-BR")}
     </span>
   );
 }
 
 /**
- * Número que sobe do zero quando a tela dele entra.
+ * Contagem regressiva até o fim da validade da proposta.
  *
- * Irmão do `Contador`, para o que não é dinheiro: contagem de campanhas,
- * de empresas, de anos. O `Contador` formata em reais sempre, e "R$ 2.326
- * campanhas" não é um número, é um erro.
- *
- * Mesma regra do outro: o valor final é o que o servidor renderiza. Sem
- * JavaScript, ou com movimento reduzido, aparece certo de cara — e a
- * contagem roda uma vez só, porque recontar a cada volta ao slide
- * pareceria truque em vez de apresentação.
+ * Só aparece depois de montar no navegador: o servidor não sabe a hora do
+ * leitor, e um relógio renderizado no servidor chegaria errado e trocaria
+ * de valor na frente da pessoa. Até lá, fica a data por extenso, que já
+ * diz o essencial. A validade vale até o fim do dia, no fuso de Brasília.
  */
-export function Numero({
-  valor,
-  prefixo = "",
-  sufixo = "",
-  duracao = 1800,
-}: {
-  valor: number;
-  prefixo?: string;
-  sufixo?: string;
-  duracao?: number;
-}) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const [mostrado, setMostrado] = useState(valor);
+export function Regressiva({ ate }: { ate: string }) {
+  const [agora, setAgora] = useState<number | null>(null);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    let raf = 0;
-    let feito = false;
-
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (!e.isIntersecting || feito) return;
-        feito = true;
-        obs.disconnect();
-        setMostrado(0);
-        const inicio = performance.now();
-        const passo = (agora: number) => {
-          const t = Math.min(1, (agora - inicio) / duracao);
-          // Desacelera no fim: o olho lê o número quando ele quase para.
-          const suave = 1 - Math.pow(1 - t, 4);
-          setMostrado(t < 1 ? Math.round(valor * suave) : valor);
-          if (t < 1) raf = requestAnimationFrame(passo);
-        };
-        raf = requestAnimationFrame(passo);
-      },
-      { threshold: 0.5 },
-    );
-    obs.observe(el);
-
+    const t0 = setTimeout(() => setAgora(Date.now()), 0);
+    const id = setInterval(() => setAgora(Date.now()), 1000);
     return () => {
-      obs.disconnect();
-      cancelAnimationFrame(raf);
+      clearTimeout(t0);
+      clearInterval(id);
     };
-  }, [valor, duracao]);
+  }, []);
+
+  const fim = new Date(`${ate}T23:59:59-03:00`).getTime();
+  if (agora === null || Number.isNaN(fim)) return null;
+
+  const resta = Math.max(0, fim - agora);
+  if (resta === 0) return null;
+
+  const s = Math.floor(resta / 1000);
+  const partes = [
+    { v: Math.floor(s / 86400), r: "dias" },
+    { v: Math.floor((s % 86400) / 3600), r: "horas" },
+    { v: Math.floor((s % 3600) / 60), r: "min" },
+    { v: s % 60, r: "seg" },
+  ];
 
   return (
-    <span ref={ref}>
-      {prefixo}
-      {mostrado.toLocaleString("pt-BR")}
-      {sufixo}
-    </span>
+    <div className="pp-regressiva" role="timer" aria-label="Tempo até o fim da oferta">
+      {partes.map((p) => (
+        <span key={p.r}>
+          <b>{String(p.v).padStart(2, "0")}</b>
+          <i>{p.r}</i>
+        </span>
+      ))}
+    </div>
   );
 }

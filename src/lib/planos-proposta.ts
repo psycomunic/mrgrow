@@ -27,6 +27,8 @@ export type Plano = {
   diferenciais: string[];
   /** Quem grava os vídeos. É a dúvida que mais volta na negociação. */
   videos: string;
+  /** Preço de tabela, mostrado na tela que compara os três planos. */
+  preco: number;
   recomendado?: boolean;
 };
 
@@ -34,6 +36,7 @@ export const PLANOS: Plano[] = [
   {
     id: "basic",
     nome: "Grow Basic",
+    preco: 3000,
     tagline: "Estratégia + conteúdo base + tráfego",
     resumo:
       "Para quem quer organizar o marketing e sair do improviso, mas tem estrutura interna para executar parte da produção. A MR Grow entrega o planejamento, a direção dos conteúdos, um pacote base de artes e a gestão do tráfego.",
@@ -55,6 +58,7 @@ export const PLANOS: Plano[] = [
   {
     id: "pro",
     nome: "Grow Pro",
+    preco: 4000,
     tagline: "Conteúdo + tráfego + posicionamento",
     resumo:
       "O equilíbrio entre estratégia, execução e performance — e o plano que a MR Grow mais recomenda. Aqui a agência assume a estratégia, a criação dos conteúdos, os roteiros, a edição dos vídeos, o tráfego e o acompanhamento. Para marcas que querem uma operação completa sem montar equipe interna.",
@@ -83,6 +87,7 @@ export const PLANOS: Plano[] = [
   {
     id: "premium",
     nome: "Grow Premium",
+    preco: 7000,
     tagline: "Conteúdo + tráfego multicanal + posicionamento avançado",
     resumo:
       "Para marcas que precisam de mais volume, mais acompanhamento e mais fontes de tráfego. Operação intensa: planejamento, produção, captação presencial, Meta e Google rodando juntos, e análise constante para ampliar as oportunidades de venda.",

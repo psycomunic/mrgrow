@@ -1,16 +1,8 @@
 "use client";
 
-import {
-  Children,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { Children, useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { Logotipo } from "@/components/marca";
-import { MARCA } from "@/lib/marca";
+import { Lampada } from "./slide";
 
 /**
  * A proposta como apresentação que passa para o lado.
@@ -30,26 +22,23 @@ import { MARCA } from "@/lib/marca";
  * documento existir e não existir.
  *
  * ============================================================
- * O FUNDO É FIXO, E OS SLIDES CORREM POR CIMA
+ * CADA TELA LEVA O PRÓPRIO FUNDO
  * ============================================================
- * Grade, brilhos e grão ficam numa camada que não se move. Se cada
- * slide levasse o próprio fundo, o brilho passaria correndo junto e
- * viraria efeito de carrossel barato. Parado, ele funciona como o
- * cenário de um palco: o que se move é o conteúdo.
+ * As telas alternam preto com foto e branco só com frase, como no deck
+ * impresso da agência, então o fundo é da tela e passa junto com ela.
+ * O que dá profundidade é o parallax das camadas por dentro de cada uma.
  */
-/* Antes da pintura no cliente, e `useEffect` no servidor — onde layout
-   não existe e o React avisaria. É o par usual para quem precisa escrever
-   no DOM sem deixar o quadro anterior aparecer. */
-const useAntesDePintar = typeof window !== "undefined" ? useLayoutEffect : useEffect;
-
 export function Deck({
   marca,
   logo = null,
+  arroba,
   children,
 }: {
   marca: string;
-  /** Logo da agência, quando cadastrada. Sem ela, o nome em texto. */
+  /** Logo da agência, quando cadastrada. Sem ela, a lâmpada da MR Grow. */
   logo?: string | null;
+  /** O @ do Instagram no canto, como no deck impresso. */
+  arroba: string;
   children: ReactNode;
 }) {
   /* `Children.toArray` achata array aninhado — é por isso que as seções
@@ -60,24 +49,6 @@ export function Deck({
   const trilho = useRef<HTMLDivElement>(null);
   const palco = useRef<HTMLDivElement>(null);
   const [atual, setAtual] = useState(0);
-
-  /**
-   * Liga o movimento, e só então esconde o que vai ser revelado.
-   *
-   * `data-mov` vinha do servidor, para a capa nascer no estado de antes
-   * da entrada e não piscar pronta. O preço era alto demais: era ele que
-   * escondia TODO o texto, e a revelação dependia do React hidratar. Numa
-   * rede ruim, num telefone velho, ou se um pedaço do bundle não chegar,
-   * a proposta que a agência mandou abre em branco — com a foto, os
-   * controles e nenhuma palavra.
-   *
-   * Agora o servidor entrega o documento legível e o atributo entra aqui,
-   * antes da pintura: não há piscada, e sem JavaScript sobra a proposta
-   * inteira e parada, que é o pior caso aceitável.
-   */
-  useAntesDePintar(() => {
-    palco.current?.setAttribute("data-mov", "");
-  }, []);
 
   const irPara = useCallback(
     (i: number) => {
@@ -133,35 +104,9 @@ export function Deck({
     const el = trilho.current;
     const raiz = palco.current;
     if (!el || !raiz) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    /* A tela de abertura se revela JÁ, antes de qualquer quadro, e antes
-       da checagem de movimento reduzido.
-
-       A revelação dependia só do laço, e `requestAnimationFrame` não
-       dispara em aba de fundo — nem quando o navegador o estrangula para
-       poupar bateria. Ali a proposta abria em branco: foto, controles, e
-       o texto escondido esperando um quadro que nunca vinha. Numa
-       proposta comercial isso não é um efeito que falha, é o documento
-       que não existe.
-
-       Abrir é obrigação; o parallax é enfeite. */
-    const telas = Array.from(el.children) as HTMLElement[];
-    telas[0]?.setAttribute("data-visto", "");
-
-    /* E se nenhum quadro rodar mesmo assim, o resto aparece sozinho. Um
-       segundo é mais que o laço precisa quando ele está vivo. */
-    const resgate = setTimeout(() => {
-      if (!raiz.style.getPropertyValue("--x")) {
-        for (const t of telas) t.setAttribute("data-visto", "");
-      }
-    }, 1000);
-
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      clearTimeout(resgate);
-      for (const t of telas) t.setAttribute("data-visto", "");
-      return;
-    }
-
+    const secoes = Array.from(el.children) as HTMLElement[];
     const fino = window.matchMedia("(pointer: fine)").matches;
 
     let alvoX = 0;
@@ -178,16 +123,16 @@ export function Deck({
       if (Math.abs(x - ultimoX) > 0.0005) {
         ultimoX = x;
         raiz.style.setProperty("--x", x.toFixed(4));
-        for (let i = 0; i < telas.length; i++) {
+        for (let i = 0; i < secoes.length; i++) {
           const d = i - x;
           // Só os vizinhos: slide a três telas de distância não aparece.
           if (Math.abs(d) < 1.6) {
-            telas[i].style.setProperty("--d", d.toFixed(4));
-            telas[i].style.setProperty("--a", Math.min(1, Math.abs(d)).toFixed(4));
+            secoes[i].style.setProperty("--d", d.toFixed(4));
+            secoes[i].style.setProperty("--a", Math.min(1, Math.abs(d)).toFixed(4));
             // A tela começa a se apresentar quando passa da metade, ainda
             // durante o arrasto — e não só depois que o trilho assenta.
-            if (Math.abs(d) < 0.5 && !telas[i].hasAttribute("data-visto"))
-              telas[i].setAttribute("data-visto", "");
+            if (Math.abs(d) < 0.5 && !secoes[i].hasAttribute("data-visto"))
+              secoes[i].setAttribute("data-visto", "");
           }
         }
       }
@@ -213,7 +158,6 @@ export function Deck({
     window.addEventListener("pointermove", aoMover, { passive: true });
 
     return () => {
-      clearTimeout(resgate);
       cancelAnimationFrame(raf);
       window.removeEventListener("pointermove", aoMover);
     };
@@ -293,40 +237,21 @@ export function Deck({
     /* `data-mov` já vem do servidor, para a capa nascer no estado de
        antes da entrada e não piscar pronta antes de animar. Quem está sem
        JavaScript recebe o `noscript` abaixo, que desliga a revelação. */
-    <div ref={palco} className="pp-palco">
+    <div ref={palco} className="pp-palco" data-mov="">
       <noscript>
-        <style>{`.pp-palco [data-revela], .pp-palco .pp-mascara > span { opacity: 1 !important; transform: none !important; filter: none !important; }`}</style>
+        <style>{`.pp-palco [data-revela], .pp-palco .pp-linha > span { opacity: 1 !important; transform: none !important; filter: none !important; clip-path: none !important; }`}</style>
       </noscript>
-      <div aria-hidden className="pp-cenario">
-        <div className="pp-grade" />
-        <div className="pp-brilho pp-brilho-azul" />
-        <div className="pp-brilho pp-brilho-frio" />
-        {/* Partículas em três profundidades. Poucas e lentas: é poeira de
-            luz no palco, não efeito de tela de descanso. */}
-        <div className="pp-poeira">
-          {Array.from({ length: 14 }, (_, i) => (
-            <span key={i} />
-          ))}
-        </div>
-      </div>
-
-      {/* A luz que segue o mouse. Só no computador, e só sobre o
-          cenário: ilumina o palco, nunca o texto. */}
-      <div aria-hidden className="pp-lanterna" />
 
       <div ref={trilho} className="pp-trilho" tabIndex={-1}>
         {slides.map((slide, i) => (
           /* O `id` deixa mandar "olha a tela 5" com link que abre nela:
-             a ancora do navegador rola o trilho sozinha, sem codigo. */
+             a âncora do navegador rola o trilho sozinha, sem código. */
           <section
             key={i}
             id={`tela-${i + 1}`}
             aria-label={`Slide ${i + 1} de ${total}`}
           >
-            {/* As faixas de topo e base existem para o conteúdo não passar
-                por baixo do cabeçalho e dos controles — e sumir
-                justamente onde o polegar fica. */}
-            <div className="pp-quadro">{slide}</div>
+            {slide}
           </section>
         ))}
       </div>
@@ -339,28 +264,19 @@ export function Deck({
         <span style={{ width: `${((atual + 1) / total) * 100}%` }} />
       </div>
 
+      {/* Cabeçalho e pontos em `difference`: brancos sobre a tela escura,
+          pretos sobre a branca, sem o Deck precisar saber o tom de cada
+          tela. */}
       <header className="pp-topo">
         {logo && /^https?:\/\//i.test(logo) ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={logo} alt={marca} className="pp-topo-logo" />
-        ) : marca === MARCA.nome ? (
-          /* A marca própria, em vetor, só quando a organização é a MR Grow.
-             A plataforma serve outras agências, e carimbar esta logo na
-             proposta de outra pessoa seria assinar o documento dela. */
-          <Logotipo className="pp-topo-vetor" />
         ) : (
-          <p className="pp-topo-marca">{marca}</p>
-        )}
-        <p
-          className="pp-mono"
-          style={{ margin: 0, fontVariantNumeric: "tabular-nums" }}
-        >
-          <span style={{ color: "var(--branco)" }}>
-            {String(atual + 1).padStart(2, "0")}
+          <span className="pp-topo-marca" aria-label={marca}>
+            <Lampada className="pp-topo-lampada" />
           </span>
-          <span style={{ margin: "0 0.25rem", opacity: 0.5 }}>/</span>
-          {String(total).padStart(2, "0")}
-        </p>
+        )}
+        <p className="pp-topo-arroba">{arroba}</p>
       </header>
 
       <nav aria-label="Navegação da proposta" className="pp-controles">
@@ -392,11 +308,7 @@ export function Deck({
           ))}
         </ol>
 
-        <p
-          aria-live="polite"
-          className="pp-mono pp-contador-mob"
-          style={{ margin: 0 }}
-        >
+        <p aria-live="polite" className="pp-contador-mob">
           {primeiro ? "arraste →" : ultimo ? "fim" : `${atual + 1} de ${total}`}
         </p>
 

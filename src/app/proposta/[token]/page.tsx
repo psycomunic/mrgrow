@@ -1,58 +1,53 @@
+import type { CSSProperties } from "react";
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import { notFound } from "next/navigation";
-import {
-  Bricolage_Grotesque,
-  IBM_Plex_Mono,
-  Newsreader,
-} from "next/font/google";
 import { Deck } from "./deck";
-import { Slide, Bloco, Janela, eco, ordem } from "./slide";
-import { Contador, Numero } from "./movimento";
+import { Tela, Camada, Foto, Linha, ordem } from "./slide";
+import {
+  Outdoor,
+  Gema,
+  IconeFacebook,
+  IconeInstagram,
+  IconeGoogle,
+  IconeWhatsApp,
+  ConversaWhats,
+  PaginaVendas,
+  GradeHorario,
+  MapaRaio,
+  Interesses,
+  Esteira,
+  Assinatura,
+} from "./pecas";
+import { Contador, Regressiva } from "./movimento";
 import { carregarMarcaPublica, carregarPorToken } from "@/lib/propostas";
-import {
-  condicoesDosServicos,
-  emReais,
-  fichaDoServico,
-} from "@/lib/servicos-proposta";
-import {
-  NUMEROS,
-  PLANOS,
-  PONTO_A,
-  PONTO_B,
-  plano as nivel,
-} from "@/lib/planos-proposta";
+import { emReais, fichaDoServico } from "@/lib/servicos-proposta";
+import { PLANOS, plano as nivel } from "@/lib/planos-proposta";
 import { MARCA } from "@/lib/marca";
 import "./deck.css";
 
-/* Três papéis, três vozes.
-
-   O grotesco da Bricolage tem largura levemente comprimida e desenho
-   "engenheirado" — serve ao que este documento é: um instrumento, não um
-   anúncio. A Newsreader carrega a prosa: quem está decidindo gastar
-   milhares por mês lê os parágrafos inteiros, e serifa com itálico de
-   verdade sustenta leitura longa melhor que qualquer sans.
-
-   A mono não é enfeite de código: ela dá algarismo tabular, e é isso que
-   alinha a coluna de valores. Números que não se alinham parecem
-   números que não batem. */
-const display = Bricolage_Grotesque({
-  subsets: ["latin"],
+/* Fontes no próprio repositório, e não do Google: a proposta é o
+   documento que o cliente abre, e ela não pode depender de um terceiro
+   responder para ficar com a cara certa. Anton é o grotesco condensado do
+   deck impresso da MR Grow; Inter carrega o texto corrido; Great Vibes é
+   só a assinatura do fecho. */
+const titulo = localFont({
+  src: "./fontes/anton.woff2",
+  variable: "--f-titulo",
   display: "swap",
-  variable: "--fonte-display",
 });
 
-const prosa = Newsreader({
-  subsets: ["latin"],
-  style: ["normal", "italic"],
+const texto = localFont({
+  src: "./fontes/inter.woff2",
+  variable: "--f-texto",
+  weight: "100 900",
   display: "swap",
-  variable: "--fonte-prosa",
 });
 
-const dado = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+const assina = localFont({
+  src: "./fontes/great-vibes.woff2",
+  variable: "--f-assina",
   display: "swap",
-  variable: "--fonte-dado",
 });
 
 /* Documento de um cliente só. Estático, o build geraria e guardaria o
@@ -60,7 +55,7 @@ const dado = IBM_Plex_Mono({
 export const dynamic = "force-dynamic";
 
 export const viewport = {
-  themeColor: "#04060b",
+  themeColor: "#050608",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover" as const,
@@ -75,40 +70,34 @@ export async function generateMetadata({
   const proposta = await carregarPorToken(token);
 
   return {
-    /* O layout raiz já aplica o template "%s · MR Grow"; repetir a marca
-       aqui produzia "… · MR Grow · MR Grow" na aba. */
+    /* O layout raiz já aplica o template "%s · MR Grow". */
     title: proposta ? proposta.titulo : "Proposta",
-    /* Documento comercial de terceiro: fora do índice. A proteção é o
-       link, que ninguém adivinha — e o preço não entra em prévia
-       nenhuma, porque prévia aparece em lista de conversa e em
-       encaminhamento para grupo. */
+    /* Documento comercial de terceiro: fora do índice, e o preço fora de
+       qualquer prévia de link. */
     robots: { index: false, follow: false, nocache: true },
   };
 }
 
-/* As fotos da proposta. Uma por tela de argumento e uma por serviço do
-   catálogo: quando a agência cadastrar um serviço novo sem foto, ele cai
-   na foto do escopo em vez de abrir com moldura vazia. */
-const FOTO = (nome: string) => `/proposta/${nome}.webp`;
-const FOTOS_DE_SERVICO = new Set([
-  "estrategia",
-  "social",
-  "video",
-  "meta",
-  "google",
-  "relatorio",
-  "implantacao",
-  "landing",
-]);
-const fotoDoServico = (id: string) =>
-  FOTO(FOTOS_DE_SERVICO.has(id) ? id : "escopo");
+const FOTO = (nome: string) => `/proposta2/${nome}`;
 
-const dataBR = (iso: string) =>
+const dataCurta = (iso: string) =>
+  new Date(`${iso}T12:00:00`).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+  });
+
+const dataLonga = (iso: string) =>
   new Date(`${iso}T12:00:00`).toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "long",
-    year: "numeric",
   });
+
+/** O @ do Instagram, tirado do endereço cadastrado. */
+function arrobaDe(url: string) {
+  const m = url.match(/instagram\.com\/([^/?#]+)/i);
+  return m ? `@${m[1]}`.toUpperCase() : "";
+}
 
 export default async function PaginaProposta({
   params,
@@ -121,673 +110,577 @@ export default async function PaginaProposta({
 
   const marca = await carregarMarcaPublica(p.organizacao_id);
   const nomeAgencia = marca?.nome ?? MARCA.nome;
+  const arroba =
+    nomeAgencia === MARCA.nome
+      ? arrobaDe(MARCA.instagramAgencia) || "@MRGROW.AG"
+      : nomeAgencia.toUpperCase();
   const zap = marca?.whatsapp || MARCA.whatsapp;
+  const cliente = p.cliente_nome ?? p.titulo;
   const linkZap = `https://wa.me/${zap.replace(/\D/g, "")}?text=${encodeURIComponent(
-    `Olá! Recebi a proposta ${p.numero} da ${nomeAgencia} e quero seguir.`,
+    `Olá! Recebi a proposta ${p.numero} da ${nomeAgencia} e quero assinar.`,
   )}`;
 
   const n = p.narrativa;
   const vencida = p.status === "expirada";
-
-  const fichas = n.servicos
-    .map((s) => ({ escolhido: s, ficha: fichaDoServico(s.id) }))
-    .filter(
-      (
-        x,
-      ): x is {
-        escolhido: typeof x.escolhido;
-        ficha: NonNullable<typeof x.ficha>;
-      } => Boolean(x.ficha),
-    );
-
-  /* Preço por serviço só quando ele foi mesmo negociado item a item. Com
-     todos em zero, mostrar "R$ 0" em cada tela seria mentir sobre a
-     forma de cobrar — a conta é fechada, e ela aparece inteira na tela
-     do investimento. */
-  const detalhaPreco = fichas.some((f) => f.escolhido.fee > 0);
-
-  /* O nível escolhido. Quando existe, ele substitui as telas de serviço:
-     o plano JÁ lista as entregas, e mostrar as duas coisas faria o cliente
-     ler a mesma entrega duas vezes com palavras diferentes. */
+  /* O plano escolhido. Sem plano, a proposta é de serviços soltos: a tela
+     de planos sai, e a de investimento lista os serviços marcados. */
   const escolhido = n.plano ? nivel(n.plano) : null;
-
-  /* O escopo antigo era um campo de texto com uma linha por entrega.
-     Proposta gravada antes do catálogo continua abrindo por aqui. */
-  const escopoAntigo = (p.escopo ?? "")
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean);
-
-  const condicoesDeSempre = condicoesDosServicos(fichas.map((f) => f.ficha.id));
-  const totalContrato = p.valor_mensal * p.meses_contrato + p.valor_setup;
-
-  const principais = fichas.filter((f) => f.ficha.papel === "principal").length;
+  const itensDaConta = escolhido
+    ? escolhido.entregas
+    : n.servicos
+        .map((x) => fichaDoServico(x.id)?.nome)
+        .filter((x): x is string => Boolean(x));
+  const mensal = p.valor_mensal;
+  const desconto = p.valor_cheio > mensal && mensal > 0;
+  const pct = desconto ? Math.round((1 - mensal / p.valor_cheio) * 100) : 0;
+  const nomeOferta = escolhido?.nome ?? "plano";
 
   return (
-    <div
-      className={`pp ${display.variable} ${prosa.variable} ${dado.variable}`}
-    >
-      <Deck marca={nomeAgencia} logo={marca?.logo_url ?? null}>
-        {/* ── Capa ────────────────────────────────────────────────── */}
-        <Slide centrado fundo={FOTO("capa")} veu="esquerda">
-          <div className="pp-capa">
-            {/* A logo do cliente na capa: a primeira coisa que ele vê é
-                o próprio nome, e não o da agência. */}
-            {p.cliente_logo_url && /^https?:\/\//i.test(p.cliente_logo_url) ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={p.cliente_logo_url}
-                alt={p.cliente_nome ?? ""}
-                className="pp-capa-logo"
-                data-revela=""
-                style={ordem(0)}
-              />
-            ) : null}
-            <p className="pp-rotulo" data-revela="" style={ordem(0)}>
-              Proposta comercial · {p.numero}
+    <div className={`pp ${titulo.variable} ${texto.variable} ${assina.variable}`}>
+      <Deck marca={nomeAgencia} logo={marca?.logo_url ?? null} arroba={arroba}>
+        {/* ── 1. Capa: o nome do cliente num outdoor ──────────────── */}
+        <Tela rotulo="Capa" className="pp-t-capa">
+          <Outdoor src={FOTO("outdoor.webp")} cliente={cliente} arroba={arroba} />
+          {p.validade ? (
+            <p className="pp-capa-validade" data-revela="" style={ordem(8)}>
+              {vencida ? "Proposta vencida em " : "Proposta válida até "}
+              {dataCurta(p.validade)}.
             </p>
+          ) : null}
+          <p className="pp-capa-numero" data-revela="" style={ordem(8)}>
+            {p.numero}
+          </p>
+        </Tela>
 
-            <h1 className="pp-mostro">
-              <span className="pp-mascara">
-                <span>{p.cliente_nome ?? p.titulo}</span>
-              </span>
-            </h1>
-
-            {p.introducao ? (
-              <p className="pp-apoio" data-revela="" style={ordem(2)}>
-                {p.introducao}
-              </p>
-            ) : null}
-
-            <dl className="pp-ficha" data-revela="" style={ordem(3)}>
-              <div>
-                <dt className="pp-mono">Emitida em</dt>
-                <dd>{dataBR(p.criado_em.slice(0, 10))}</dd>
-              </div>
-              {p.validade ? (
-                <div>
-                  <dt className="pp-mono">
-                    {vencida ? "Venceu em" : "Válida até"}
-                  </dt>
-                  <dd data-alerta={vencida ? "" : undefined}>
-                    {dataBR(p.validade)}
-                  </dd>
-                </div>
-              ) : null}
-              <div>
-                <dt className="pp-mono">Por</dt>
-                <dd>{nomeAgencia}</dd>
-              </div>
-            </dl>
-
-            {vencida ? (
-              <p className="pp-vencida" data-revela="" style={ordem(4)}>
-                Esta proposta passou da validade. Fale com a {nomeAgencia} para
-                receber uma versão atualizada, com os valores conferidos.
-              </p>
-            ) : (
-              <p
-                className="pp-mono pp-dica"
-                data-revela=""
-                style={ordem(4)}
-              >
-                <span>Deslize para começar</span>
-                <span aria-hidden className="pp-dica-seta">
-                  →
-                </span>
-              </p>
-            )}
+        {/* ── 2. Seja visto ou seja esquecido ─────────────────────── */}
+        <Tela rotulo="Seja visto ou seja esquecido" className="pp-t-visto">
+          <Foto src={FOTO("rainha.webp")} posicao="70% center" prof={-3} />
+          <div className="pp-veu pp-veu-esq" />
+          <div className="pp-conteudo pp-meio">
+            <h2 className="pp-gigante">
+              <Linha i={0}>Seja visto</Linha>
+              <Linha i={1}>ou seja</Linha>
+              <Linha i={2} className="pp-esquecido">
+                esquecido
+              </Linha>
+            </h2>
+            <span className="pp-traco" data-revela="" style={ordem(4)} />
+            <p className="pp-apoio" data-revela="" style={ordem(5)}>
+              No digital, quem não aparece não existe para o cliente. E quem
+              aparece sem estratégia vira só mais um no feed.
+            </p>
           </div>
+        </Tela>
 
-          {/* A faixa de serviços correndo no pé da capa: antes de ler uma
-              linha, a pessoa já viu tudo o que está sendo oferecido. */}
-          {fichas.length > 0 ? (
-            <div aria-hidden className="pp-faixa">
-              <div className="pp-faixa-trilho">
-                {[0, 1].map((volta) => (
-                  <span key={volta} className="pp-faixa-grupo">
-                    {fichas.map(({ ficha }) => (
-                      <span key={ficha.id}>
-                        {ficha.nome}
-                        <i>✦</i>
-                      </span>
-                    ))}
-                  </span>
-                ))}
+        {/* ── 3. Posicionamento (tela branca) ─────────────────────── */}
+        <Tela tom="claro" rotulo="Posicionamento" className="pp-t-posiciona">
+          <div className="pp-conteudo pp-meio pp-centro">
+            <p className="pp-frase">
+              <Linha i={0}>Hoje o marketing não premia</Linha>
+              <Linha i={1}>quem grita mais alto.</Linha>
+            </p>
+            <p className="pp-frase pp-frase-forte">
+              <Linha i={2}>
+                <em>Premia quem</em> se posiciona melhor.
+              </Linha>
+            </p>
+            <div className="pp-versus">
+              <p data-revela="" style={ordem(4)}>
+                <span>Ser bom é o</span>
+                <strong>básico</strong>
+              </p>
+              <span className="pp-versus-linha" />
+              <p data-revela="" style={ordem(6)}>
+                <span>Ser visto é</span>
+                <strong className="pp-azul">estratégia</strong>
+              </p>
+            </div>
+          </div>
+        </Tela>
+
+        {/* ── 4. MR Grow ───────────────────────────────────────────── */}
+        <Tela rotulo={nomeAgencia} className="pp-t-marca">
+          <Camada prof={2} className="pp-oculos">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={FOTO("oculos.webp")} alt="" decoding="async" />
+          </Camada>
+          <div className="pp-conteudo pp-baixo pp-centro">
+            <h2 className="pp-nome-agencia">
+              <Linha i={0}>{nomeAgencia}</Linha>
+            </h2>
+            <p className="pp-slogan" data-revela="" style={ordem(2)}>
+              Posicionamos marcas. Transformamos atenção em venda.
+            </p>
+          </div>
+          <div className="pp-logos" data-revela="" style={ordem(4)}>
+            <p>Marcas que já cresceram com a gente</p>
+            <Esteira segundos={50}>
+              {Array.from({ length: 16 }, (_, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={i}
+                  src={`/clientes/branco/${String(i + 1).padStart(2, "0")}.webp`}
+                  alt=""
+                  loading="lazy"
+                />
+              ))}
+            </Esteira>
+          </div>
+        </Tela>
+
+        {/* ── 5. Não vendemos likes (tela branca) ─────────────────── */}
+        <Tela tom="claro" rotulo="O que vendemos" className="pp-t-likes">
+          <div className="pp-coracoes" aria-hidden>
+            {Array.from({ length: 9 }, (_, i) => (
+              <span key={i} style={{ "--i": i } as CSSProperties}>
+                ♥
+              </span>
+            ))}
+          </div>
+          <div className="pp-conteudo pp-meio pp-centro">
+            <p className="pp-frase">
+              <Linha i={0}>Na {nomeAgencia}, não vendemos posts.</Linha>
+            </p>
+            <p className="pp-frase pp-frase-gigante">
+              <Linha i={1}>
+                Não vendemos <em className="pp-riscado">likes.</em>
+              </Linha>
+            </p>
+            <p className="pp-frase pp-frase-media" data-revela="" style={ordem(4)}>
+              Vendemos posicionamento, percepção e{" "}
+              <span className="pp-azul">crescimento.</span>
+            </p>
+            <p className="pp-frase pp-frase-media" data-revela="" style={ordem(6)}>
+              E é aqui que a sua virada de jogo começa.
+            </p>
+          </div>
+        </Tela>
+
+        {/* ── 6. DNA em números ───────────────────────────────────── */}
+        <Tela rotulo="Nosso DNA em números" className="pp-t-dna">
+          <div className="pp-conteudo pp-dna">
+            <h2 className="pp-titulo-tela pp-centro">
+              <Linha i={0}>Nosso DNA em números</Linha>
+            </h2>
+            <div className="pp-dna-grade">
+              <div className="pp-dna-num" data-revela="" style={ordem(2)}>
+                <b>
+                  <i>+</i>
+                  <Contador valor={583} />
+                </b>
+                <span>empresas posicionadas</span>
+              </div>
+              <Camada prof={1.5} className="pp-dna-gema">
+                <Gema />
+              </Camada>
+              <div className="pp-dna-num" data-revela="" style={ordem(3)}>
+                <b>
+                  <i>+</i>
+                  <Contador valor={9} duracao={1200} /> mi
+                </b>
+                <span>em verba administrada em anúncios</span>
               </div>
             </div>
-          ) : null}
-        </Slide>
+            <div className="pp-dna-num pp-dna-largo" data-revela="" style={ordem(4)}>
+              <b>
+                <i>+</i>
+                <Contador valor={2326} duracao={2000} /> campanhas otimizadas
+              </b>
+            </div>
+            <div className="pp-dna-num pp-dna-anos" data-revela="" style={ordem(5)}>
+              <b>
+                <i>+</i>
+                <Contador valor={10} duracao={1000} /> anos de mercado
+              </b>
+              <span>Especialistas em transformar atenção em venda.</span>
+            </div>
+          </div>
+        </Tela>
 
-        {/* ── Os números da agência ───────────────────────────────── */}
-        {/* Entra logo depois da capa, antes de qualquer argumento. Quem
-            abre uma proposta não sabe se fala com alguém que já fez isso
-            centenas de vezes ou com alguém no segundo mês: dez anos e nove
-            milhões de verba respondem em quatro segundos. */}
-        <Slide
-          rotulo="Nosso DNA em números"
-          titulo={eco("Transformar atenção em venda")}
-          fundo={FOTO("escopo")}
-          veu="total"
-        >
-          <dl className="pp-numeros">
-            {NUMEROS.map((n, i) => (
-              <div key={n.rotulo} data-revela="" style={ordem(3 + i)}>
-                <dt className="pp-num pp-numeros-valor">
-                  <Numero valor={n.valor} prefixo={n.prefixo} />
-                </dt>
-                <dd className="pp-numeros-rotulo">{n.rotulo}</dd>
-              </div>
-            ))}
-          </dl>
-        </Slide>
-
-        {/* ── Diagnóstico ─────────────────────────────────────────── */}
-        {/* Abre a argumentação de propósito. Sem ele a proposta começa
-            falando de preço, e quem lê conclui que recebeu tabela. */}
-        {n.diagnostico.length > 0 ? (
-          <Slide
-            rotulo="Diagnóstico"
-            titulo={eco("O que encontramos")}
-            apoio="O ponto de partida desta proposta. Se algo aqui estiver errado, o escopo muda junto."
-            visual={
-              <Janela
-                src={FOTO("diagnostico")}
-                alt="Lupa sobre gráficos de desempenho"
-                legenda="Leitura da operação atual"
-                selo={
-                  <>
-                    <span className="pp-selo-pulso" />
-                    <span>
-                      <strong>{n.diagnostico.length}</strong> pontos de atenção
-                    </span>
-                  </>
-                }
-              />
-            }
-          >
-            <ol className="pp-lista">
-              {n.diagnostico.map((d, i) => (
-                <li key={d}>
-                  <Bloco className="pp-linha" indice={3 + i}>
-                    <span className="pp-marcador">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span className="pp-texto-linha">{d}</span>
-                  </Bloco>
+        {/* ── 7. Método G.R.O.W. ──────────────────────────────────── */}
+        <Tela rotulo="Método G.R.O.W." className="pp-t-grow">
+          <Foto src={FOTO("notebook.webp")} posicao="center" prof={-2.5} className="pp-grow-foto" />
+          <div className="pp-veu pp-veu-esq" />
+          <div className="pp-conteudo pp-meio">
+            <p className="pp-sobretitulo" data-revela="" style={ordem(0)}>
+              Nosso diferencial
+            </p>
+            <h2 className="pp-titulo-tela">
+              <Linha i={1}>Método G.R.O.W.</Linha>
+            </h2>
+            <p className="pp-apoio" data-revela="" style={ordem(2)}>
+              Toda estratégia da {nomeAgencia} passa pelas mesmas quatro
+              etapas. É o que faz o resultado ser repetível, e não sorte.
+            </p>
+            <ol className="pp-grow">
+              {[
+                ["G", "Goals", "Metas", "Metas reais de faturamento e autoridade. Nada de número de vaidade."],
+                ["R", "Results", "Resultados", "Medimos o que paga as contas: leads, vendas e mercado conquistado. Curtida não paga boleto."],
+                ["O", "Optimization", "Otimização", "Todo mês a estratégia é revisada para escalar o que funciona e cortar o que não funciona."],
+                ["W", "Winner Mind", "Mente campeã", "Lado a lado com você: constância, estratégia e visão de futuro."],
+              ].map(([letra, en, pt, txt], i) => (
+                <li
+                  key={letra}
+                  data-revela=""
+                  style={{ ...ordem(3 + i), "--k": i } as CSSProperties}
+                >
+                  <span className="pp-grow-letra">{letra}</span>
+                  <span>
+                    <b>
+                      {en} <small>({pt})</small>
+                    </b>
+                    <span>{txt}</span>
+                  </span>
                 </li>
               ))}
             </ol>
-          </Slide>
+          </div>
+        </Tela>
+
+        {/* ── Diagnóstico, quando a proposta tiver ────────────────── */}
+        {n.diagnostico.length > 0 ? (
+          <Tela tom="claro" rotulo="Diagnóstico" className="pp-t-diag">
+            <div className="pp-conteudo pp-meio">
+              <p className="pp-sobretitulo pp-escuro" data-revela="" style={ordem(0)}>
+                Diagnóstico · {cliente}
+              </p>
+              <h2 className="pp-titulo-tela">
+                <Linha i={1}>O que encontramos</Linha>
+                <Linha i={2}>no seu negócio.</Linha>
+              </h2>
+              <ol className="pp-diag">
+                {n.diagnostico.map((d, i) => (
+                  <li key={d} data-revela="" style={ordem(3 + i)}>
+                    <span>{String(i + 1).padStart(2, "0")}</span>
+                    <p>{d}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </Tela>
         ) : null}
 
-        {/* ── Do ponto A ao ponto B ───────────────────────────────── */}
-        {/* A copy é a da proposta que a agência já manda: "pegamos do
-            ponto A e levamos para um ponto B". Vale duas telas e não uma
-            porque são dois movimentos — de onde vem o clique, e para onde
-            ele vai. Numa tela só, o trilho fica com dezoito itens e o
-            cliente lê nenhum. */}
-        <Slide
-          rotulo="Ponto A"
-          titulo={eco("De onde vêm seus clientes")}
-          apoio="Cada canal tem um jeito próprio de alcançar quem ainda não te conhece. A estrutura muda conforme a consciência de compra, não o criativo."
-          fundo={FOTO("meta")}
-          veu="esquerda"
-          numeral="A"
-        >
-          <div className="pp-canais">
-            {PONTO_A.map((c, i) => (
-              <Bloco key={c.canal} indice={3 + i} className="pp-canal">
-                <h3 className="pp-canal-nome">{c.canal}</h3>
-                <p className="pp-canal-texto">{c.texto}</p>
-              </Bloco>
-            ))}
+        {/* ── 8. Ponto A ──────────────────────────────────────────── */}
+        <Tela rotulo="Ponto A" className="pp-t-ponto">
+          <span className="pp-letra-fundo" aria-hidden>
+            A
+          </span>
+          <div className="pp-conteudo pp-meio">
+            <h2 className="pp-titulo-tela">
+              <Linha i={0}>Pegamos seus futuros clientes</Linha>
+              <Linha i={1}>
+                no <span className="pp-azul">ponto A.</span>
+              </Linha>
+            </h2>
+            <ul className="pp-canais">
+              <li data-revela="" style={ordem(2)}>
+                <span className="pp-canal-icone" style={{ "--k": 0 } as CSSProperties}>
+                  <IconeFacebook />
+                </span>
+                <span>
+                  <b>Facebook</b>
+                  Campanhas pensadas para cada nível de consciência de compra.
+                  Despertamos o desejo em quem ainda nem sabe que precisa de você.
+                </span>
+              </li>
+              <li data-revela="" style={ordem(3)}>
+                <span className="pp-canal-icone" style={{ "--k": 1 } as CSSProperties}>
+                  <IconeInstagram />
+                </span>
+                <span>
+                  <b>Instagram</b>
+                  Feed, Stories e Reels, com criativos próprios para cada
+                  posicionamento. Os números dizem onde escalar: numa
+                  plataforma ou nas duas.
+                </span>
+              </li>
+              <li data-revela="" style={ordem(4)}>
+                <span className="pp-canal-icone" style={{ "--k": 2 } as CSSProperties}>
+                  <IconeGoogle />
+                </span>
+                <span>
+                  <b>Google Ads</b>
+                  Quem pesquisa já quer comprar. Colocamos sua marca nas
+                  primeiras posições, na hora exata da decisão.
+                </span>
+              </li>
+            </ul>
           </div>
-        </Slide>
-
-        <Slide
-          rotulo="Ponto B"
-          titulo={eco("E para onde eles vão")}
-          apoio="Anúncio bom que termina em lugar nenhum é verba queimada. O destino é parte da campanha."
-          fundo={FOTO("landing")}
-          veu="direita"
-          numeral="B"
-        >
-          <div className="pp-canais" data-dois="">
-            {PONTO_B.map((c, i) => (
-              <Bloco key={c.canal} indice={3 + i} className="pp-canal">
-                <h3 className="pp-canal-nome">{c.canal}</h3>
-                <p className="pp-canal-texto">{c.texto}</p>
-              </Bloco>
-            ))}
+          <div className="pp-rota" aria-hidden>
+            <span className="pp-rota-a">A</span>
+            <span className="pp-rota-linha" />
+            <span className="pp-rota-b">B</span>
           </div>
-        </Slide>
+        </Tela>
 
-        {/* ── Segmentação ─────────────────────────────────────────── */}
-        <Slide
-          rotulo="Segmentação"
-          titulo={eco("Na hora certa, para quem importa")}
-          fundo={FOTO("google")}
-          veu="esquerda"
-        >
-          <div className="pp-mira" data-revela="" style={ordem(3)}>
-            {/* O radar é desenho, não enfeite solto: ele diz em imagem o
-                que a frase diz em palavra — um público que vai sendo
-                varrido até sobrar quem interessa. */}
-            <span aria-hidden className="pp-mira-anel" />
-            <span aria-hidden className="pp-mira-anel" />
-            <span aria-hidden className="pp-mira-anel" />
-            <span aria-hidden className="pp-mira-varre" />
-            <p className="pp-mira-texto">
-              Já pensou seus anúncios aparecerem na hora certa, para as pessoas certas? É o que
-              separa alcance de faturamento: a mesma verba, entregue a quem tem motivo para
-              comprar.
+        {/* ── 9. Ponto B ──────────────────────────────────────────── */}
+        <Tela rotulo="Ponto B" className="pp-t-ponto pp-t-pontob">
+          <span className="pp-letra-fundo" aria-hidden>
+            B
+          </span>
+          <div className="pp-conteudo pp-pontob">
+            <h2 className="pp-titulo-tela">
+              <Linha i={0}>
+                E levamos até o <span className="pp-azul">ponto B:</span>
+              </Linha>
+              <Linha i={1}>a venda.</Linha>
+            </h2>
+            <div className="pp-pontob-grade">
+              <div className="pp-pontob-item" data-revela="" style={ordem(2)}>
+                <ConversaWhats marca={cliente} />
+                <div>
+                  <b>
+                    <IconeWhatsApp /> WhatsApp
+                  </b>
+                  <p>
+                    O lead chega pronto para conversar. Com um atendimento
+                    afiado, a conversa vira venda, e quem não comprou entra
+                    na lista de remarketing.
+                  </p>
+                </div>
+              </div>
+              <div className="pp-pontob-item" data-revela="" style={ordem(3)}>
+                <PaginaVendas />
+                <div>
+                  <b>Página de vendas</b>
+                  <p>
+                    Site ou página de captura com domínio próprio, rápida e
+                    medida. Cada visita vira dado, e cada dado vira
+                    faturamento.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Tela>
+
+        {/* ── 10. Segmentação ─────────────────────────────────────── */}
+        <Tela rotulo="Segmentação" className="pp-t-seg">
+          <div className="pp-conteudo pp-seg">
+            <h2 className="pp-titulo-tela">
+              <Linha i={0}>Segmentação</Linha>
+            </h2>
+            <p className="pp-apoio" data-revela="" style={ordem(1)}>
+              Seu anúncio na hora certa, no lugar certo, para a pessoa certa.
+              Sem desperdiçar verba com quem nunca vai comprar.
+            </p>
+            <div className="pp-seg-grade">
+              <figure data-revela="" style={ordem(2)}>
+                <figcaption>Horário programado</figcaption>
+                <GradeHorario />
+                <p>Anúncios no ar nos horários em que seu público compra.</p>
+              </figure>
+              <figure data-revela="" style={ordem(3)}>
+                <figcaption>Localização exata</figcaption>
+                <MapaRaio />
+                <p>Só quem está no raio que você atende vê o anúncio.</p>
+              </figure>
+              <figure data-revela="" style={ordem(4)}>
+                <figcaption>Interesses do seu nicho</figcaption>
+                <Interesses />
+                <p>Comportamento de compra e interesses do seu cliente ideal.</p>
+              </figure>
+            </div>
+          </div>
+        </Tela>
+
+        {/* ── 11. Conteúdo ────────────────────────────────────────── */}
+        <Tela rotulo="Criação de conteúdo" className="pp-t-conteudo">
+          <div className="pp-conteudo pp-conteudo-topo">
+            <h2 className="pp-titulo-tela">
+              <Linha i={0}>Criação de conteúdo</Linha>
+            </h2>
+            <p className="pp-apoio pp-apoio-largo" data-revela="" style={ordem(1)}>
+              Conteúdo com intenção comercial: posts, reels e stories que
+              constroem autoridade e trazem cliente. Antes de criar, a gente
+              mergulha na sua marca, na sua mensagem e nos seus objetivos.
             </p>
           </div>
-        </Slide>
-
-        {/* ── Escopo em frentes, ou o texto antigo ────────────────── */}
-        {n.frentes.length > 0 ? (
-          <Slide
-            rotulo="Escopo"
-            titulo={eco("O que vamos fazer")}
-            fundo={FOTO("escopo")}
-            veu="total"
-          >
-            <div className="pp-frentes">
-              {n.frentes.map((b, i) => (
-                <Bloco key={b.frente} indice={3 + i}>
-                  <h3 className="pp-sub">{b.frente}</h3>
-                  <ul className="pp-itens">
-                    {b.itens.map((it) => (
-                      <li key={it}>{it}</li>
-                    ))}
-                  </ul>
-                </Bloco>
+          <div className="pp-portfolio" data-revela="" style={ordem(2)}>
+            <Esteira segundos={46}>
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={i} src={FOTO(`post-${i}.webp`)} alt="" loading="lazy" />
               ))}
-            </div>
-          </Slide>
-        ) : escopoAntigo.length > 0 && fichas.length === 0 ? (
-          <Slide
-            rotulo="Escopo"
-            titulo={eco("O que vamos fazer")}
-            fundo={FOTO("escopo")}
-            veu="total"
-          >
-            <Bloco>
-              <ul className="pp-itens" style={{ marginTop: 0 }}>
-                {escopoAntigo.map((i) => (
-                  <li key={i}>{i}</li>
-                ))}
-              </ul>
-            </Bloco>
-          </Slide>
+            </Esteira>
+            <Esteira segundos={52} sentido="direita">
+              {[4, 6, 1, 5, 3, 2].map((i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={i} src={FOTO(`post-${i}.webp`)} alt="" loading="lazy" />
+              ))}
+            </Esteira>
+          </div>
+        </Tela>
+
+        {/* ── 12. Planos ──────────────────────────────────────────── */}
+        {escolhido ? (
+        <Tela rotulo="Planos" className="pp-t-planos">
+          <div className="pp-conteudo pp-planos-topo pp-centro">
+            <h2 className="pp-titulo-tela">
+              <Linha i={0}>Escolha o nível de crescimento</Linha>
+            </h2>
+            <p className="pp-apoio" data-revela="" style={ordem(1)}>
+              Estratégia, conteúdo e tráfego para sua marca sair do improviso e
+              crescer com direção.
+            </p>
+          </div>
+          <div className="pp-planos">
+            {PLANOS.map((pl, i) => (
+              <article
+                key={pl.id}
+                className="pp-plano"
+                data-recomendado={pl.recomendado ? "" : undefined}
+                data-escolhido={pl.id === escolhido.id ? "" : undefined}
+                data-revela=""
+                style={ordem(2 + i)}
+              >
+                {pl.recomendado ? (
+                  <span className="pp-plano-selo">★ Mais recomendado</span>
+                ) : null}
+                <h3>Plano {pl.nome}</h3>
+                <p className="pp-plano-formula">{pl.tagline}</p>
+                <ul>
+                  {pl.entregas.map((e) => (
+                    <li key={e}>{e}</li>
+                  ))}
+                </ul>
+                {pl.id === escolhido.id ? (
+                  <p className="pp-plano-seu">✓ O plano desta proposta</p>
+                ) : null}
+                <div className="pp-plano-preco">
+                  <span>Investimento mensal</span>
+                  <b>{emReais(pl.preco)}</b>
+                </div>
+              </article>
+            ))}
+          </div>
+        </Tela>
         ) : null}
 
-        {/* ── Escolha o nível ─────────────────────────────────────── */}
-        {escolhido ? (
-          <Slide
-            rotulo="Escolha o nível de crescimento"
-            titulo={eco(escolhido.nome)}
-            apoio={escolhido.tagline}
-            fundo={FOTO("estrategia")}
-            veu="esquerda"
-          >
-            <div className="pp-niveis">
-              {PLANOS.map((p, i) => (
-                <Bloco
-                  key={p.id}
-                  indice={3 + i}
-                  destaque={p.id === escolhido.id}
-                  className="pp-nivel"
-                >
-                  {/* O selo pulsa de leve só no plano desta proposta.
-                      Três preços sem dizer qual serve convidam o cliente
-                      a comprar para baixo. */}
-                  {p.id === escolhido.id ? (
-                    <span className="pp-nivel-selo">Seu plano</span>
-                  ) : p.recomendado ? (
-                    <span className="pp-nivel-selo" data-fraco="">
-                      Mais recomendado
-                    </span>
-                  ) : null}
-                  <h3 className="pp-nivel-nome">{p.nome}</h3>
-                  <p className="pp-nivel-tag">{p.tagline}</p>
-                </Bloco>
-              ))}
+        {/* ── 13. Plano selecionado ───────────────────────────────── */}
+        <Tela rotulo="Plano selecionado" className="pp-t-escolhido">
+          <div className="pp-escolhido-foto">
+            <Foto src={FOTO("carro.webp")} posicao="center 70%" prof={-2} />
+            <div className="pp-escolhido-titulo">
+              <Linha i={0}>Entrega da</Linha>
+              <Linha i={1}>assessoria</Linha>
+              <Linha i={2} className="pp-completa">
+                completa
+              </Linha>
             </div>
-          </Slide>
-        ) : null}
-
-        {/* ── As entregas do plano ────────────────────────────────── */}
-        {escolhido ? (
-          <Slide
-            rotulo="Entregas da assessoria"
-            titulo={eco("O que entra todo mês")}
-            apoio={escolhido.resumo}
-            visual={
-              <Janela
-                src={FOTO("social")}
-                alt="Produção de conteúdo da MR Grow"
-                legenda={escolhido.nome}
-              />
-            }
-          >
-            <ul className="pp-itens pp-itens-duas" style={{ marginTop: 0 }}>
-              {escolhido.entregas.map((e) => (
-                <li key={e}>{e}</li>
+          </div>
+          <div className="pp-escolhido-texto">
+            <p className="pp-sobretitulo pp-escuro" data-revela="" style={ordem(0)}>
+              {escolhido ? "Plano selecionado" : "Sua assessoria"}
+            </p>
+            <h2 className="pp-escolhido-nome" data-revela="" style={ordem(1)}>
+              {escolhido?.nome ?? cliente}
+            </h2>
+            <ul className="pp-escolhido-lista">
+              {itensDaConta.map((e, i) => (
+                <li key={e} data-revela="" style={ordem(2 + i * 0.4)}>
+                  {e}
+                </li>
               ))}
             </ul>
-          </Slide>
-        ) : null}
 
-        {/* ── Vídeos e diferenciais ───────────────────────────────── */}
-        {escolhido ? (
-          <Slide
-            rotulo="Como funciona"
-            titulo={eco("Quem grava, quem edita")}
-            fundo={FOTO("video")}
-            veu="direita"
-          >
-            <div className="pp-duas">
-              <Bloco destaque indice={3}>
-                <p className="pp-mono" style={{ margin: 0 }}>
-                  Os vídeos
+            <div className="pp-investimento" data-revela="" style={ordem(7)}>
+              <p className="pp-investimento-rotulo">Investimento</p>
+              {desconto && p.validade && !vencida ? (
+                <p className="pp-oferta">
+                  {pct}% off no {nomeOferta} até {dataLonga(p.validade)}.
                 </p>
-                <p className="pp-canal-texto" style={{ marginTop: "0.75rem" }}>
-                  {escolhido.videos}
-                </p>
-              </Bloco>
-              {escolhido.diferenciais.length > 0 ? (
-                <Bloco indice={4}>
-                  <p className="pp-mono" style={{ margin: 0 }}>
-                    {escolhido.recomendado
-                      ? "Por que este é o mais recomendado"
-                      : "O que este nível tem a mais"}
-                  </p>
-                  <ul className="pp-itens">
-                    {escolhido.diferenciais.map((x) => (
-                      <li key={x}>{x}</li>
-                    ))}
-                  </ul>
-                </Bloco>
               ) : null}
-            </div>
-          </Slide>
-        ) : null}
-
-        {/* ── Um slide por serviço ────────────────────────────────── */}
-        {/* Array, e não fragmento: o Deck fatia pelos filhos diretos, e um
-            fragmento com seis slides dentro vira UMA tela de três mil
-            pixels. `Children.toArray` achata array aninhado. */}
-        {(escolhido ? [] : fichas).map(({ ficha: f, escolhido: item }, i) => (
-          <Slide
-            key={f.id}
-            numeral={String(i + 1).padStart(2, "0")}
-            rotulo={
-              f.papel === "complemento"
-                ? "Complemento"
-                : f.cobranca === "projeto"
-                  ? "O projeto"
-                  : "O serviço"
-            }
-            titulo={eco(f.nome)}
-            visual={
-              <Janela
-                src={fotoDoServico(f.id)}
-                alt={f.nome}
-                legenda={`${String(i + 1).padStart(2, "0")} / ${String(fichas.length).padStart(2, "0")}`}
-                selo={
-                  <>
-                    <span className="pp-selo-pulso" />
-                    <span>
-                      {f.cobranca === "mensal"
-                        ? "Recorrente, todo mês"
-                        : "Projeto, entrega única"}
-                    </span>
-                  </>
-                }
-              />
-            }
-          >
-            <div className="pp-servico">
-              <div data-revela="" style={ordem(3)}>
-                <p className="pp-mono" style={{ margin: 0 }}>
-                  {f.paraQuem}
-                </p>
-                <p className="pp-promessa">{f.promessa}</p>
-
-                {detalhaPreco && item.fee > 0 ? (
-                  <p className="pp-num pp-preco">
-                    {emReais(item.fee)}
-                    <span>
-                      {f.cobranca === "mensal" ? "por mês" : "valor do projeto"}
-                    </span>
-                  </p>
-                ) : null}
-              </div>
-
-              <div className="pp-entra-sai">
-                <Bloco indice={4}>
-                  <p className="pp-mono" style={{ margin: 0 }}>
-                    O que entra
-                  </p>
-                  <ul className="pp-itens">
-                    {f.entregas.map((e) => (
-                      <li key={e}>{e}</li>
-                    ))}
-                  </ul>
-                </Bloco>
-
-                {/* O que NÃO entra tem tela igual à do que entra, e não uma
-                    nota de rodapé. É a parte que evita a conversa
-                    desconfortável do segundo mês. */}
-                <Bloco indice={5}>
-                  <p className="pp-mono" style={{ margin: 0 }}>
-                    O que não entra
-                  </p>
-                  <ul className="pp-itens" data-fora="">
-                    {f.naoInclui.map((e) => (
-                      <li key={e}>{e}</li>
-                    ))}
-                  </ul>
-                </Bloco>
-              </div>
-            </div>
-          </Slide>
-        ))}
-
-        {/* ── A conta ─────────────────────────────────────────────── */}
-        {/* Depois dos serviços e antes das condições: a pessoa acabou de
-            ver o que recebe, e a pergunta imediata é "quanto sai por
-            mês, tudo somado?". Deixar ela somar sozinha é deixar que
-            erre — e o erro é sempre para mais. */}
-        <Slide
-          rotulo="Investimento"
-          titulo={eco("Quanto custa")}
-          fundo={FOTO("investimento")}
-          veu="esquerda"
-          apoio={
-            p.valor_setup > 0
-              ? "A implantação é cobrada uma vez, no começo. O mensal recomeça a cada ciclo."
-              : principais > 0
-                ? `${principais} ${principais === 1 ? "frente" : "frentes"} de trabalho numa conta só, fechada.`
-                : undefined
-          }
-        >
-          <div className="pp-conta">
-            <Bloco destaque indice={3}>
-              <p className="pp-mono" style={{ margin: 0 }}>
-                Mensal
-              </p>
-              {/* A oferta, quando existe: o preço de tabela riscado em
-                  cima do que o cliente vai pagar. Só aparece se alguém
-                  cadastrou um valor cheio maior que o mensal — a validação
-                  da action não deixa "desconto" para cima passar. */}
-              {p.valor_cheio > p.valor_mensal ? (
+              {desconto ? (
                 <p className="pp-de">
-                  de <s>{emReais(p.valor_cheio)}</s>
-                  <span className="pp-off">
-                    {Math.round((1 - p.valor_mensal / p.valor_cheio) * 100)}% OFF
-                  </span>
+                  De <s>{emReais(p.valor_cheio)}</s> / mês
                 </p>
               ) : null}
-              <p className="pp-num pp-valor">
-                <Contador valor={p.valor_mensal} />
+              <p className="pp-por">
+                {desconto ? <span>por</span> : null}
+                <Contador valor={mensal} moeda duracao={1400} />
+                <small>/ mês</small>
               </p>
-              <p className="pp-nota">
-                Contrato de {p.meses_contrato} meses. Depois disso, renovação
-                mensal.
-                {p.validade && p.valor_cheio > p.valor_mensal
-                  ? ` Esta condição vale até ${dataBR(p.validade)}.`
-                  : ""}
-              </p>
-            </Bloco>
-
-            {p.valor_setup > 0 ? (
-              <Bloco indice={4}>
-                <p className="pp-mono" style={{ margin: 0 }}>
-                  Implantação, uma vez
-                </p>
-                <p className="pp-num pp-valor">
-                  <Contador valor={p.valor_setup} />
-                </p>
-                <p className="pp-nota">
-                  Auditoria, rastreamento e estrutura inicial, antes da primeira
-                  campanha.
-                </p>
-              </Bloco>
-            ) : null}
-
-            <Bloco indice={5}>
-              <p className="pp-mono" style={{ margin: 0 }}>
-                Total do contrato
-              </p>
-              <p className="pp-num pp-valor">
-                <Contador valor={totalContrato} duracao={2000} />
-              </p>
-              <p className="pp-nota">
-                {p.meses_contrato} × {emReais(p.valor_mensal)}
+              <p className="pp-condicao">
+                Contrato de {p.meses_contrato} meses
                 {p.valor_setup > 0
-                  ? ` + ${emReais(p.valor_setup)} de implantação`
+                  ? ` + implantação de ${emReais(p.valor_setup)}, cobrada uma vez`
                   : ""}
-                .
+                . A verba de anúncios é paga direto às plataformas.
               </p>
-            </Bloco>
+              {p.validade && !vencida ? (
+                <div className="pp-prazo">
+                  <span>A oferta acaba em</span>
+                  <Regressiva ate={p.validade} />
+                </div>
+              ) : null}
+            </div>
           </div>
+        </Tela>
 
-          {/* A verba de mídia fora da soma, e dito antes de perguntarem.
-              É o mal-entendido mais caro que uma proposta de tráfego
-              produz: o cliente soma a gestão com o que vai gastar em
-              anúncio e acha que está tudo ali. */}
-          {fichas.some(
-            (f) => f.ficha.id === "meta" || f.ficha.id === "google",
-          ) ? (
-            <p className="pp-nota pp-nota-midia" data-revela="" style={ordem(6)}>
-              A verba de mídia não está aqui. Ela é paga por você direto ao Meta
-              e ao Google, no valor que você definir — a {nomeAgencia} não
-              intermedeia pagamento de plataforma, e este documento cobra só a
-              gestão.
-            </p>
-          ) : null}
-        </Slide>
-
-        {/* ── Condições ───────────────────────────────────────────── */}
-        <Slide
-          rotulo="Condições"
-          titulo={eco("Como funciona")}
-          fundo={FOTO("condicoes")}
-          veu="total"
-        >
-          <ul className="pp-lista">
-            {/* As negociadas primeiro, e destacadas: é o que a pessoa
-                abriu esta tela para conferir. As de sempre ela já leu em
-                qualquer proposta. */}
-            {[
-              ...n.condicoesExtras.map((c) => ({ c, destaque: true })),
-              ...(p.condicoes ?? "")
-                .split("\n")
-                .map((l) => l.trim())
-                .filter(Boolean)
-                .map((c) => ({ c, destaque: false })),
-              ...condicoesDeSempre.map((c) => ({ c, destaque: false })),
-            ].map(({ c, destaque }, i) => (
-              <li key={c}>
-                <Bloco destaque={destaque} className="pp-linha" indice={3 + i}>
-                  <span aria-hidden className="pp-seta">
-                    →
-                  </span>
-                  <span className="pp-texto-linha">{c}</span>
-                </Bloco>
-              </li>
-            ))}
-          </ul>
-        </Slide>
-
-        {/* ── Próximos passos ─────────────────────────────────────── */}
+        {/* ── Próximos passos, quando a proposta tiver ────────────── */}
         {n.proximosPassos.length > 0 ? (
-          <Slide
-            rotulo="A partir do sim"
-            titulo={eco("Próximos passos")}
-            fundo={FOTO("passos")}
-            veu="esquerda"
-          >
-            {/* Linha do tempo: o fio azul se desenha de cima para baixo
-                quando a tela entra, ligando um passo ao outro. */}
-            <ol className="pp-passos">
-              {n.proximosPassos.map((s, i) => (
-                <li key={s} data-revela="" style={ordem(3 + i)}>
-                  <span className="pp-passo-marca">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span className="pp-texto-linha">{s}</span>
-                </li>
-              ))}
-            </ol>
-          </Slide>
+          <Tela rotulo="Próximos passos" className="pp-t-passos">
+            <Foto src={FOTO("cidade.webp")} posicao="center" prof={-2} />
+            <div className="pp-veu pp-veu-total" />
+            <div className="pp-conteudo pp-meio">
+              <p className="pp-sobretitulo" data-revela="" style={ordem(0)}>
+                A partir do sim
+              </p>
+              <h2 className="pp-titulo-tela">
+                <Linha i={1}>Próximos passos</Linha>
+              </h2>
+              <ol className="pp-passos">
+                {n.proximosPassos.map((s, i) => (
+                  <li key={s} data-revela="" style={ordem(2 + i)}>
+                    <span>{String(i + 1).padStart(2, "0")}</span>
+                    <p>{s}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </Tela>
         ) : null}
 
-        {/* ── Aceite ──────────────────────────────────────────────── */}
-        <Slide centrado fundo={FOTO("aceite")} veu="centro">
-          <div className="pp-aceite">
-            <p className="pp-rotulo" data-revela="" style={ordem(0)}>
-              Aceite
-            </p>
-
-            <h2 className="pp-mostro">
-              <span className="pp-mascara">
-                <span>{eco("Pronto para começar")}</span>
-              </span>
+        {/* ── 14. Compromisso (tela branca) ───────────────────────── */}
+        <Tela tom="claro" rotulo="Nosso compromisso" className="pp-t-fim">
+          <div className="pp-conteudo pp-meio pp-centro">
+            <h2 className="pp-compromisso">
+              <Linha i={0}>Nosso compromisso</Linha>
             </h2>
-
-            <p className="pp-apoio" data-revela="" style={ordem(2)}>
-              Responda por aqui que a {nomeAgencia} começa o kick off e o
-              primeiro calendário na mesma semana.
+            <p className="pp-frase pp-frase-media" data-revela="" style={ordem(2)}>
+              Sua marca pode ser só mais uma.
+              <br />
+              <small>Ou pode ser a marca que ninguém ignora.</small>
             </p>
-
-            <div data-revela="" style={{ ...ordem(3), marginTop: "2.25rem" }}>
-              <a
-                href={linkZap}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="pp-cta"
-              >
-                <span>Aceitar e falar no WhatsApp</span>
-                <span aria-hidden className="pp-cta-seta">
-                  →
-                </span>
-              </a>
+            <p className="pp-proximo">
+              <Linha i={3}>O próximo movimento é seu</Linha>
+            </p>
+            <div className="pp-assinar" data-revela="" style={ordem(5)}>
+              <Assinatura />
+              <span>agora essa transformação.</span>
             </div>
-
-            <p className="pp-rodape" data-revela="" style={ordem(4)}>
-              Documento confidencial, preparado para{" "}
-              {p.cliente_nome ?? p.titulo}.
-              {p.validade ? ` Os valores valem até ${dataBR(p.validade)}.` : ""}
-              <br />© {new Date().getFullYear()} {nomeAgencia}
+            <a
+              href={linkZap}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pp-cta"
+              data-revela=""
+              style={ordem(6)}
+            >
+              <span>Quero assinar pelo WhatsApp</span>
+              <span aria-hidden className="pp-cta-seta">
+                →
+              </span>
+            </a>
+            <p className="pp-rodape" data-revela="" style={ordem(7)}>
+              Documento confidencial, preparado para {cliente}.
+              {p.validade ? ` Valores válidos até ${dataCurta(p.validade)}.` : ""}{" "}
+              © {new Date().getFullYear()} {nomeAgencia}
               {marca?.documento ? ` · CNPJ ${marca.documento}` : ""}.
             </p>
           </div>
-        </Slide>
+        </Tela>
       </Deck>
     </div>
   );

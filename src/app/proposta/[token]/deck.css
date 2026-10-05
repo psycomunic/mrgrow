@@ -1,38 +1,35 @@
 /* ═══════════════════════════════════════════════════════════════════
-   A proposta comercial da MR Grow.
+   A proposta comercial da MR Grow, em telas que passam para o lado.
 
-   Folha própria, fora do Tailwind do painel, por um motivo prático: a
-   proposta é o único documento que o cliente final abre, e ela precisa
-   ficar igual daqui a um ano mesmo que o painel mude de tema. Aqui os
-   valores são literais.
+   A linguagem é a do deck impresso da agência: grotesco condensado em
+   caixa alta, preto com textura de papel e telas brancas só de frase,
+   azul como única cor. Folha própria, fora do Tailwind do painel: a
+   proposta é o documento que o cliente final abre, e ela precisa ficar
+   igual mesmo que o painel mude de tema.
 
-   A estrutura é de apresentação que passa para o lado. A identidade é a
-   da MR Grow: azul #1668f5 sobre quase preto, Bricolage no título,
-   Newsreader na prosa e mono nos números.
+   O movimento vem de quatro variáveis escritas pelo Deck a cada quadro:
+   --d e --a (distância da tela ao centro), --mx/--my (mouse). Só
+   `transform`, `opacity`, `clip-path` e `filter`, que o navegador compõe
+   sem recalcular layout.
    ═══════════════════════════════════════════════════════════════════ */
 
 .pp {
-  --tinta: #04060b;
-  --tinta-2: #0b0f17;
-  --azul: #1668f5;
-  --azul-claro: #5798ff;
-  --azul-forte: #0b4fd1;
+  --preto: #050608;
+  --carvao: #0b0e14;
   --branco: #ffffff;
-  --neve: #c7cfdd;
-  --cinza: #8b95a8;
-  --fio: rgba(255, 255, 255, 0.1);
-  --fio-forte: rgba(87, 152, 255, 0.4);
-
-  /* Uma escala só, fluida, para os três tamanhos de texto que o
-     documento tem. `clamp` porque o mesmo deck é lido num telefone de
-     360px e num monitor de 27 polegadas, e ponto fixo perde nos dois. */
-  --mostro: clamp(2.6rem, 8.5vw, 5.2rem);
-  --titulo: clamp(1.85rem, 5vw, 3.1rem);
-  --guia: clamp(1rem, 2.5vw, 1.15rem);
+  --papel: #f6f6f3;
+  --azul: #1f5cff;
+  --azul-claro: #6b97ff;
+  --azul-real: #2433c9;
+  --cinza: #9aa3b2;
+  --cinza-escuro: #5b6270;
+  --fio: rgba(255, 255, 255, 0.12);
+  --sai: cubic-bezier(0.16, 1, 0.3, 1);
+  --margem: clamp(1.25rem, 5vw, 5.5rem);
 
   color: var(--branco);
-  background: var(--tinta);
-  font-family: var(--fonte-prosa), Georgia, serif;
+  background: var(--preto);
+  font-family: var(--f-texto), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -42,82 +39,36 @@
   box-sizing: border-box;
 }
 
-/* ── Palco ───────────────────────────────────────────────────────── */
+.pp p,
+.pp h1,
+.pp h2,
+.pp h3,
+.pp ol,
+.pp ul,
+.pp figure {
+  margin: 0;
+}
+
+.pp ol,
+.pp ul {
+  padding: 0;
+  list-style: none;
+}
+
+/* ── Palco e trilho ──────────────────────────────────────────────── */
 
 .pp-palco {
   position: relative;
-  height: 100dvh; /* e não 100vh: no celular, `vh` ignora a barra de
-                     endereço e o rodapé de cada slide fica atrás dela */
+  height: 100dvh;
   width: 100%;
   overflow: hidden;
 }
 
-/* O cenário NÃO se move com os slides. Se cada slide levasse o próprio
-   brilho, ele passaria correndo junto e viraria efeito de carrossel. */
-.pp-cenario {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.pp-grade {
-  position: absolute;
-  inset: 0;
-  opacity: 0.5;
-  background-image:
-    linear-gradient(var(--fio) 1px, transparent 1px),
-    linear-gradient(90deg, var(--fio) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(
-    ellipse 80% 60% at 50% 40%,
-    #000 30%,
-    transparent 75%
-  );
-}
-
-.pp-brilho {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(90px);
-}
-
-.pp-brilho-azul {
-  right: -28%;
-  top: -32%;
-  height: 720px;
-  width: 720px;
-  background: radial-gradient(circle, rgba(22, 104, 245, 0.5), transparent 68%);
-}
-
-.pp-brilho-frio {
-  left: -26%;
-  bottom: -24%;
-  height: 640px;
-  width: 640px;
-  background: radial-gradient(
-    circle,
-    rgba(87, 152, 255, 0.24),
-    transparent 70%
-  );
-}
-
-/* O grão é o que separa "preto chapado" de superfície. */
-.pp-grao {
-  position: absolute;
-  inset: 0;
-  z-index: 30;
-  pointer-events: none;
-  opacity: 0.22;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23r)' opacity='.5'/%3E%3C/svg%3E");
-}
-
-/* ── Trilho ──────────────────────────────────────────────────────── */
-
+/* Trilho e controles sem z-index de propósito: com ele, cada um vira um
+   contexto de empilhamento e o `difference` dos pontos se misturaria só
+   com o vazio do próprio contêiner, em vez de com a tela embaixo. */
 .pp-trilho {
   position: relative;
-  z-index: 10;
   display: flex;
   height: 100%;
   overflow-x: auto;
@@ -135,796 +86,169 @@
 }
 
 .pp-trilho > section {
-  position: relative; /* âncora do fundo de tela cheia do slide */
+  position: relative;
   height: 100%;
   width: 100%;
   flex: none;
   scroll-snap-align: center;
   scroll-snap-stop: always;
-  overflow-y: auto; /* cada slide rola sozinho: slide que não cabe num
-                       telefone pequeno é regra, não exceção */
-  overflow-x: hidden;
-  scrollbar-width: none;
+  overflow: hidden;
 }
 
-.pp-quadro {
-  margin: 0 auto;
+/* No telefone, tela que não cabe rola por dentro. */
+@media (max-width: 899px) {
+  .pp-trilho > section {
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+  }
+}
+
+/* ── A tela ──────────────────────────────────────────────────────── */
+
+.pp-tela {
+  position: relative;
   display: flex;
   min-height: 100%;
   width: 100%;
-  max-width: 1200px;
   flex-direction: column;
-  padding: 3.5rem 1.5rem 7rem;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: var(--preto);
+  /* Papel preto: vinheta e riscos finos, como o fundo do deck impresso. */
+  background-image:
+    radial-gradient(ellipse 120% 90% at 50% 40%, transparent 40%, rgba(0, 0, 0, 0.75)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400'%3E%3Cg stroke='%23ffffff' stroke-opacity='.07' fill='none' stroke-linecap='round'%3E%3Cpath d='M40 60c30 8 60 2 90 14'/%3E%3Cpath d='M420 300c18-10 40-12 70-6'/%3E%3Cpath d='M300 40l12 34'/%3E%3Cpath d='M520 120c-6 20-2 36 8 52'/%3E%3Cpath d='M90 330c40-6 70 4 96 0'/%3E%3Cpath d='M230 210c10 4 16 12 18 24'/%3E%3C/g%3E%3Cg fill='%23ffffff' fill-opacity='.09'%3E%3Ccircle cx='120' cy='140' r='1.2'/%3E%3Ccircle cx='470' cy='60' r='1'/%3E%3Ccircle cx='350' cy='260' r='1.6'/%3E%3Ccircle cx='560' cy='350' r='1'/%3E%3Ccircle cx='60' cy='250' r='1.4'/%3E%3Ccircle cx='260' cy='120' r='.8'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: cover, 600px 400px;
 }
 
-@media (min-width: 640px) {
-  .pp-quadro {
-    padding: 5rem 2.5rem 8rem;
-  }
+.pp-tela[data-tom="claro"] {
+  color: #050505;
+  background-color: var(--branco);
+  background-image: none;
 }
 
-/* ── Gabarito do slide ───────────────────────────────────────────── */
-
-.pp-slide {
-  display: flex;
-  /* `flex: 1`, e nao `min-height: 100%`: a porcentagem se resolveria
-     contra um pai que so tem `min-height`, e ali ela vira `auto` — foi
-     por isso que a capa "centrada" nascia colada no topo. */
-  flex: 1;
-  width: 100%;
-  flex-direction: column;
-  gap: 1.75rem;
-  justify-content: flex-start;
-}
-
-.pp-slide[data-centrado] {
-  justify-content: center;
-}
-
-@media (min-width: 640px) {
-  .pp-slide {
-    gap: 2.25rem;
-  }
-}
-
-.pp-cabeca {
-  flex: none;
-}
-
-/* O corpo leva `min-height: 0` porque, sem isso, um filho com rolagem
-   própria estoura a grade em vez de rolar. É o padrão do flex, e é o
-   erro que faz o fim de uma lista longa não existir no telefone. */
-.pp-corpo {
-  min-height: 0;
-  flex: 1;
-}
-
-.pp-rotulo {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 0;
-  font-family: var(--fonte-dado), ui-monospace, monospace;
-  font-size: clamp(0.72rem, 2.4vw, 0.8rem);
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--azul-claro);
-}
-
-.pp-rotulo::before {
-  content: "";
-  display: block;
-  height: 1px;
-  width: 1.75rem;
-  flex: none;
-  background: var(--azul);
-}
-
-@media (min-width: 640px) {
-  .pp-rotulo::before {
-    width: 2.5rem;
-  }
-}
-
-.pp-titulo {
-  margin: 1rem 0 0;
-  max-width: 17ch;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: var(--titulo);
-  font-weight: 800;
-  line-height: 1.04;
-  letter-spacing: -0.035em;
-}
-
-.pp-mostro {
-  margin: 1.5rem 0 0;
-  max-width: 14ch;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: var(--mostro);
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.045em;
-}
-
-/* A última palavra do título em azul. É a batida do documento: repetida
-   em toda tela, ela é o que faz doze slides parecerem um documento só. */
-.pp-eco {
-  color: var(--azul-claro);
-}
-
-.pp-apoio {
-  margin: 1rem 0 0;
-  max-width: 54ch;
-  font-size: var(--guia);
-  line-height: 1.65;
-  color: var(--neve);
-}
-
-/* ── Blocos ──────────────────────────────────────────────────────── */
-
-.pp-bloco {
+/* O conteúdo anda à frente da tela quando ela passa, e esmaece ao sair. */
+.pp-conteudo {
   position: relative;
-  overflow: hidden;
-  border-radius: 1rem;
-  border: 1px solid var(--fio);
-  background: linear-gradient(
-    160deg,
-    rgba(255, 255, 255, 0.055),
-    rgba(255, 255, 255, 0.015)
-  );
-  padding: 1rem;
+  z-index: 2;
+  width: min(1240px, calc(100% - 2 * var(--margem)));
+  margin-inline: auto;
+  padding: 5.5rem 0 7.5rem;
 }
 
-@media (min-width: 640px) {
-  .pp-bloco {
-    padding: 1.5rem;
-  }
+.pp-palco[data-mov] .pp-conteudo {
+  will-change: transform, opacity;
+  transform: translate3d(calc(var(--d, 0) * 12vw), 0, 0);
+  opacity: calc(1 - var(--a, 0) * 0.8);
 }
 
-/* O fio de luz na aresta de cima: é o detalhe que faz o cartão parecer
-   iluminado por cima em vez de recortado. */
-.pp-bloco::before {
-  content: "";
-  position: absolute;
-  inset-inline: 1.5rem;
-  top: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.35),
-    transparent
-  );
-}
-
-.pp-bloco[data-destaque] {
-  border-color: var(--fio-forte);
-  box-shadow: 0 24px 60px -30px rgba(22, 104, 245, 0.65);
-}
-
-/* ── Tipografia de apoio ─────────────────────────────────────────── */
-
-.pp-mono {
-  font-family: var(--fonte-dado), ui-monospace, monospace;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--cinza);
-}
-
-.pp-num {
-  font-variant-numeric: tabular-nums;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-}
-
-.pp-marcador {
+.pp-meio {
   display: flex;
-  height: 2.25rem;
-  width: 2.25rem;
-  flex: none;
-  align-items: center;
+  flex: 1;
+  flex-direction: column;
   justify-content: center;
-  border-radius: 9999px;
-  background: rgba(22, 104, 245, 0.16);
-  font-family: var(--fonte-dado), ui-monospace, monospace;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--azul-claro);
 }
 
-/* ── Arranjos que se repetem ─────────────────────────────────────── */
-
-/* Bloco com marcador à esquerda e texto à direita. */
-.pp-linha {
+.pp-baixo {
   display: flex;
-  gap: 1rem;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
-@media (min-width: 640px) {
-  .pp-linha {
-    gap: 1.25rem;
-  }
+.pp-centro {
+  align-items: center;
+  text-align: center;
 }
 
-/* Lista de entregas. O marcador é um traço azul, e não bolinha: bolinha
-   em lista dentro de cartão vira ruído no telefone. */
-.pp-itens {
-  margin: 0.875rem 0 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 0.625rem;
-  font-size: 0.92rem;
-  line-height: 1.6;
-  color: var(--neve);
-}
+/* ── Camadas de profundidade ─────────────────────────────────────── */
 
-.pp-itens > li {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.pp-itens > li::before {
-  content: "—";
-  flex: none;
-  color: var(--azul-claro);
-}
-
-/* O que não entra usa o mesmo desenho, em cinza: mesma importância
-   visual, tom diferente. */
-.pp-itens[data-fora] {
-  color: var(--cinza);
-}
-
-.pp-itens[data-fora] > li::before {
-  content: "×";
-  color: var(--cinza);
-}
-
-/* Serviço: promessa à esquerda, entregas à direita. Numa coluna só no
-   telefone, porque duas colunas de 160px não são duas colunas. */
-.pp-duas {
-  display: grid;
-  gap: 1.25rem;
-}
-
-@media (min-width: 1024px) {
-  .pp-duas {
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: 3rem;
-  }
-}
-
-/* A conta. `auto-fit` porque a proposta pode ter dois cartões ou três,
-   conforme exista implantação. */
-.pp-conta {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-}
-
-/* ── Controles ───────────────────────────────────────────────────── */
-
-.pp-topo,
-.pp-controles {
+.pp-camada {
   position: absolute;
-  inset-inline: 0;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  pointer-events: none;
-}
-
-.pp-topo {
-  top: 0;
-  padding: 1.25rem 1.5rem 0;
-}
-
-.pp-controles {
-  bottom: 0;
-  padding: 3.5rem 1.25rem max(1.1rem, env(safe-area-inset-bottom));
-  background: linear-gradient(to top, var(--tinta) 22%, transparent);
-}
-
-@media (min-width: 640px) {
-  .pp-topo {
-    padding: 1.25rem 2.5rem 0;
-  }
-  .pp-controles {
-    padding-inline: 2rem;
-  }
-}
-
-.pp-progresso {
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  z-index: 20;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.pp-progresso > span {
-  display: block;
-  height: 100%;
-  background: var(--azul);
-  transition: width 0.3s ease;
-}
-
-.pp-botao {
-  pointer-events: auto;
-  display: flex;
-  height: 3rem;
-  width: 3rem;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  border: 1px solid var(--fio);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--branco);
-  font-size: 1.1rem;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-  transition: background-color 0.2s;
-}
-
-.pp-botao:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.pp-botao:disabled {
-  opacity: 0.2;
-  cursor: default;
-}
-
-.pp-botao[data-principal] {
-  border-color: transparent;
-  background: var(--azul);
-  box-shadow: 0 10px 30px -10px rgba(22, 104, 245, 0.9);
-}
-
-.pp-botao[data-principal]:hover:not(:disabled) {
-  background: var(--azul-forte);
-}
-
-.pp-botao[data-principal]:disabled {
-  background: rgba(255, 255, 255, 0.06);
-  box-shadow: none;
-}
-
-.pp-pontos {
-  pointer-events: auto;
-  display: none;
-  align-items: center;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-@media (min-width: 640px) {
-  .pp-pontos {
-    display: flex;
-  }
-  .pp-contador-mob {
-    display: none;
-  }
-}
-
-.pp-ponto {
-  display: flex;
-  height: 2.75rem;
-  width: 1.5rem;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  background: none;
-  cursor: pointer;
-}
-
-.pp-ponto > span {
-  display: block;
-  height: 0.5rem;
-  width: 0.5rem;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.25);
-  transition: all 0.3s;
-}
-
-.pp-ponto[aria-current] > span {
-  width: 2rem;
-  background: var(--azul);
-}
-
-/* ── Chamada ─────────────────────────────────────────────────────── */
-
-.pp-cta {
-  display: inline-flex;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  background: var(--azul);
-  padding: 1rem 2.25rem;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--branco);
-  text-decoration: none;
-  box-shadow: 0 18px 50px -18px rgba(22, 104, 245, 0.95);
-  transition: background-color 0.2s;
-}
-
-.pp-cta:hover {
-  background: var(--azul-forte);
-}
-
-@media (min-width: 640px) {
-  .pp-cta {
-    width: auto;
-  }
-}
-
-/* O aviso de que a tela continua abaixo. Sem ele, quem não sabe que há
-   mais desliza para o lado e perde metade do que estava escrito.
-
-   Fica no palco, e não como `::after` fixo dentro da seção: dentro do
-   trilho com rolagem própria o Chrome desenhava a faixa chapada, por
-   cima do texto, em vez do degradê. */
-.pp-mais {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 104px;
-  z-index: 15;
-  display: none;
-  height: 72px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s;
-  background: linear-gradient(to top, rgba(4, 6, 11, 0.92), rgba(4, 6, 11, 0));
-}
-
-.pp-mais > span {
-  position: absolute;
-  left: 50%;
-  bottom: 0.25rem;
-  translate: -50% 0;
-  color: var(--azul-claro);
-  font-size: 0.9rem;
-  animation: pp-desce 1.6s ease-in-out infinite;
-}
-
-@keyframes pp-desce {
-  0%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.5;
-  }
-  50% {
-    transform: translateY(4px);
-    opacity: 1;
-  }
-}
-
-@media (max-width: 767px) {
-  .pp-mais {
-    display: block;
-  }
-  .pp-palco:has(section[data-ativo][data-tem-mais]) .pp-mais {
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pp-trilho {
-    scroll-behavior: auto;
-  }
-  .pp-progresso > span,
-  .pp-ponto > span {
-    transition: none;
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   MOVIMENTO, PROFUNDIDADE E FOTOGRAFIA
-
-   Tudo abaixo lê quatro variáveis escritas pelo Deck a cada quadro:
-   --x (posição do trilho), --d e --a (distância do slide ao centro,
-   com e sem sinal) e --mx/--my (mouse, de -1 a 1). Sem JavaScript, ou
-   com movimento reduzido, todas valem zero e nada se mexe.
-
-   Só `transform`, `opacity`, `clip-path` e `filter`: propriedades que o
-   navegador compõe na placa de vídeo, sem recalcular layout. É o que
-   deixa o parallax liso num celular comum.
-   ═══════════════════════════════════════════════════════════════════ */
-
-.pp {
-  --sai: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@property --ang {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
-/* ── O cenário anda devagar ──────────────────────────────────────── */
-
-.pp-grade {
-  background-position: calc(var(--x, 0) * -96px) calc(var(--my, 0) * -12px);
-}
-
-.pp-brilho {
+  inset: 0;
   will-change: transform;
-  animation: pp-respira 11s ease-in-out infinite alternate;
-}
-
-.pp-brilho-azul {
   transform: translate3d(
-    calc(var(--x, 0) * -2.5vw + var(--mx, 0) * -40px),
-    calc(var(--my, 0) * -28px),
+    calc(var(--d, 0) * var(--p, 0) * 8vw + var(--mx, 0) * var(--p, 0) * 6px),
+    calc(var(--my, 0) * var(--p, 0) * 4px),
     0
   );
 }
 
-.pp-brilho-frio {
-  animation-delay: -5s;
-  transform: translate3d(
-    calc(var(--x, 0) * 1.5vw + var(--mx, 0) * 30px),
-    calc(var(--my, 0) * 22px),
-    0
-  );
-}
-
-@keyframes pp-respira {
-  from {
-    scale: 1;
-    opacity: 0.85;
-  }
-  to {
-    scale: 1.18;
-    opacity: 1;
-  }
-}
-
-/* Poeira de luz. As posições são fixas, e não sorteadas no JavaScript,
-   para o servidor e o navegador desenharem a mesma coisa. */
-.pp-poeira {
-  position: absolute;
-  inset: 0;
-  transform: translate3d(calc(var(--x, 0) * -6vw), 0, 0);
-}
-
-.pp-poeira > span {
-  position: absolute;
-  bottom: -2%;
-  display: block;
-  height: 3px;
-  width: 3px;
-  border-radius: 9999px;
-  background: var(--azul-claro);
-  box-shadow: 0 0 10px 2px rgba(87, 152, 255, 0.7);
-  opacity: 0;
-  animation: pp-sobe linear infinite;
-}
-
-.pp-poeira > span:nth-child(1) { left: 6%; animation-duration: 19s; animation-delay: -2s; }
-.pp-poeira > span:nth-child(2) { left: 14%; animation-duration: 26s; animation-delay: -11s; scale: 0.6; }
-.pp-poeira > span:nth-child(3) { left: 23%; animation-duration: 22s; animation-delay: -6s; }
-.pp-poeira > span:nth-child(4) { left: 31%; animation-duration: 30s; animation-delay: -19s; scale: 0.5; }
-.pp-poeira > span:nth-child(5) { left: 39%; animation-duration: 17s; animation-delay: -9s; scale: 1.3; }
-.pp-poeira > span:nth-child(6) { left: 47%; animation-duration: 24s; animation-delay: -1s; scale: 0.7; }
-.pp-poeira > span:nth-child(7) { left: 55%; animation-duration: 28s; animation-delay: -14s; }
-.pp-poeira > span:nth-child(8) { left: 62%; animation-duration: 20s; animation-delay: -4s; scale: 0.5; }
-.pp-poeira > span:nth-child(9) { left: 70%; animation-duration: 25s; animation-delay: -17s; scale: 1.2; }
-.pp-poeira > span:nth-child(10) { left: 77%; animation-duration: 18s; animation-delay: -8s; scale: 0.6; }
-.pp-poeira > span:nth-child(11) { left: 84%; animation-duration: 29s; animation-delay: -21s; }
-.pp-poeira > span:nth-child(12) { left: 90%; animation-duration: 21s; animation-delay: -12s; scale: 0.8; }
-.pp-poeira > span:nth-child(13) { left: 95%; animation-duration: 27s; animation-delay: -3s; scale: 0.5; }
-.pp-poeira > span:nth-child(14) { left: 2%; animation-duration: 23s; animation-delay: -15s; scale: 0.9; }
-
-@keyframes pp-sobe {
-  0% {
-    transform: translate3d(0, 0, 0);
-    opacity: 0;
-  }
-  12% {
-    opacity: 0.8;
-  }
-  80% {
-    opacity: 0.5;
-  }
-  100% {
-    transform: translate3d(3vw, -105dvh, 0);
-    opacity: 0;
-  }
-}
-
-/* A luz que segue o mouse passa por cima das fotos com `screen`: clareia
-   o que está embaixo sem nunca escurecer o texto. */
-.pp-lanterna {
-  display: none;
-}
-
-.pp-palco[data-mouse] .pp-lanterna {
-  position: absolute;
-  inset: 0;
-  z-index: 12;
-  display: block;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  background: radial-gradient(
-    520px circle at var(--cx, 50%) var(--cy, 40%),
-    rgba(22, 104, 245, 0.13),
-    transparent 62%
-  );
-}
-
-.pp-camadas {
-  display: contents;
-}
-
-/* ── Fundo de tela cheia do slide ────────────────────────────────── */
-
-/* Plano 0 é a foto, o numeral vem logo acima e o texto fica no plano 1.
-   Sem `isolation` na seção de propósito: ela quebrava o aviso de "tem
-   mais abaixo", que é `position: fixed` e precisa da tela como base. */
-.pp-fundo {
-  position: absolute;
-  inset: 0;
+.pp-foto {
+  inset: 0 -12%;
   z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
 }
 
-/* Mais larga que a tela, para ter onde correr. Anda contra o dedo: a
-   foto fica para trás enquanto o slide passa, e é isso que dá fundo. */
-.pp-fundo-movel {
+.pp-kb,
+.pp-kb-parado {
   position: absolute;
-  inset: -3% -18%;
-  will-change: transform;
-  transform: translate3d(
-    calc(var(--d, 0) * -32% + var(--mx, 0) * -16px),
-    calc(var(--my, 0) * -10px),
-    0
-  );
+  inset: 0;
 }
 
 .pp-kb {
-  position: absolute;
-  inset: 0;
-  animation: pp-kb 26s ease-in-out infinite alternate;
+  animation: pp-kb 28s ease-in-out infinite alternate;
 }
 
-/* Fora da tela, a câmera para: ninguém vê, e a placa de vídeo agradece. */
-.pp-trilho > section:not([data-ativo]) .pp-kb {
-  animation-play-state: paused;
-}
-
-.pp-kb > img {
+.pp-kb > img,
+.pp-kb-parado > img {
   display: block;
   height: 100%;
   width: 100%;
   object-fit: cover;
-  filter: saturate(1.08) contrast(1.06);
 }
 
 @keyframes pp-kb {
   from {
-    transform: scale(1.04) translate3d(0, 0, 0);
+    transform: scale(1.03);
   }
   to {
-    transform: scale(1.16) translate3d(-1.5%, -1%, 0);
+    transform: scale(1.14) translate3d(-1.2%, -0.8%, 0);
   }
 }
 
-.pp-fundo-veu {
+/* Fora da tela, nada anima: ninguém vê, e a placa de vídeo agradece.
+   É também o que faz cada sequência começar do zero ao chegar na tela. */
+.pp-trilho > section:not([data-ativo]) .pp-tela *,
+.pp-trilho > section:not([data-ativo]) .pp-tela *::before,
+.pp-trilho > section:not([data-ativo]) .pp-tela *::after {
+  animation-play-state: paused !important;
+}
+
+.pp-veu {
   position: absolute;
   inset: 0;
-}
-
-.pp-fundo-veu[data-lado="esquerda"] {
-  background:
-    linear-gradient(to top, var(--tinta) 0%, transparent 32%),
-    linear-gradient(to bottom, rgba(4, 6, 11, 0.7) 0%, transparent 22%),
-    linear-gradient(
-      90deg,
-      rgba(4, 6, 11, 0.96) 0%,
-      rgba(4, 6, 11, 0.86) 34%,
-      rgba(4, 6, 11, 0.42) 64%,
-      rgba(4, 6, 11, 0.18) 100%
-    );
-}
-
-.pp-fundo-veu[data-lado="direita"] {
-  background:
-    linear-gradient(to top, var(--tinta) 0%, transparent 32%),
-    linear-gradient(
-      270deg,
-      rgba(4, 6, 11, 0.96) 0%,
-      rgba(4, 6, 11, 0.86) 34%,
-      rgba(4, 6, 11, 0.42) 64%,
-      rgba(4, 6, 11, 0.18) 100%
-    );
-}
-
-.pp-fundo-veu[data-lado="total"] {
-  background:
-    linear-gradient(to top, var(--tinta) 0%, transparent 40%),
-    radial-gradient(
-      ellipse 90% 70% at 50% 45%,
-      rgba(4, 6, 11, 0.62),
-      rgba(4, 6, 11, 0.9)
-    );
-}
-
-/* Fecho: escuro só atrás do texto, a foto respira nas bordas e no pé —
-   a pista acesa no horizonte é o "começo" que a tela promete. */
-.pp-fundo-veu[data-lado="centro"] {
-  background:
-    radial-gradient(
-      ellipse 55% 50% at 50% 42%,
-      rgba(4, 6, 11, 0.82),
-      rgba(4, 6, 11, 0.35) 70%,
-      rgba(4, 6, 11, 0.15)
-    ),
-    linear-gradient(to bottom, rgba(4, 6, 11, 0.6), transparent 30%);
-}
-
-/* No telefone o texto ocupa a largura toda: o véu lateral não basta. */
-@media (max-width: 767px) {
-  .pp-fundo-veu[data-lado="esquerda"],
-  .pp-fundo-veu[data-lado="direita"] {
-    background:
-      linear-gradient(to top, var(--tinta) 8%, transparent 45%),
-      linear-gradient(rgba(4, 6, 11, 0.55), rgba(4, 6, 11, 0.78));
-  }
-}
-
-/* ── O texto anda à frente ───────────────────────────────────────── */
-
-.pp-palco[data-mov] .pp-slide {
-  will-change: transform, opacity;
-  transform: translate3d(calc(var(--d, 0) * 14vw), 0, 0);
-  opacity: calc(1 - var(--a, 0) * 0.85);
-}
-
-/* Numeral vazado, no plano mais fundo depois da foto. */
-.pp-numeral {
-  position: absolute;
-  z-index: 0;
-  right: 3vw;
-  bottom: 9vh;
+  z-index: 1;
   pointer-events: none;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: clamp(9rem, 30vw, 24rem);
-  font-weight: 800;
-  line-height: 0.8;
-  letter-spacing: -0.06em;
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(87, 152, 255, 0.2);
-  transform: translate3d(
-    calc(var(--d, 0) * -46% + var(--mx, 0) * -28px),
-    calc(var(--my, 0) * -16px),
-    0
-  );
+}
+
+.pp-veu-esq {
+  background:
+    linear-gradient(90deg, var(--preto) 0%, rgba(5, 6, 8, 0.9) 32%, rgba(5, 6, 8, 0.25) 62%, transparent 80%),
+    linear-gradient(to top, rgba(5, 6, 8, 0.9), transparent 30%);
+}
+
+.pp-veu-total {
+  background: linear-gradient(rgba(5, 6, 8, 0.82), rgba(5, 6, 8, 0.9));
+}
+
+@media (max-width: 899px) {
+  .pp-veu-esq {
+    background: linear-gradient(rgba(5, 6, 8, 0.55), rgba(5, 6, 8, 0.92) 60%);
+  }
 }
 
 /* ── Entrada de cada tela ────────────────────────────────────────── */
 
 .pp-palco[data-mov] [data-revela] {
   opacity: 0;
-  transform: translate3d(0, 26px, 0);
+  transform: translate3d(0, 28px, 0);
   filter: blur(8px);
   transition:
     opacity 0.9s var(--sai),
     transform 1.1s var(--sai),
     filter 0.9s var(--sai);
-  transition-delay: calc(var(--i, 0) * 90ms + 140ms);
+  transition-delay: calc(var(--i, 0) * 110ms + 120ms);
 }
 
 .pp-palco[data-mov] section[data-visto] [data-revela] {
@@ -933,644 +257,2093 @@
   filter: none;
 }
 
-/* O título sobe de trás de uma máscara, como letreiro de cinema. */
-.pp-mascara {
+/* Título que sobe de trás de uma máscara, linha a linha. */
+/* O respiro em cima é o dos acentos: no Anton, o til e o agudo das
+   maiúsculas sobem acima da caixa da linha, e a máscara os cortaria. */
+.pp-linha {
   display: block;
   overflow: hidden;
-  padding-bottom: 0.1em;
-  margin-bottom: -0.1em;
+  padding: 0.2em 0.18em 0.04em;
+  margin: -0.2em -0.18em -0.04em;
 }
 
-.pp-mascara > span {
+.pp-linha > span {
   display: block;
 }
 
-.pp-palco[data-mov] .pp-mascara > span {
-  transform: translate3d(0, 108%, 0);
-  transition: transform 1.2s var(--sai) 0.18s;
+.pp-palco[data-mov] .pp-linha > span {
+  transform: translate3d(0, 112%, 0);
+  transition: transform 1.15s var(--sai);
+  transition-delay: calc(var(--i, 0) * 110ms + 100ms);
 }
 
-.pp-palco[data-mov] section[data-visto] .pp-mascara > span {
+.pp-palco[data-mov] section[data-visto] .pp-linha > span {
   transform: none;
 }
 
-/* ── Slide com foto emoldurada ───────────────────────────────────── */
+/* ── Tipografia ──────────────────────────────────────────────────── */
 
-.pp-slide[data-com-visual] {
-  display: grid;
-  gap: 1.5rem;
-  align-content: start;
+.pp-gigante,
+.pp-titulo-tela,
+.pp-frase,
+.pp-nome-agencia,
+.pp-slogan,
+.pp-compromisso,
+.pp-proximo {
+  font-family: var(--f-titulo), Impact, "Arial Narrow", sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
 }
 
-.pp-slide-texto {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 1.75rem;
+.pp-gigante {
+  font-size: clamp(3.4rem, 9.4vw, 9.6rem);
+  line-height: 0.9;
 }
 
-@media (min-width: 1024px) {
-  .pp-slide[data-com-visual] {
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-    gap: 4rem;
-    align-items: center;
-    align-content: center;
-  }
-  .pp-slide-texto {
-    gap: 2rem;
-  }
+.pp-titulo-tela {
+  font-size: clamp(2.3rem, 5.4vw, 5rem);
+  line-height: 0.95;
 }
 
-.pp-janela {
-  position: relative;
-  margin: 0;
+.pp-sobretitulo {
+  margin-bottom: 1rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--azul-claro);
 }
 
-.pp-janela-moldura {
-  position: relative;
+.pp-sobretitulo.pp-escuro {
+  color: var(--azul);
+}
+
+.pp-apoio {
+  margin-top: 1.25rem;
+  max-width: 46ch;
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  line-height: 1.6;
+  color: #b9c0cc;
+}
+
+.pp-apoio-largo {
+  max-width: 72ch;
+}
+
+.pp-azul {
+  color: var(--azul);
+}
+
+.pp-tela:not([data-tom="claro"]) .pp-azul {
+  color: var(--azul-claro);
+}
+
+.pp-traco {
+  display: block;
+  margin-top: 1.75rem;
+  height: 2px;
+  width: min(560px, 80%);
+  background: rgba(255, 255, 255, 0.75);
+  transform-origin: left;
+}
+
+.pp-palco[data-mov] .pp-traco {
+  transform: scaleX(0);
+}
+
+.pp-palco[data-mov] section[data-visto] .pp-traco {
+  transform: scaleX(1);
+  filter: none;
+  opacity: 1;
+}
+
+/* ── 1. Capa ─────────────────────────────────────────────────────── */
+
+.pp-outdoor {
+  position: absolute;
+  inset: 0;
   overflow: hidden;
-  height: 30dvh;
-  min-height: 190px;
-  border-radius: 1.5rem;
-  border: 1px solid var(--fio);
-  background: var(--tinta-2);
-  box-shadow:
-    0 50px 100px -50px rgba(22, 104, 245, 0.7),
-    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+  background: #04060b;
 }
 
-@media (min-width: 1024px) {
-  .pp-janela-moldura {
-    height: min(64dvh, 620px);
-    width: auto;
-    max-width: 100%;
-    aspect-ratio: 4 / 5;
+/* A caixa 16:9 que cobre a tela, com a foto e a placa juntas. */
+.pp-outdoor-caixa {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100%, calc(100dvh * 16 / 9));
+  aspect-ratio: 16 / 9;
+  container-type: inline-size;
+  translate: -50% -50%;
+  transform: translate3d(calc(var(--d, 0) * -10vw + var(--mx, 0) * -10px), calc(var(--my, 0) * -6px), 0);
+}
+
+.pp-outdoor-caixa > img {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+/* No telefone em pé, cobrir a tela cortaria a placa: a caixa fica do
+   tamanho da placa caber, e o céu e a pista se dissolvem no preto. */
+@media (max-aspect-ratio: 1/1) {
+  .pp-outdoor-caixa {
+    width: 170vw;
+    top: 44%;
+    mask-image: linear-gradient(transparent, #000 14%, #000 82%, transparent);
+  }
+}
+
+.pp-outdoor-placa {
+  position: absolute;
+  left: 18.125%;
+  top: 20.83%;
+  width: 62.97%;
+  height: 41.94%;
+}
+
+.pp-outdoor-texto {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3cqw;
+  text-align: center;
+}
+
+.pp-outdoor-texto > p {
+  font-size: 1.35cqw;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.pp-outdoor-texto > h1 {
+  margin-top: 0.4cqw;
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-weight: 400;
+  line-height: 0.95;
+  text-transform: uppercase;
+  white-space: nowrap;
+  /* O nome ocupa a placa inteira, seja curto ou comprido. */
+  font-size: min(9.5cqw, calc(55cqw / (var(--letras, 10) * 0.5)));
+  text-shadow: 0 0.3cqw 1.4cqw rgba(0, 0, 40, 0.45);
+}
+
+.pp-outdoor-lampada {
+  position: absolute;
+  left: 3.2%;
+  top: 9%;
+  width: 1.2cqw;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.pp-outdoor-arroba {
+  position: absolute;
+  right: 3.2%;
+  top: 9%;
+  font-size: 0.85cqw;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Os cones de luz dos refletores sobre a placa. */
+.pp-outdoor-luzes > span {
+  position: absolute;
+  top: -2%;
+  height: 78%;
+  width: 17%;
+  translate: -50% 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: radial-gradient(
+    ellipse 50% 70% at 50% 0%,
+    rgba(200, 220, 255, 0.5),
+    rgba(120, 160, 255, 0.12) 55%,
+    transparent 72%
+  );
+  opacity: 0;
+  animation: pp-acende 1.1s steps(1, end) forwards;
+  animation-delay: calc(var(--i) * 0.16s + 0.5s);
+}
+
+/* O painel começa apagado e acende junto com os refletores. */
+.pp-outdoor-apagado {
+  position: absolute;
+  inset: -12% -1% -1%;
+  background: rgba(2, 4, 12, 0.86);
+  pointer-events: none;
+  animation: pp-painel 1.8s ease-out forwards 0.45s;
+}
+
+.pp-outdoor-texto {
+  opacity: 0;
+  animation: pp-nome 1.2s var(--sai) forwards 1.65s;
+}
+
+.pp-outdoor-lampada,
+.pp-outdoor-arroba {
+  opacity: 0;
+  animation: pp-surge 0.8s ease forwards 1.9s;
+}
+
+/* O cordão de lâmpadas da moldura. */
+.pp-outdoor-cordao {
+  position: absolute;
+  inset: -0.45cqw;
+  border: 0.3cqw dotted rgba(255, 255, 255, 0.95);
+  border-radius: 0.2cqw;
+  filter: drop-shadow(0 0 0.35cqw rgba(255, 255, 255, 0.9));
+  opacity: 0;
+  animation:
+    pp-surge 0.6s ease forwards 1.3s,
+    pp-cintila 1.6s ease-in-out infinite 2s;
+}
+
+/* Um farol cruza a pista de tempos em tempos. */
+.pp-outdoor-farol {
+  position: absolute;
+  left: 0;
+  top: 82%;
+  height: 0.5%;
+  width: 22%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, transparent, rgba(255, 70, 60, 0.9) 30%, rgba(255, 255, 255, 0.95) 85%, transparent);
+  filter: blur(0.25cqw);
+  transform: translateX(-30%);
+  animation: pp-farol 9s cubic-bezier(0.5, 0, 0.5, 1) infinite 3s;
+  opacity: 0;
+}
+
+@keyframes pp-acende {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  22% { opacity: 0.15; }
+  34% { opacity: 1; }
+  44% { opacity: 0.4; }
+  56%, 100% { opacity: 1; }
+}
+
+@keyframes pp-painel {
+  0% { opacity: 1; }
+  20% { opacity: 0.7; }
+  28% { opacity: 0.9; }
+  60% { opacity: 0.25; }
+  100% { opacity: 0; }
+}
+
+@keyframes pp-nome {
+  from {
+    opacity: 0;
+    transform: scale(1.08);
+    filter: blur(1cqw);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes pp-surge {
+  to { opacity: 1; }
+}
+
+@keyframes pp-cintila {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes pp-farol {
+  0% { transform: translateX(-30vw); opacity: 0; }
+  8% { opacity: 1; }
+  40% { transform: translateX(130cqw); opacity: 1; }
+  41%, 100% { transform: translateX(130cqw); opacity: 0; }
+}
+
+.pp-capa-validade,
+.pp-capa-numero {
+  position: absolute;
+  bottom: 6.6rem;
+  z-index: 3;
+  font-size: clamp(0.85rem, 1.4vw, 1.15rem);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.pp-capa-validade {
+  right: var(--margem);
+}
+
+.pp-capa-numero {
+  left: var(--margem);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+@media (max-width: 639px) {
+  .pp-capa-numero {
+    display: none;
+  }
+  .pp-capa-validade {
+    right: 50%;
+    translate: 50% 0;
+    white-space: nowrap;
+  }
+}
+
+/* ── 2. Seja visto ───────────────────────────────────────────────── */
+
+.pp-t-visto .pp-gigante {
+  max-width: 9ch;
+}
+
+/* "Esquecido" some e volta, como uma marca que o público esquece. */
+.pp-esquecido > span {
+  animation: pp-esquece 6s ease-in-out infinite 2.2s;
+}
+
+@keyframes pp-esquece {
+  0%, 35% { opacity: 1; filter: none; letter-spacing: 0.005em; }
+  55%, 70% { opacity: 0.12; filter: blur(6px); letter-spacing: 0.06em; }
+  90%, 100% { opacity: 1; filter: none; letter-spacing: 0.005em; }
+}
+
+/* ── 3 e 5. Telas brancas de frase ───────────────────────────────── */
+
+.pp-frase {
+  font-size: clamp(1.5rem, 3.7vw, 3.5rem);
+  line-height: 1.02;
+}
+
+.pp-frase em {
+  font-style: italic;
+}
+
+.pp-frase-forte {
+  margin-top: 0.15em;
+  font-size: clamp(2rem, 5.6vw, 5.4rem);
+}
+
+.pp-frase-gigante {
+  font-size: clamp(2.6rem, 8.6vw, 8.4rem);
+  line-height: 0.95;
+}
+
+.pp-frase-media {
+  margin-top: 2.2rem;
+  font-size: clamp(1.25rem, 2.9vw, 2.75rem);
+}
+
+.pp-frase-media small {
+  display: block;
+  margin-top: 0.25em;
+  font-size: 0.7em;
+  color: #2a2a2a;
+}
+
+.pp-versus {
+  margin-top: clamp(2.5rem, 7vh, 5rem);
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.pp-versus > p {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--f-titulo), Impact, sans-serif;
+  text-transform: uppercase;
+  line-height: 0.92;
+}
+
+.pp-versus > p > span {
+  font-size: clamp(1.6rem, 4vw, 4rem);
+}
+
+.pp-versus > p > strong {
+  font-weight: 400;
+  font-size: clamp(2.6rem, 7.6vw, 7.6rem);
+}
+
+.pp-versus-linha {
+  height: 2px;
+  width: clamp(3rem, 12vw, 11rem);
+  background: #7a7a7a;
+  transform-origin: left;
+  transition: transform 1s var(--sai) 0.9s;
+}
+
+.pp-palco[data-mov] .pp-versus-linha {
+  transform: scaleX(0);
+}
+
+.pp-palco[data-mov] section[data-visto] .pp-versus-linha {
+  transform: scaleX(1);
+}
+
+@media (max-width: 767px) {
+  .pp-versus {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  .pp-versus-linha {
     margin-inline: auto;
   }
 }
 
-/* A foto corre por dentro da moldura, contra o dedo e contra o mouse. */
-.pp-janela-movel {
-  position: absolute;
-  inset: -4% -20%;
-  will-change: transform;
-  transform: translate3d(
-    calc(var(--d, 0) * -24% + var(--mx, 0) * -18px),
-    calc(var(--my, 0) * -14px),
-    0
-  );
-}
-
-.pp-janela-moldura::after {
-  content: "";
+/* Corações que sobem e somem: o like que não paga boleto. */
+.pp-coracoes {
   position: absolute;
   inset: 0;
+  z-index: 0;
   pointer-events: none;
-  background:
-    linear-gradient(to top, rgba(4, 6, 11, 0.85) 0%, transparent 42%),
-    linear-gradient(160deg, rgba(22, 104, 245, 0.18), transparent 50%);
+  overflow: hidden;
 }
 
-/* A linha de varredura: um scanner que passa pela foto de tempos em
-   tempos. Diz "análise" sem precisar de uma palavra. */
-.pp-janela-varredura {
+.pp-coracoes > span {
+  position: absolute;
+  bottom: -10%;
+  left: calc(6% + var(--i) * 11%);
+  font-size: calc(1.4rem + (var(--i) * 7 % 4) * 0.6rem);
+  color: #e9ebf1;
+  animation: pp-coracao calc(9s + var(--i) * 0.7s) linear infinite;
+  animation-delay: calc(var(--i) * -1.9s);
+}
+
+@keyframes pp-coracao {
+  0% { transform: translate3d(0, 0, 0) rotate(-8deg); opacity: 0; }
+  10% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translate3d(2vw, -115dvh, 0) rotate(10deg); opacity: 0; }
+}
+
+/* "Likes" levando um risco, depois que a frase entra. */
+.pp-riscado {
+  position: relative;
+  display: inline-block;
+  font-style: italic;
+}
+
+.pp-riscado::after {
+  content: "";
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  top: 52%;
+  height: 0.09em;
+  background: var(--azul);
+  transform: rotate(-4deg) scaleX(0);
+  transform-origin: left;
+  transition: transform 0.7s var(--sai) 1.2s;
+}
+
+.pp-palco section[data-visto] .pp-riscado::after {
+  transform: rotate(-4deg) scaleX(1);
+}
+
+/* ── 4. A marca ──────────────────────────────────────────────────── */
+
+.pp-oculos {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: clamp(4rem, 9vh, 6.5rem);
+  pointer-events: none;
+}
+
+/* Um halo azul atrás dos óculos amarra a foto preta à cor da marca. */
+.pp-oculos::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  height: min(46vw, 560px);
+  width: min(70vw, 900px);
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(31, 92, 255, 0.32), transparent);
+  filter: blur(20px);
+  animation: pp-cintila 5s ease-in-out infinite;
+}
+
+.pp-oculos > img {
+  position: relative;
+  width: min(64vw, 820px);
+  height: auto;
+  mask-image: radial-gradient(ellipse 60% 62% at 50% 50%, #000 55%, transparent 75%);
+  animation: pp-flutua 6s ease-in-out infinite;
+  filter: drop-shadow(0 30px 40px rgba(31, 92, 255, 0.35));
+}
+
+@keyframes pp-flutua {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+  50% { transform: translateY(-14px) rotate(1.5deg); }
+}
+
+.pp-t-marca .pp-conteudo {
+  padding-bottom: 12.5rem;
+}
+
+.pp-nome-agencia {
+  font-size: clamp(4rem, 15vw, 15rem);
+  line-height: 0.84;
+  font-style: italic;
+}
+
+.pp-slogan {
+  margin-top: 0.6rem;
+  font-size: clamp(1.05rem, 2.4vw, 2.3rem);
+}
+
+.pp-logos {
   position: absolute;
   inset-inline: 0;
-  top: 0;
-  z-index: 1;
-  height: 35%;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    rgba(87, 152, 255, 0.1) 75%,
-    rgba(150, 190, 255, 0.55) 99%,
-    transparent
-  );
-  transform: translate3d(0, -110%, 0);
-  animation: pp-varre 7s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-}
-
-@keyframes pp-varre {
-  0%,
-  35% {
-    transform: translate3d(0, -110%, 0);
-  }
-  85%,
-  100% {
-    transform: translate3d(0, 300%, 0);
-  }
-}
-
-/* Marcas de corte nos quatro cantos, como num visor de câmera. */
-.pp-janela-cantos {
-  position: absolute;
-  inset: 14px;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0.6;
-  --c: rgba(255, 255, 255, 0.85);
-  background:
-    linear-gradient(var(--c), var(--c)) top left / 18px 1px no-repeat,
-    linear-gradient(var(--c), var(--c)) top left / 1px 18px no-repeat,
-    linear-gradient(var(--c), var(--c)) top right / 18px 1px no-repeat,
-    linear-gradient(var(--c), var(--c)) top right / 1px 18px no-repeat,
-    linear-gradient(var(--c), var(--c)) bottom left / 18px 1px no-repeat,
-    linear-gradient(var(--c), var(--c)) bottom left / 1px 18px no-repeat,
-    linear-gradient(var(--c), var(--c)) bottom right / 18px 1px no-repeat,
-    linear-gradient(var(--c), var(--c)) bottom right / 1px 18px no-repeat;
-}
-
-.pp-janela-legenda {
-  position: absolute;
-  left: 1.5rem;
-  bottom: 1.35rem;
+  bottom: 6.3rem;
   z-index: 2;
-  margin: 0;
-  color: var(--branco);
 }
 
-/* A moldura abre do meio para fora quando a tela entra. */
-.pp-palco[data-mov] .pp-janela[data-revela] {
-  transform: none;
-  filter: none;
-}
-
-.pp-palco[data-mov] .pp-janela-moldura {
-  clip-path: inset(48% 0 48% 0 round 1.5rem);
-  transition: clip-path 1.4s var(--sai) 0.25s;
-}
-
-.pp-palco[data-mov] section[data-visto] .pp-janela-moldura {
-  clip-path: inset(0 0 0 0 round 1.5rem);
-}
-
-/* O selo flutua num plano à frente da foto: anda mais que ela. */
-.pp-selo {
-  position: absolute;
-  right: 0.75rem;
-  top: 0.75rem;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  border-radius: 9999px;
-  border: 1px solid var(--fio-forte);
-  background: rgba(11, 15, 23, 0.72);
-  padding: 0.6rem 1rem;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: 0.8rem;
+.pp-logos > p {
+  margin-bottom: 0.9rem;
+  text-align: center;
+  font-size: 0.7rem;
   font-weight: 600;
-  color: var(--branco);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.8);
-  transform: translate3d(
-    calc(var(--d, 0) * 40% + var(--mx, 0) * 16px),
-    calc(var(--my, 0) * 12px),
-    0
-  );
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--cinza-escuro);
 }
 
-.pp-selo strong {
-  color: var(--azul-claro);
+.pp-logos img {
+  height: clamp(26px, 3.4vw, 38px);
+  width: auto;
+  opacity: 0.62;
 }
 
-@media (min-width: 1024px) {
-  .pp-selo {
-    right: -1.25rem;
-    top: 2rem;
-    padding: 0.8rem 1.2rem;
-    font-size: 0.85rem;
-  }
+/* ── Esteira que corre ───────────────────────────────────────────── */
+
+.pp-esteira {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
 }
 
-.pp-palco[data-mov] .pp-selo {
-  opacity: 0;
-  scale: 0.85;
-  transition:
-    opacity 0.8s var(--sai) 1s,
-    scale 0.8s var(--sai) 1s;
+.pp-esteira-trilho {
+  display: flex;
+  width: max-content;
+  animation: pp-esteira linear infinite;
 }
 
-.pp-palco[data-mov] section[data-visto] .pp-selo {
-  opacity: 1;
-  scale: 1;
+.pp-esteira-trilho[data-sentido="direita"] {
+  animation-direction: reverse;
 }
 
-.pp-selo-pulso {
-  position: relative;
-  display: block;
-  height: 0.5rem;
-  width: 0.5rem;
+.pp-esteira-grupo {
+  display: flex;
   flex: none;
-  border-radius: 9999px;
-  background: var(--azul-claro);
+  align-items: center;
+  gap: clamp(2rem, 4vw, 3.75rem);
+  padding-right: clamp(2rem, 4vw, 3.75rem);
 }
 
-.pp-selo-pulso::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: var(--azul-claro);
-  animation: pp-pulso 2s ease-out infinite;
+@keyframes pp-esteira {
+  to { transform: translate3d(-50%, 0, 0); }
 }
 
-@keyframes pp-pulso {
-  from {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-  to {
-    transform: scale(3.2);
-    opacity: 0;
-  }
+/* ── 6. DNA em números ───────────────────────────────────────────── */
+
+.pp-dna {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
-/* ── Conteúdo ────────────────────────────────────────────────────── */
+.pp-t-dna .pp-titulo-tela {
+  font-size: clamp(2.6rem, 7vw, 6.6rem);
+}
 
-.pp-lista {
+.pp-dna-grade {
   display: grid;
-  gap: 0.75rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  width: 100%;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 3rem);
+  margin-top: clamp(0.5rem, 2vh, 1.5rem);
 }
 
-.pp-texto-linha {
-  min-width: 0;
-  align-self: center;
-  line-height: 1.6;
-  color: var(--neve);
+.pp-dna-num {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--f-titulo), Impact, sans-serif;
+  text-transform: uppercase;
 }
 
-.pp-seta {
-  flex: none;
-  color: var(--azul-claro);
-}
-
-.pp-sub {
-  margin: 0;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.pp-frentes {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
-}
-
-.pp-servico {
-  display: grid;
-  gap: 1.5rem;
-}
-
-.pp-promessa {
-  margin: 0.75rem 0 0;
-  max-width: 56ch;
-  font-size: var(--guia);
-  line-height: 1.6;
-  color: var(--neve);
-}
-
-.pp-preco {
-  margin: 1.25rem 0 0;
-  font-size: 2rem;
-}
-
-.pp-preco > span {
-  margin-left: 0.5rem;
-  font-family: var(--fonte-prosa), Georgia, serif;
-  font-size: 0.95rem;
+.pp-dna-num b {
   font-weight: 400;
-  letter-spacing: 0;
+  font-size: clamp(3rem, 7.6vw, 7rem);
+  line-height: 0.95;
+  font-variant-numeric: tabular-nums;
+}
+
+.pp-dna-num b i {
+  font-style: normal;
+  color: var(--azul);
+  margin-right: 0.05em;
+}
+
+.pp-dna-num > span {
+  margin-top: 0.3rem;
+  max-width: 18ch;
+  font-size: clamp(0.95rem, 1.6vw, 1.5rem);
+}
+
+.pp-dna-largo b {
+  font-size: clamp(2rem, 5.4vw, 5rem);
+}
+
+.pp-dna-anos {
+  margin-top: 0.9rem;
+}
+
+.pp-dna-anos b {
+  font-size: clamp(1.5rem, 3vw, 2.8rem);
+}
+
+.pp-dna-anos > span {
+  max-width: none;
+  font-family: var(--f-texto), sans-serif;
+  text-transform: none;
+  font-size: 0.95rem;
   color: var(--cinza);
 }
 
-.pp-entra-sai {
-  display: grid;
-  gap: 0.75rem;
+.pp-dna-gema {
+  position: relative;
+  inset: auto;
 }
 
-@media (min-width: 1200px) {
-  .pp-entra-sai {
-    grid-template-columns: 1fr 1fr;
+@media (max-width: 767px) {
+  .pp-dna-grade {
+    grid-template-columns: 1fr;
+  }
+  .pp-dna-gema {
+    order: -1;
   }
 }
 
-.pp-valor {
-  margin: 0.625rem 0 0;
-  font-size: clamp(2rem, 4vw, 2.6rem);
+/* A gema: flutua, gira no eixo e um reflexo atravessa as facetas. */
+.pp-gema {
+  position: relative;
+  width: clamp(170px, 24vw, 340px);
+  aspect-ratio: 1;
+  animation: pp-flutua 5s ease-in-out infinite;
 }
 
-.pp-nota {
-  margin: 0.75rem 0 0;
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: var(--cinza);
+.pp-gema-giro {
+  height: 100%;
+  width: 100%;
+  animation: pp-gira 7s ease-in-out infinite;
+  filter: drop-shadow(0 0 30px rgba(60, 160, 255, 0.55)) drop-shadow(0 0 80px rgba(31, 92, 255, 0.35));
 }
 
-.pp-nota-midia {
-  margin-top: 1.25rem;
-  max-width: 62ch;
-}
-
-/* Cartão vivo: no computador, ele acende quando o mouse passa. */
-.pp-bloco {
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-
-.pp-palco[data-mouse] .pp-bloco {
-  transition:
-    border-color 0.3s,
-    background-color 0.3s,
-    translate 0.4s var(--sai);
-}
-
-.pp-palco[data-mouse] .pp-bloco:hover {
-  translate: 0 -3px;
-  border-color: var(--fio-forte);
-  background-color: rgba(22, 104, 245, 0.06);
-}
-
-/* O destaque ganha um feixe de luz que corre pela borda. */
-.pp-bloco[data-destaque]::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  pointer-events: none;
-  background: conic-gradient(
-    from var(--ang),
-    transparent 0 68%,
-    rgba(87, 152, 255, 0.95) 84%,
-    transparent 100%
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  animation: pp-gira 6s linear infinite;
+.pp-gema-giro svg {
+  display: block;
+  height: 100%;
+  width: 100%;
 }
 
 @keyframes pp-gira {
-  to {
-    --ang: 360deg;
-  }
+  0%, 100% { transform: perspective(600px) rotateY(-14deg) rotateX(6deg); }
+  50% { transform: perspective(600px) rotateY(14deg) rotateX(-4deg); }
 }
 
-/* ── Capa ────────────────────────────────────────────────────────── */
-
-.pp-capa {
-  max-width: 780px;
+.pp-gema-reflexo {
+  animation: pp-reflexo-gema 4.2s ease-in-out infinite 1s;
 }
 
-.pp-capa-logo {
-  display: block;
-  height: 44px;
-  width: auto;
-  max-width: 200px;
-  object-fit: contain;
-  margin-bottom: 1.75rem;
+@keyframes pp-reflexo-gema {
+  0% { transform: rotate(20deg) translateX(0); }
+  45%, 100% { transform: rotate(20deg) translateX(380px); }
 }
 
-.pp-capa .pp-mostro,
-.pp-aceite .pp-mostro {
-  text-shadow: 0 10px 40px rgba(4, 6, 11, 0.6);
+.pp-gema-sombra {
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  bottom: -14%;
+  height: 10%;
+  border-radius: 50%;
+  background: radial-gradient(rgba(31, 92, 255, 0.5), transparent 70%);
+  filter: blur(8px);
 }
 
-.pp-ficha {
-  margin: 2.5rem 0 0;
-  padding-top: 1.75rem;
-  border-top: 1px solid var(--fio);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.25rem 3rem;
+.pp-gema-faisca {
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  background:
+    linear-gradient(90deg, transparent 45%, #fff 50%, transparent 55%),
+    linear-gradient(transparent 45%, #fff 50%, transparent 55%);
+  border-radius: 50%;
+  animation: pp-faisca 3s ease-in-out infinite;
 }
 
-.pp-ficha dd {
-  margin: 0.375rem 0 0;
-  color: var(--neve);
+@keyframes pp-faisca {
+  0%, 100% { transform: scale(0) rotate(0); opacity: 0; }
+  50% { transform: scale(1.2) rotate(45deg); opacity: 1; }
 }
 
-.pp-ficha dd[data-alerta] {
-  color: var(--azul-claro);
+/* ── 7. Método G.R.O.W. ──────────────────────────────────────────── */
+
+.pp-grow-foto {
+  inset: 0 -12% 0 22%;
 }
 
-.pp-vencida {
-  margin-top: 2rem;
-  max-width: 54ch;
+.pp-grow-foto .pp-kb > img {
+  animation: pp-tela-pulsa 5s ease-in-out infinite;
+}
+
+@keyframes pp-tela-pulsa {
+  0%, 100% { filter: brightness(1) saturate(1); }
+  50% { filter: brightness(1.18) saturate(1.15); }
+}
+
+.pp-grow {
+  margin-top: clamp(1.5rem, 4vh, 2.5rem);
+  display: grid;
+  gap: 0.5rem;
+  max-width: 640px;
+}
+
+.pp-grow > li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 3.4rem 1fr;
+  align-items: center;
+  gap: 1rem;
   border-radius: 1rem;
-  border: 1px solid var(--fio-forte);
-  background: rgba(22, 104, 245, 0.1);
-  padding: 1rem;
-  font-size: 0.9rem;
-  line-height: 1.6;
+  padding: 0.7rem 1rem 0.7rem 0.5rem;
+}
+
+/* Um destaque passa de etapa em etapa, como se o método estivesse rodando. */
+.pp-grow > li::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  border: 1px solid rgba(107, 151, 255, 0.45);
+  background: linear-gradient(90deg, rgba(31, 92, 255, 0.22), rgba(31, 92, 255, 0.04));
+  opacity: 0;
+  animation: pp-etapa 10s ease-in-out infinite;
+  animation-delay: calc(var(--k) * 2.5s + 1.5s);
+}
+
+@keyframes pp-etapa {
+  0%, 30% { opacity: 0; }
+  5%, 22% { opacity: 1; }
+}
+
+.pp-grow-letra {
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-size: 3.2rem;
+  line-height: 1;
+  text-align: center;
   color: var(--azul-claro);
 }
 
-.pp-dica {
-  margin: 2.5rem 0 0;
-  display: inline-flex;
+.pp-grow b {
+  display: block;
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.3rem, 2.2vw, 1.9rem);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.pp-grow b small {
+  font-size: 0.7em;
+  color: var(--cinza);
+}
+
+.pp-grow li > span > span {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: #b9c0cc;
+}
+
+/* ── Diagnóstico ─────────────────────────────────────────────────── */
+
+.pp-diag {
+  margin-top: 2rem;
+  display: grid;
+  gap: 1rem;
+  max-width: 900px;
+}
+
+.pp-diag > li {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr;
+  gap: 1rem;
+  border-top: 1px solid #e3e3e3;
+  padding-top: 1rem;
+}
+
+.pp-diag > li > span {
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--azul);
+}
+
+.pp-diag p {
+  font-size: clamp(0.98rem, 1.4vw, 1.12rem);
+  line-height: 1.6;
+  color: #26292f;
+}
+
+/* ── 8 e 9. Ponto A e ponto B ────────────────────────────────────── */
+
+.pp-letra-fundo {
+  position: absolute;
+  right: -2vw;
+  bottom: -12vh;
+  z-index: 0;
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-size: 92dvh;
+  line-height: 0.8;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(107, 151, 255, 0.16);
+  pointer-events: none;
+  transform: translate3d(calc(var(--d, 0) * -22vw + var(--mx, 0) * -24px), 0, 0);
+}
+
+.pp-canais {
+  margin-top: clamp(1.75rem, 5vh, 3rem);
+  display: grid;
+  gap: clamp(1.25rem, 3.4vh, 2.2rem);
+  max-width: 980px;
+}
+
+.pp-canais > li {
+  display: grid;
+  grid-template-columns: clamp(4rem, 6.5vw, 5.6rem) 1fr;
+  align-items: center;
+  gap: clamp(1rem, 2.6vw, 2.2rem);
+  font-size: clamp(0.95rem, 1.4vw, 1.12rem);
+  line-height: 1.55;
+  color: #c3c9d4;
+}
+
+.pp-canais b {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 2.6vw, 2.3rem);
+  text-transform: uppercase;
+  color: var(--branco);
+}
+
+.pp-canal-icone {
+  display: block;
+  animation: pp-flutua 4.5s ease-in-out infinite;
+  animation-delay: calc(var(--k) * -1.4s);
+}
+
+.pp-icone {
+  display: block;
+  height: auto;
+  width: 100%;
+  filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.55));
+}
+
+/* A rota de A até B, com um ponto correndo. */
+.pp-rota {
+  position: absolute;
+  right: var(--margem);
+  bottom: 6.8rem;
+  z-index: 2;
+  display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: var(--neve);
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-size: 1.1rem;
 }
 
-.pp-dica-seta {
-  display: inline-block;
-  color: var(--azul-claro);
-  animation: pp-cutuca 1.8s var(--sai) infinite;
-}
-
-@keyframes pp-cutuca {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(8px);
-  }
-}
-
-/* A faixa de serviços, de ponta a ponta da tela, no pé da capa. */
-.pp-faixa {
-  position: absolute;
-  left: 50%;
-  bottom: -1.75rem;
-  width: 100vw;
-  translate: -50% 0;
-  overflow: hidden;
-  border-block: 1px solid var(--fio);
-  background: rgba(4, 6, 11, 0.35);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  padding: 0.85rem 0;
-  mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #000 12%,
-    #000 88%,
-    transparent
-  );
-}
-
-/* Âncora da faixa. Com movimento ligado o `transform` já faria isso;
-   aqui vale também para quem está com movimento reduzido. */
-.pp-slide {
+.pp-rota-linha {
   position: relative;
-  z-index: 1;
+  height: 2px;
+  width: clamp(5rem, 14vw, 12rem);
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.4) 0 6px, transparent 6px 12px);
 }
 
-.pp-faixa-trilho {
-  display: flex;
-  width: max-content;
-  animation: pp-faixa 46s linear infinite;
+.pp-rota-linha::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 10px;
+  width: 10px;
+  border-radius: 9999px;
+  background: var(--azul-claro);
+  box-shadow: 0 0 14px var(--azul-claro);
+  translate: -50% -50%;
+  animation: pp-rota 2.8s ease-in-out infinite;
 }
 
-.pp-faixa-grupo {
-  display: flex;
-  flex: none;
+@keyframes pp-rota {
+  0% { left: 0; }
+  85%, 100% { left: 100%; }
 }
 
-.pp-faixa-grupo > span {
-  display: inline-flex;
-  align-items: center;
-  white-space: nowrap;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--neve);
-}
-
-.pp-faixa-grupo i {
-  margin: 0 2.25rem;
-  font-style: normal;
-  font-size: 0.7rem;
+.pp-rota-b {
   color: var(--azul-claro);
 }
 
-@keyframes pp-faixa {
-  to {
-    transform: translate3d(-50%, 0, 0);
+@media (max-width: 639px) {
+  .pp-rota {
+    display: none;
+  }
+}
+
+.pp-pontob {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pp-pontob-grade {
+  margin-top: clamp(1.75rem, 4.5vh, 3rem);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1.5rem, 4vw, 4rem);
+}
+
+.pp-pontob-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: clamp(1.25rem, 2.5vw, 2rem);
+}
+
+.pp-pontob-item b {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 2.4vw, 2.2rem);
+  text-transform: uppercase;
+}
+
+.pp-pontob-item b .pp-icone {
+  width: 1.6em;
+}
+
+.pp-pontob-item p {
+  font-size: clamp(0.92rem, 1.25vw, 1.05rem);
+  line-height: 1.6;
+  color: #c3c9d4;
+}
+
+@media (max-width: 1100px) {
+  .pp-pontob-grade {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 639px) {
-  .pp-faixa {
-    display: none;
+  .pp-pontob-item {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* A conversa no WhatsApp. */
+.pp-chat {
+  width: clamp(230px, 20vw, 280px);
+  overflow: hidden;
+  border-radius: 1.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0b141a;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8), 0 0 0 6px #151a22;
+  font-size: 0.74rem;
+}
+
+.pp-chat-topo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #202c33;
+  padding: 0.7rem 0.85rem;
+}
+
+.pp-chat-topo b {
+  display: block;
+  max-width: 14ch;
+  overflow: hidden;
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pp-chat-topo i {
+  font-style: normal;
+  font-size: 0.66rem;
+  color: #8fd9a8;
+}
+
+.pp-chat-avatar {
+  display: grid;
+  height: 1.9rem;
+  width: 1.9rem;
+  flex: none;
+  place-items: center;
+  border-radius: 9999px;
+  background: var(--azul);
+  font-weight: 700;
+}
+
+.pp-chat-corpo {
+  display: flex;
+  min-height: 15.5rem;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.85rem;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.025) 0 2px, transparent 3px) 0 0 / 22px 22px,
+    #0b141a;
+}
+
+.pp-msg,
+.pp-digitando,
+.pp-chat-selo {
+  opacity: 0;
+  animation: pp-msg 13s ease infinite;
+  animation-delay: calc(var(--i) * 1.6s + 0.6s);
+}
+
+.pp-msg {
+  max-width: 82%;
+  border-radius: 0.7rem;
+  padding: 0.45rem 0.6rem;
+  line-height: 1.4;
+  color: #e9edef;
+}
+
+.pp-msg[data-lado="cliente"] {
+  align-self: flex-start;
+  border-top-left-radius: 0.15rem;
+  background: #202c33;
+}
+
+.pp-msg[data-lado="loja"] {
+  align-self: flex-end;
+  border-top-right-radius: 0.15rem;
+  background: #005c4b;
+}
+
+.pp-digitando {
+  display: flex;
+  align-self: flex-end;
+  gap: 3px;
+  border-radius: 0.7rem;
+  background: #005c4b;
+  padding: 0.55rem 0.65rem;
+  animation-name: pp-digita;
+}
+
+.pp-digitando > span {
+  height: 5px;
+  width: 5px;
+  border-radius: 9999px;
+  background: #cfe9e1;
+  animation: pp-ponto-digita 1s ease-in-out infinite;
+}
+
+.pp-digitando > span:nth-child(2) { animation-delay: 0.15s; }
+.pp-digitando > span:nth-child(3) { animation-delay: 0.3s; }
+
+.pp-chat-selo {
+  align-self: center;
+  margin-top: 0.3rem;
+  border-radius: 9999px;
+  background: rgba(37, 211, 102, 0.16);
+  padding: 0.3rem 0.8rem;
+  font-weight: 700;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4be38a;
+}
+
+@keyframes pp-msg {
+  0% { opacity: 0; transform: translateY(8px) scale(0.96); }
+  4%, 80% { opacity: 1; transform: none; }
+  86%, 100% { opacity: 0; transform: none; }
+}
+
+/* O "digitando" aparece e some antes da resposta chegar. */
+@keyframes pp-digita {
+  0% { opacity: 0; height: auto; }
+  2%, 10% { opacity: 1; }
+  12%, 100% { opacity: 0; display: none; }
+}
+
+@keyframes pp-ponto-digita {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50% { transform: translateY(-3px); opacity: 1; }
+}
+
+/* A página de vendas. */
+.pp-site {
+  position: relative;
+  width: clamp(240px, 21vw, 300px);
+  border-radius: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #f4f6fb;
+  color: #12151c;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8);
+  font-size: 0.72rem;
+}
+
+.pp-site-barra {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 0.9rem 0.9rem 0 0;
+  background: #dfe3ec;
+  padding: 0.5rem 0.7rem;
+}
+
+.pp-site-barra > span {
+  height: 0.5rem;
+  width: 0.5rem;
+  border-radius: 9999px;
+  background: #b6bdcb;
+}
+
+.pp-site-barra > i {
+  margin-left: 0.4rem;
+  flex: 1;
+  border-radius: 9999px;
+  background: #fff;
+  padding: 0.15rem 0.6rem;
+  font-style: normal;
+  font-size: 0.62rem;
+  color: #5b6270;
+}
+
+.pp-site-corpo {
+  display: grid;
+  gap: 0.9rem;
+  padding: 0.9rem;
+}
+
+.pp-site-hero {
+  display: grid;
+  gap: 0.4rem;
+  border-radius: 0.6rem;
+  background: linear-gradient(135deg, #0d1b4d, #1f5cff);
+  padding: 0.9rem;
+}
+
+.pp-esq {
+  display: block;
+  height: 0.6rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.pp-esq-fino {
+  height: 0.35rem;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.pp-site-cta {
+  margin-top: 0.3rem;
+  justify-self: start;
+  border-radius: 9999px;
+  background: #fff;
+  padding: 0.3rem 0.7rem;
+  font-weight: 700;
+  font-size: 0.62rem;
+  color: #1f5cff;
+  animation: pp-cta-site 2.2s ease-in-out infinite;
+}
+
+@keyframes pp-cta-site {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.55); }
+  60% { box-shadow: 0 0 0 7px rgba(255, 255, 255, 0); }
+}
+
+.pp-site-form {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.pp-site-campo {
+  display: block;
+  overflow: hidden;
+  border-radius: 0.4rem;
+  border: 1px solid #d5dae5;
+  background: #fff;
+  padding: 0.35rem 0.5rem;
+  white-space: nowrap;
+}
+
+.pp-site-digita {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  border-right: 1.5px solid #1f5cff;
+  font-style: normal;
+  max-width: 0;
+  animation: pp-digita-campo 8s steps(16, end) infinite;
+}
+
+@keyframes pp-digita-campo {
+  0%, 8% { max-width: 0; }
+  30%, 85% { max-width: 12em; }
+  95%, 100% { max-width: 0; }
+}
+
+.pp-site-enviar {
+  justify-self: stretch;
+  border-radius: 0.4rem;
+  background: #1f5cff;
+  padding: 0.4rem;
+  text-align: center;
+  font-weight: 700;
+  color: #fff;
+  animation: pp-enviar 8s ease infinite;
+}
+
+@keyframes pp-enviar {
+  0%, 36%, 44%, 100% { transform: none; filter: none; }
+  40% { transform: scale(0.95); filter: brightness(1.25); }
+}
+
+.pp-site-toast {
+  position: absolute;
+  right: -1.2rem;
+  top: 3.2rem;
+  display: grid;
+  gap: 0.1rem;
+  border-radius: 0.7rem;
+  background: #fff;
+  padding: 0.55rem 0.75rem;
+  box-shadow: 0 16px 34px -10px rgba(0, 0, 0, 0.55);
+  border-left: 3px solid #25d366;
+  opacity: 0;
+  animation: pp-toast 8s var(--sai) infinite;
+}
+
+.pp-site-toast b {
+  font-size: 0.68rem;
+  color: #12151c;
+}
+
+.pp-site-toast span {
+  font-size: 0.62rem;
+  color: #5b6270;
+}
+
+@keyframes pp-toast {
+  0%, 40% { opacity: 0; transform: translateY(10px) scale(0.9); }
+  46%, 82% { opacity: 1; transform: none; }
+  90%, 100% { opacity: 0; transform: translateY(-6px); }
+}
+
+@property --n {
+  syntax: "<integer>";
+  initial-value: 27;
+  inherits: false;
+}
+
+.pp-site-contador {
+  position: absolute;
+  left: -1.2rem;
+  bottom: -1.1rem;
+  display: grid;
+  border-radius: 0.7rem;
+  background: #0b0e14;
+  padding: 0.5rem 0.8rem;
+  color: #fff;
+  box-shadow: 0 16px 34px -10px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(107, 151, 255, 0.45);
+}
+
+.pp-site-contador span {
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cinza);
+}
+
+.pp-site-numero {
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-weight: 400;
+  font-size: 1.4rem;
+  line-height: 1.1;
+  counter-reset: n var(--n);
+  animation: pp-leads 24s steps(19, end) infinite;
+}
+
+.pp-site-numero::after {
+  content: counter(n);
+}
+
+@keyframes pp-leads {
+  from { --n: 27; }
+  to { --n: 46; }
+}
+
+/* ── 10. Segmentação ─────────────────────────────────────────────── */
+
+.pp-seg {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pp-seg-grade {
+  margin-top: clamp(1.75rem, 4.5vh, 3rem);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(1rem, 2vw, 1.75rem);
+}
+
+.pp-seg-grade > figure {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-radius: 1.25rem;
+  border: 1px solid var(--fio);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015));
+  padding: 1.5rem 1.25rem 1.25rem;
+}
+
+.pp-seg-grade figcaption {
+  position: absolute;
+  top: -0.95rem;
+  left: 1.25rem;
+  border-radius: 9999px;
+  background: #3cb3ff;
+  padding: 0.35rem 0.9rem;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: #04121f;
+  box-shadow: 0 10px 24px -8px rgba(60, 179, 255, 0.7);
+}
+
+.pp-seg-grade figure > p {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #b9c0cc;
+}
+
+@media (max-width: 899px) {
+  .pp-seg-grade {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+/* Grade de horários: as horas da noite acendem. */
+.pp-grade-h {
+  display: grid;
+  gap: 4px;
+  font-size: 0.6rem;
+  color: var(--cinza);
+}
+
+.pp-grade-h-horas,
+.pp-grade-h-linha {
+  display: grid;
+  grid-template-columns: 2rem repeat(8, 1fr);
+  gap: 4px;
+  align-items: center;
+}
+
+.pp-grade-h-horas {
+  padding-left: 2rem;
+  grid-template-columns: repeat(8, 1fr);
+}
+
+.pp-grade-h-linha > i {
+  height: 0.95rem;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.pp-grade-h-linha > i[data-on] {
+  animation: pp-celula 5s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.12s + 0.4s);
+}
+
+@keyframes pp-celula {
+  0% { background: rgba(255, 255, 255, 0.07); }
+  12%, 80% { background: var(--azul); box-shadow: 0 0 10px rgba(31, 92, 255, 0.6); }
+  100% { background: rgba(255, 255, 255, 0.07); }
+}
+
+/* Mapa com o raio de alcance. */
+.pp-mapa {
+  position: relative;
+  height: 8.6rem;
+  overflow: hidden;
+  border-radius: 0.8rem;
+}
+
+.pp-mapa svg {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.pp-mapa-raio {
+  position: absolute;
+  left: 58%;
+  top: 52%;
+  height: 7rem;
+  width: 7rem;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(60, 179, 255, 0.9);
+  background: rgba(60, 179, 255, 0.15);
+  translate: -50% -50%;
+  animation: pp-raio 2.6s ease-out infinite;
+}
+
+@keyframes pp-raio {
+  from { transform: scale(0.1); opacity: 1; }
+  to { transform: scale(1); opacity: 0; }
+}
+
+.pp-mapa-pino {
+  position: absolute;
+  left: 58%;
+  top: 52%;
+  height: 1.3rem;
+  width: 1.3rem;
+  border-radius: 50% 50% 50% 0;
+  background: #3cb3ff;
+  translate: -50% -100%;
+  rotate: -45deg;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+  animation: pp-pino 2.6s ease-in-out infinite;
+}
+
+.pp-mapa-pino::after {
+  content: "";
+  position: absolute;
+  inset: 30%;
+  border-radius: 9999px;
+  background: #04121f;
+}
+
+@keyframes pp-pino {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(3px, -3px); }
+}
+
+.pp-mapa-rotulo {
+  position: absolute;
+  left: 0.6rem;
+  bottom: 0.6rem;
+  border-radius: 9999px;
+  background: rgba(4, 18, 31, 0.85);
+  padding: 0.2rem 0.6rem;
+  font-size: 0.66rem;
+  color: #9fd8ff;
+}
+
+/* Interesses: busca digitando e etiquetas que aparecem. */
+.pp-interesses {
+  display: grid;
+  gap: 0.7rem;
+  min-height: 8.6rem;
+  align-content: start;
+}
+
+.pp-interesses-busca {
+  display: block;
+  overflow: hidden;
+  border-radius: 0.6rem;
+  border: 1px solid var(--fio);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.5rem 0.7rem;
+  font-size: 0.72rem;
+  color: var(--cinza);
+  white-space: nowrap;
+}
+
+.pp-interesses-busca > i {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  border-right: 1.5px solid #3cb3ff;
+  font-style: normal;
+  animation: pp-digita-campo 9s steps(30, end) infinite;
+}
+
+.pp-interesses-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.pp-interesses-chips > span {
+  border-radius: 9999px;
+  border: 1px solid rgba(60, 179, 255, 0.5);
+  background: rgba(60, 179, 255, 0.12);
+  padding: 0.3rem 0.65rem;
+  font-size: 0.7rem;
+  color: #cfeaff;
+  opacity: 0;
+  animation: pp-chip 9s var(--sai) infinite;
+  animation-delay: calc(var(--i) * 0.45s + 1.2s);
+}
+
+@keyframes pp-chip {
+  0% { opacity: 0; transform: scale(0.7); }
+  5%, 78% { opacity: 1; transform: none; }
+  86%, 100% { opacity: 0; transform: none; }
+}
+
+/* ── 11. Conteúdo ────────────────────────────────────────────────── */
+
+.pp-conteudo-topo {
+  padding-bottom: 1.5rem;
+}
+
+.pp-portfolio {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: clamp(0.8rem, 2vh, 1.25rem);
+  padding-bottom: 7rem;
+  transform: rotate(-3deg) translate3d(calc(var(--d, 0) * 18vw), 0, 0);
+}
+
+.pp-portfolio img {
+  height: clamp(150px, 24vh, 240px);
+  width: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 0.9rem;
+  box-shadow: 0 20px 40px -18px rgba(0, 0, 0, 0.9);
+}
+
+.pp-portfolio .pp-esteira-grupo {
+  gap: clamp(0.8rem, 1.6vw, 1.4rem);
+  padding-right: clamp(0.8rem, 1.6vw, 1.4rem);
+}
+
+/* ── 12. Planos ──────────────────────────────────────────────────── */
+
+.pp-planos-topo {
+  padding-bottom: 1.75rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.pp-t-planos .pp-titulo-tela {
+  font-size: clamp(2rem, 4.4vw, 4rem);
+}
+
+.pp-t-planos .pp-apoio {
+  margin-top: 0.6rem;
+  max-width: 62ch;
+}
+
+.pp-planos {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: min(1320px, calc(100% - 2 * var(--margem)));
+  margin: 0 auto;
+  padding-bottom: 7rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(0.9rem, 1.6vw, 1.5rem);
+  align-items: stretch;
+}
+
+.pp-palco[data-mov] .pp-planos {
+  transform: translate3d(calc(var(--d, 0) * 16vw), 0, 0);
+  opacity: calc(1 - var(--a, 0) * 0.8);
+}
+
+.pp-plano {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 1.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: linear-gradient(170deg, #0f1422, #080a10);
+  padding: clamp(1.25rem, 2vw, 1.75rem);
+}
+
+.pp-plano[data-recomendado] {
+  border-color: rgba(107, 151, 255, 0.8);
+  box-shadow: 0 30px 70px -30px rgba(31, 92, 255, 0.8);
+}
+
+.pp-plano[data-recomendado]::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: conic-gradient(from var(--ang), transparent 0 70%, #9bb9ff 85%, transparent);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: pp-borda 5s linear infinite;
+}
+
+@property --ang {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes pp-borda {
+  to { --ang: 360deg; }
+}
+
+.pp-plano-selo {
+  position: absolute;
+  top: -0.9rem;
+  left: 50%;
+  translate: -50% 0;
+  white-space: nowrap;
+  border-radius: 9999px;
+  background: var(--azul);
+  padding: 0.35rem 0.9rem;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pp-plano h3 {
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+  text-transform: uppercase;
+  line-height: 1;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid rgba(31, 92, 255, 0.7);
+}
+
+.pp-plano-formula {
+  margin-top: 0.75rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.pp-plano-para {
+  margin-top: 0.45rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--cinza);
+}
+
+.pp-plano ul {
+  margin: 0.9rem 0 1.1rem;
+  display: grid;
+  gap: 0.32rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: #d5dae3;
+}
+
+.pp-plano li {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pp-plano li::before {
+  content: "";
+  margin-top: 0.45em;
+  height: 0.35rem;
+  width: 0.35rem;
+  flex: none;
+  border-radius: 9999px;
+  background: var(--azul-claro);
+}
+
+.pp-plano[data-escolhido]:not([data-recomendado]) {
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.pp-plano-seu {
+  margin-bottom: 0.6rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--azul-claro);
+}
+
+.pp-plano-preco {
+  margin-top: auto;
+  display: grid;
+  justify-items: center;
+  border-radius: 0.9rem;
+  background: var(--branco);
+  padding: 0.55rem 0.9rem 0.6rem;
+  color: #050505;
+}
+
+.pp-plano-preco span {
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--azul);
+}
+
+.pp-plano-preco b {
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.8rem, 2.8vw, 2.5rem);
+  line-height: 1.05;
+}
+
+@media (max-width: 1023px) {
+  .pp-planos {
+    grid-template-columns: 1fr;
+    max-width: 560px;
+    gap: 2rem;
+  }
+}
+
+/* ── 13. Plano selecionado ───────────────────────────────────────── */
+
+.pp-t-escolhido {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.pp-escolhido-foto {
+  position: relative;
+  overflow: hidden;
+  min-height: 100%;
+}
+
+.pp-escolhido-foto .pp-foto {
+  inset: 0 -14%;
+}
+
+.pp-escolhido-foto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(rgba(5, 6, 8, 0.35), rgba(5, 6, 8, 0.15) 40%, rgba(5, 6, 8, 0.65));
+}
+
+.pp-escolhido-titulo {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 clamp(1.5rem, 4vw, 4rem);
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-size: clamp(3rem, 7.2vw, 7rem);
+  line-height: 0.9;
+  text-transform: uppercase;
+  text-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  transform: translate3d(calc(var(--d, 0) * 10vw), 0, 0);
+}
+
+.pp-completa > span {
+  font-style: italic;
+}
+
+.pp-escolhido-texto {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--branco);
+  color: #050505;
+  padding: 5rem clamp(1.5rem, 4vw, 4.5rem) 7rem;
+}
+
+.pp-escolhido-nome {
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-weight: 400;
+  font-size: clamp(2.6rem, 5vw, 4.8rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--azul-real);
+}
+
+.pp-escolhido-lista {
+  margin-top: 1.1rem;
+  display: grid;
+  gap: 0.3rem;
+  font-size: clamp(0.85rem, 1.15vw, 1rem);
+  line-height: 1.45;
+  color: #1c1f25;
+}
+
+.pp-escolhido-lista > li::before {
+  content: "• ";
+  color: var(--azul);
+}
+
+.pp-investimento {
+  margin-top: clamp(1.25rem, 3vh, 2rem);
+}
+
+.pp-investimento-rotulo {
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-size: clamp(1.8rem, 3.4vw, 3rem);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.pp-oferta {
+  margin-top: 0.6rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--azul);
+}
+
+.pp-de {
+  margin-top: 0.5rem;
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-size: clamp(1.4rem, 2.4vw, 2.2rem);
+  text-transform: uppercase;
+  color: #5b6270;
+}
+
+.pp-de s {
+  position: relative;
+  text-decoration: none;
+}
+
+.pp-de s::after {
+  content: "";
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  top: 50%;
+  height: 0.08em;
+  background: #e0242c;
+  transform: rotate(-6deg) scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s var(--sai) 1.6s;
+}
+
+.pp-palco section[data-visto] .pp-de s::after {
+  transform: rotate(-6deg) scaleX(1);
+}
+
+.pp-por {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-size: clamp(3rem, 6vw, 5.6rem);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.pp-por > span:first-child {
+  font-size: 0.5em;
+}
+
+.pp-por small {
+  font-size: 0.32em;
+  color: #5b6270;
+}
+
+.pp-condicao {
+  margin-top: 0.6rem;
+  max-width: 52ch;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #5b6270;
+}
+
+.pp-prazo {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5b6270;
+}
+
+.pp-regressiva {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.pp-regressiva > span {
+  display: grid;
+  justify-items: center;
+  min-width: 3rem;
+  border-radius: 0.5rem;
+  background: #050505;
+  padding: 0.3rem 0.4rem;
+  color: #fff;
+}
+
+.pp-regressiva b {
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-weight: 400;
+  font-size: 1.3rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.pp-regressiva i {
+  font-style: normal;
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  color: #9aa3b2;
+}
+
+@media (max-width: 899px) {
+  .pp-t-escolhido {
+    display: flex;
+  }
+  .pp-escolhido-foto {
+    min-height: 46dvh;
+    flex: none;
+  }
+  .pp-escolhido-titulo {
+    font-size: clamp(2.6rem, 12vw, 4rem);
+  }
+  .pp-escolhido-texto {
+    padding-top: 2.5rem;
   }
 }
 
 /* ── Próximos passos ─────────────────────────────────────────────── */
 
 .pp-passos {
-  position: relative;
+  margin-top: 2rem;
   display: grid;
-  gap: 1.15rem;
-  max-width: 660px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* O fio da linha do tempo se desenha de cima para baixo. */
-.pp-passos::before {
-  content: "";
-  position: absolute;
-  left: 1.125rem;
-  top: 1.2rem;
-  bottom: 1.2rem;
-  width: 1px;
-  background: linear-gradient(var(--azul), rgba(87, 152, 255, 0.12));
-  transform-origin: top;
-}
-
-.pp-palco[data-mov] .pp-passos::before {
-  transform: scaleY(0);
-  transition: transform 1.8s cubic-bezier(0.65, 0, 0.35, 1) 0.5s;
-}
-
-.pp-palco[data-mov] section[data-visto] .pp-passos::before {
-  transform: scaleY(1);
+  gap: 1rem;
+  max-width: 760px;
 }
 
 .pp-passos > li {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 1.25rem;
-}
-
-.pp-passos .pp-texto-linha {
-  padding-top: 0.4rem;
-}
-
-.pp-passo-marca {
   display: grid;
-  height: 2.25rem;
-  width: 2.25rem;
-  flex: none;
-  place-items: center;
-  border-radius: 9999px;
-  border: 1px solid var(--fio-forte);
-  background: var(--tinta);
-  box-shadow: 0 0 24px -6px rgba(22, 104, 245, 0.8);
-  font-family: var(--fonte-dado), ui-monospace, monospace;
-  font-size: 0.72rem;
-  font-weight: 600;
+  grid-template-columns: 3rem 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.pp-passos > li > span {
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-size: 1.8rem;
+  line-height: 1;
   color: var(--azul-claro);
 }
 
-/* ── Aceite ──────────────────────────────────────────────────────── */
+.pp-passos p {
+  padding-top: 0.2rem;
+  line-height: 1.55;
+  color: #d5dae3;
+}
 
-.pp-aceite {
+/* ── 14. Compromisso ─────────────────────────────────────────────── */
+
+.pp-compromisso {
+  margin-bottom: 0.25em;
+  font-size: clamp(3rem, 9vw, 9rem);
+  line-height: 0.9;
+  font-style: italic;
+  transform: skewX(-8deg);
+}
+
+.pp-proximo {
+  margin-top: clamp(1.5rem, 4vh, 2.8rem);
+  font-size: clamp(2rem, 5.6vw, 5.4rem);
+  line-height: 0.95;
+  font-style: italic;
+}
+
+.pp-assinar {
+  margin-top: clamp(1.25rem, 3vh, 2rem);
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   align-items: center;
-  margin-inline: auto;
-  max-width: 820px;
-  text-align: center;
+  justify-content: center;
+  gap: 0.6rem 1.25rem;
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-size: clamp(1.2rem, 2.4vw, 2.2rem);
+  text-transform: uppercase;
 }
 
-.pp-aceite .pp-rotulo::after {
-  content: "";
-  display: block;
-  height: 1px;
-  width: 1.75rem;
-  flex: none;
-  background: var(--azul);
+.pp-assina {
+  display: inline-block;
+  font-family: var(--f-assina), cursive;
+  font-size: 2.1em;
+  line-height: 1;
+  text-transform: none;
+  color: #111;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 1.6s cubic-bezier(0.6, 0, 0.3, 1) 1.2s;
 }
 
-@media (min-width: 640px) {
-  .pp-aceite .pp-rotulo::after {
-    width: 2.5rem;
-  }
-}
-
-.pp-aceite .pp-mostro {
-  margin-inline: auto;
-}
-
-.pp-aceite .pp-apoio {
-  margin-inline: auto;
+.pp-palco section[data-visto] .pp-assina {
+  clip-path: inset(0 -10% 0 0);
 }
 
 .pp-cta {
+  margin-top: clamp(1.75rem, 4vh, 2.5rem);
   position: relative;
-  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
   gap: 0.75rem;
-  padding: 1.15rem 2.5rem;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: var(--azul);
+  padding: 1.1rem 2.4rem;
+  font-weight: 700;
   font-size: 1rem;
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 18px 40px -16px rgba(31, 92, 255, 0.95);
   animation: pp-chama 2.6s ease-out infinite;
 }
 
@@ -1578,12 +2351,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    110deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.38) 50%,
-    transparent 70%
-  );
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%);
   transform: translateX(-120%);
   animation: pp-reflexo 3.4s ease-in-out infinite;
 }
@@ -1601,410 +2369,277 @@
 }
 
 @keyframes pp-reflexo {
-  0%,
-  45% {
-    transform: translateX(-120%);
-  }
-  100% {
-    transform: translateX(120%);
-  }
+  0%, 45% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
 }
 
 @keyframes pp-chama {
-  0% {
-    box-shadow:
-      0 18px 50px -18px rgba(22, 104, 245, 0.95),
-      0 0 0 0 rgba(22, 104, 245, 0.55);
-  }
-  100% {
-    box-shadow:
-      0 18px 50px -18px rgba(22, 104, 245, 0.95),
-      0 0 0 18px rgba(22, 104, 245, 0);
-  }
+  0% { box-shadow: 0 18px 40px -16px rgba(31, 92, 255, 0.95), 0 0 0 0 rgba(31, 92, 255, 0.5); }
+  100% { box-shadow: 0 18px 40px -16px rgba(31, 92, 255, 0.95), 0 0 0 18px rgba(31, 92, 255, 0); }
 }
 
 .pp-rodape {
-  margin: 3rem 0 0;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--fio);
-  font-size: 0.78rem;
-  line-height: 1.7;
-  color: var(--cinza);
+  margin-top: 2.6rem;
+  max-width: 70ch;
+  font-size: 0.74rem;
+  line-height: 1.6;
+  color: #8a8f99;
 }
 
-/* ── Cabeçalho e progresso ───────────────────────────────────────── */
+/* ── Cabeçalho, progresso e controles ────────────────────────────── */
+
+.pp-topo,
+.pp-controles {
+  position: absolute;
+  inset-inline: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  pointer-events: none;
+}
+
+.pp-topo {
+  top: 0;
+  padding: 1.6rem var(--margem) 0;
+  color: #fff;
+  mix-blend-mode: difference;
+}
+
+.pp-topo-lampada {
+  display: block;
+  height: 2rem;
+  width: auto;
+}
 
 .pp-topo-logo {
   display: block;
-  height: 28px;
+  height: 30px;
   width: auto;
   max-width: 140px;
   object-fit: contain;
 }
 
-/* O vetor herda a cor do palco, que é branca — a mesma do texto que ele
-   substitui. A altura é menor que a do logo enviado porque o lockup é
-   muito mais largo: 9 para 1 contra 2 para 1. */
-.pp-topo-vetor {
-  display: block;
-  height: 15px;
-  width: auto;
-  color: var(--branco);
+.pp-topo-arroba {
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
 }
 
-.pp-topo-marca {
-  margin: 0;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: 0.85rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+.pp-progresso {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  z-index: 21;
+  height: 3px;
+  background: rgba(127, 127, 127, 0.25);
 }
 
 .pp-progresso > span {
-  box-shadow:
-    0 0 14px rgba(22, 104, 245, 0.9),
-    0 0 2px var(--azul-claro);
+  display: block;
+  height: 100%;
+  background: var(--azul);
+  box-shadow: 0 0 12px rgba(31, 92, 255, 0.9);
   transition: width 0.6s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-/* ── Movimento reduzido: tudo parado, tudo visível ───────────────── */
-
-
-/* ═══════════════════════════════════════════════════════════════════
-   AS TELAS DA PROPOSTA ORIGINAL
-
-   Números da agência, o caminho do ponto A ao ponto B, a segmentação e
-   os três níveis. Todo o movimento daqui é `transform` e `opacity`, que
-   a placa de vídeo compõe sem refazer layout — e todo ele morre no
-   `prefers-reduced-motion` no fim do arquivo.
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* ── Números ─────────────────────────────────────────────────────── */
-
-.pp-numeros {
-  margin: 0;
-  display: grid;
-  gap: 1.75rem 2.5rem;
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-}
-
-.pp-numeros dt {
-  margin: 0;
-}
-
-.pp-numeros-valor {
-  font-size: clamp(2.2rem, 6vw, 3.6rem);
-  line-height: 1;
-  color: var(--branco);
-  /* Tabular para o número não dançar enquanto sobe: sem isto, a largura
-     de cada dígito muda e a linha inteira treme na contagem. */
-  font-variant-numeric: tabular-nums;
-}
-
-.pp-numeros-rotulo {
-  margin: 0.5rem 0 0;
-  max-width: 16ch;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: var(--neve);
-}
-
-/* ── Canais do ponto A e do ponto B ──────────────────────────────── */
-
-.pp-canais {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-}
-
-.pp-canais[data-dois] {
-  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
-}
-
-.pp-canal-nome {
-  margin: 0;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--branco);
-}
-
-.pp-canal-texto {
-  margin: 0.75rem 0 0;
-  font-size: 0.92rem;
-  line-height: 1.65;
-  color: var(--neve);
-}
-
-/* O fio de luz que atravessa o cartão: diz, em imagem, que ali passa
-   gente — e corre uma vez cada, em tempos diferentes, para não virar
-   pisca-pisca sincronizado. */
-.pp-palco[data-mov] section[data-visto] .pp-canal::after {
-  content: "";
-  position: absolute;
-  left: 0;
+.pp-controles {
   bottom: 0;
-  height: 2px;
-  width: 100%;
-  background: linear-gradient(90deg, transparent, var(--azul-claro), transparent);
-  transform: translate3d(-100%, 0, 0);
-  animation: pp-passa 2.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  animation-delay: calc(var(--i, 0) * 260ms + 500ms);
+  z-index: auto;
+  padding: 1.5rem var(--margem) max(1.25rem, env(safe-area-inset-bottom));
 }
 
-@keyframes pp-passa {
-  to {
-    transform: translate3d(100%, 0, 0);
-  }
-}
-
-/* ── Segmentação: o radar ────────────────────────────────────────── */
-
-.pp-mira {
-  position: relative;
-  display: grid;
-  place-items: center;
-  min-height: 22rem;
-  padding: 2.5rem 0;
-}
-
-.pp-mira-texto {
-  position: relative;
-  z-index: 2;
-  margin: 0;
-  max-width: 34ch;
-  text-align: center;
-  font-size: var(--guia);
-  line-height: 1.7;
-  color: var(--neve);
-}
-
-.pp-mira-anel,
-.pp-mira-varre {
-  position: absolute;
-  top: 50%;
-  left: 50%;
+.pp-botao {
+  pointer-events: auto;
+  display: flex;
+  height: 3rem;
+  width: 3rem;
+  flex: none;
+  align-items: center;
+  justify-content: center;
   border-radius: 9999px;
-  pointer-events: none;
+  border: 1px solid rgba(127, 127, 127, 0.45);
+  background: rgba(127, 127, 127, 0.18);
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background-color 0.2s;
 }
 
-.pp-mira-anel {
-  /* Maior que o texto, para emoldurar em vez de cortar: o anel de 13rem
-     passava por dentro das linhas e parecia erro de alinhamento. */
-  height: 26rem;
-  width: 26rem;
-  margin: -13rem 0 0 -13rem;
-  border: 1px solid var(--fio-forte);
-  opacity: 0;
+.pp-botao:hover:not(:disabled) {
+  background: rgba(127, 127, 127, 0.35);
 }
 
-/* Três anéis saindo do centro, um atrás do outro: é o pulso do radar. */
-.pp-palco[data-mov] section[data-visto] .pp-mira-anel {
-  animation: pp-pulso 3.6s ease-out infinite;
-}
-.pp-palco[data-mov] section[data-visto] .pp-mira-anel:nth-of-type(2) {
-  animation-delay: 1.2s;
-}
-.pp-palco[data-mov] section[data-visto] .pp-mira-anel:nth-of-type(3) {
-  animation-delay: 2.4s;
+.pp-botao:disabled {
+  opacity: 0.2;
+  cursor: default;
 }
 
-@keyframes pp-pulso {
-  0% {
-    transform: scale(0.35);
-    opacity: 0;
-  }
-  18% {
-    opacity: 0.85;
-  }
-  100% {
-    transform: scale(1.6);
-    opacity: 0;
-  }
-}
-
-/* A varredura: um setor de luz girando devagar, como a agulha do radar. */
-.pp-mira-varre {
-  height: 34rem;
-  width: 34rem;
-  margin: -17rem 0 0 -17rem;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    rgba(87, 152, 255, 0.22) 28deg,
-    transparent 60deg
-  );
-  mask-image: radial-gradient(circle, #000 32%, transparent 72%);
-}
-
-.pp-palco[data-mov] section[data-visto] .pp-mira-varre {
-  animation: pp-gira 9s linear infinite;
-}
-
-@keyframes pp-gira {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ── Os três níveis ─────────────────────────────────────────────── */
-
-.pp-niveis {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-}
-
-.pp-nivel-nome {
-  margin: 0.75rem 0 0;
-  font-family: var(--fonte-display), system-ui, sans-serif;
-  font-size: 1.15rem;
-  font-weight: 800;
-  letter-spacing: -0.025em;
-  color: var(--branco);
-}
-
-.pp-nivel-tag {
-  margin: 0.5rem 0 0;
-  font-size: 0.85rem;
-  line-height: 1.55;
-  color: var(--cinza);
-}
-
-.pp-nivel-selo {
-  display: inline-block;
-  border-radius: 9999px;
+.pp-botao[data-principal] {
+  border-color: transparent;
   background: var(--azul);
-  padding: 0.25rem 0.7rem;
-  font-family: var(--fonte-dado), ui-monospace, monospace;
-  font-size: 0.62rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--branco);
+  box-shadow: 0 10px 30px -10px rgba(31, 92, 255, 0.9);
 }
 
-/* O selo do plano desta proposta respira. O "mais recomendado" dos
-   outros fica parado e em contorno: um chama, o outro só informa. */
-.pp-palco[data-mov] section[data-visto] .pp-nivel-selo:not([data-fraco]) {
-  animation: pp-respira 2.8s ease-in-out infinite;
+.pp-botao[data-principal]:hover:not(:disabled) {
+  background: #1747d1;
 }
 
-.pp-nivel-selo[data-fraco] {
-  background: transparent;
-  border: 1px solid var(--fio-forte);
-  color: var(--azul-claro);
+.pp-botao[data-principal]:disabled {
+  background: rgba(127, 127, 127, 0.25);
+  box-shadow: none;
 }
 
-@keyframes pp-respira {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(22, 104, 245, 0.55);
-  }
-  60% {
-    box-shadow: 0 0 0 10px rgba(22, 104, 245, 0);
-  }
+.pp-pontos,
+.pp-contador-mob {
+  mix-blend-mode: difference;
+  color: #fff;
 }
 
-/* Entregas em duas colunas quando há espaço: doze itens numa coluna só
-   viram uma lista que não cabe na tela. */
+.pp-pontos {
+  pointer-events: auto;
+  display: none;
+  align-items: center;
+}
+
 @media (min-width: 640px) {
-  .pp-itens-duas {
-    grid-template-columns: 1fr 1fr;
-    column-gap: 2rem;
+  .pp-pontos {
+    display: flex;
   }
-}
-
-/* ── A oferta ────────────────────────────────────────────────────── */
-
-.pp-de {
-  margin: 0 0 0.25rem;
-  font-size: 0.9rem;
-  color: var(--cinza);
-}
-
-.pp-de s {
-  text-decoration-thickness: 1px;
-}
-
-.pp-off {
-  margin-left: 0.6rem;
-  display: inline-block;
-  border-radius: 9999px;
-  background: rgba(22, 104, 245, 0.18);
-  border: 1px solid var(--fio-forte);
-  padding: 0.1rem 0.55rem;
-  font-family: var(--fonte-dado), ui-monospace, monospace;
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: var(--azul-claro);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pp-palco[data-mov] [data-revela],
-  .pp-palco[data-mov] .pp-mascara > span,
-  .pp-palco[data-mov] .pp-selo {
-    opacity: 1;
-    transform: none;
-    filter: none;
-    scale: 1;
-    transition: none;
-  }
-  .pp-palco[data-mov] .pp-janela-moldura {
-    clip-path: none;
-    transition: none;
-  }
-  .pp-palco[data-mov] .pp-passos::before {
-    transform: none;
-    transition: none;
-  }
-  /* As animações das telas novas também param: radar girando e selo
-     pulsando são exatamente o que incomoda quem pediu menos movimento. */
-  .pp-palco[data-mov] section[data-visto] .pp-canal::after,
-  .pp-palco[data-mov] section[data-visto] .pp-mira-anel,
-  .pp-palco[data-mov] section[data-visto] .pp-mira-varre,
-  .pp-palco[data-mov] section[data-visto] .pp-nivel-selo:not([data-fraco]) {
-    animation: none;
-  }
-  .pp-mira-anel {
-    opacity: 0.4;
-  }
-  .pp-kb,
-  .pp-brilho,
-  .pp-poeira > span,
-  .pp-janela-varredura,
-  .pp-faixa-trilho,
-  .pp-dica-seta,
-  .pp-cta,
-  .pp-cta::before,
-  .pp-selo-pulso::after,
-  .pp-bloco[data-destaque]::after {
-    animation: none;
-  }
-  .pp-poeira {
+  .pp-contador-mob {
     display: none;
   }
 }
 
-/* ── Impressão ───────────────────────────────────────────────────── */
+.pp-contador-mob {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.pp-ponto {
+  display: flex;
+  height: 2.75rem;
+  width: 1.3rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.pp-ponto > span {
+  display: block;
+  height: 0.45rem;
+  width: 0.45rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.35);
+  transition: all 0.3s;
+}
+
+.pp-ponto[aria-current] > span {
+  width: 1.8rem;
+  background: #fff;
+}
+
+/* O grão de filme por cima de tudo. */
+.pp-grao {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  opacity: 0.16;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23r)' opacity='.5'/%3E%3C/svg%3E");
+}
+
+/* O aviso de que a tela continua abaixo, no telefone. Fica no palco, e
+   não como `::after` fixo dentro da seção: dentro do trilho com rolagem
+   própria o Chrome desenhava a faixa chapada, por cima do texto. */
+.pp-mais {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 84px;
+  z-index: 15;
+  display: none;
+  height: 64px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  background: linear-gradient(to top, rgba(5, 6, 8, 0.85), rgba(5, 6, 8, 0));
+}
+
+.pp-mais > span {
+  position: absolute;
+  left: 50%;
+  bottom: 0.25rem;
+  translate: -50% 0;
+  color: var(--azul-claro);
+  animation: pp-desce 1.6s ease-in-out infinite;
+}
+
+@keyframes pp-desce {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50% { transform: translateY(4px); opacity: 1; }
+}
+
+@media (max-width: 899px) {
+  .pp-mais {
+    display: block;
+  }
+  .pp-palco:has(section[data-ativo][data-tem-mais]) .pp-mais {
+    opacity: 1;
+  }
+  .pp-conteudo {
+    padding: 5rem 0 7rem;
+  }
+}
+
+/* ── Movimento reduzido: tudo parado, tudo visível ───────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-palco[data-mov] [data-revela],
+  .pp-palco[data-mov] .pp-linha > span {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+  .pp-palco[data-mov] .pp-traco,
+  .pp-palco[data-mov] .pp-versus-linha {
+    transform: none;
+  }
+  .pp-assina {
+    clip-path: none;
+  }
+  .pp *,
+  .pp *::before,
+  .pp *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .pp-coracoes,
+  .pp-outdoor-farol {
+    display: none;
+  }
+}
+
+/* ── Impressão: uma tela por página ──────────────────────────────── */
 
 @media print {
   .pp-palco {
     height: auto;
     overflow: visible;
   }
-  .pp-cenario,
   .pp-grao,
-  .pp-lanterna,
-  .pp-fundo,
-  .pp-numeral,
-  .pp-faixa,
-  .pp-janela-varredura,
   .pp-topo,
   .pp-controles,
-  .pp-progresso {
+  .pp-progresso,
+  .pp-mais {
     display: none;
   }
   .pp-trilho {
@@ -2013,24 +2648,15 @@
     overflow: visible;
   }
   .pp-trilho > section {
-    height: auto;
-    width: auto;
-    overflow: visible;
+    height: 100vh;
+    width: 100%;
     break-after: page;
   }
-  .pp-quadro {
-    padding: 2rem 0;
-  }
-  .pp-palco[data-mov] .pp-slide,
   .pp-palco[data-mov] [data-revela],
-  .pp-palco[data-mov] .pp-mascara > span,
-  .pp-palco[data-mov] .pp-selo {
+  .pp-palco[data-mov] .pp-linha > span,
+  .pp-palco[data-mov] .pp-conteudo {
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;
-    scale: 1 !important;
-  }
-  .pp-palco[data-mov] .pp-janela-moldura {
-    clip-path: none !important;
   }
 }
