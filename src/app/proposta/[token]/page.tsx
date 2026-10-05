@@ -6,7 +6,8 @@ import {
   Newsreader,
 } from "next/font/google";
 import { Deck } from "./deck";
-import { Slide, Bloco, eco } from "./slide";
+import { Slide, Bloco, Janela, eco, ordem } from "./slide";
+import { Contador } from "./movimento";
 import { carregarMarcaPublica, carregarPorToken } from "@/lib/propostas";
 import {
   condicoesDosServicos,
@@ -78,6 +79,23 @@ export async function generateMetadata({
   };
 }
 
+/* As fotos da proposta. Uma por tela de argumento e uma por serviço do
+   catálogo: quando a agência cadastrar um serviço novo sem foto, ele cai
+   na foto do escopo em vez de abrir com moldura vazia. */
+const FOTO = (nome: string) => `/proposta/${nome}.webp`;
+const FOTOS_DE_SERVICO = new Set([
+  "estrategia",
+  "social",
+  "video",
+  "meta",
+  "google",
+  "relatorio",
+  "implantacao",
+  "landing",
+]);
+const fotoDoServico = (id: string) =>
+  FOTO(FOTOS_DE_SERVICO.has(id) ? id : "escopo");
+
 const dataBR = (iso: string) =>
   new Date(`${iso}T12:00:00`).toLocaleDateString("pt-BR", {
     day: "2-digit",
@@ -131,78 +149,102 @@ export default async function PaginaProposta({
   const condicoesDeSempre = condicoesDosServicos(fichas.map((f) => f.ficha.id));
   const totalContrato = p.valor_mensal * p.meses_contrato + p.valor_setup;
 
+  const principais = fichas.filter((f) => f.ficha.papel === "principal").length;
+
   return (
     <div
       className={`pp ${display.variable} ${prosa.variable} ${dado.variable}`}
     >
-      <Deck marca={nomeAgencia}>
+      <Deck marca={nomeAgencia} logo={marca?.logo_url ?? null}>
         {/* ── Capa ────────────────────────────────────────────────── */}
-        <Slide centrado>
-          <div>
-            <p className="pp-rotulo">Proposta comercial · {p.numero}</p>
+        <Slide centrado fundo={FOTO("capa")} veu="esquerda">
+          <div className="pp-capa">
+            {/* A logo do cliente na capa: a primeira coisa que ele vê é
+                o próprio nome, e não o da agência. */}
+            {p.cliente_logo_url && /^https?:\/\//i.test(p.cliente_logo_url) ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={p.cliente_logo_url}
+                alt={p.cliente_nome ?? ""}
+                className="pp-capa-logo"
+                data-revela=""
+                style={ordem(0)}
+              />
+            ) : null}
+            <p className="pp-rotulo" data-revela="" style={ordem(0)}>
+              Proposta comercial · {p.numero}
+            </p>
 
-            <h1 className="pp-mostro">{p.cliente_nome ?? p.titulo}</h1>
+            <h1 className="pp-mostro">
+              <span className="pp-mascara">
+                <span>{p.cliente_nome ?? p.titulo}</span>
+              </span>
+            </h1>
 
-            {p.introducao ? <p className="pp-apoio">{p.introducao}</p> : null}
+            {p.introducao ? (
+              <p className="pp-apoio" data-revela="" style={ordem(2)}>
+                {p.introducao}
+              </p>
+            ) : null}
 
-            <dl
-              style={{
-                marginTop: "2.5rem",
-                paddingTop: "1.75rem",
-                borderTop: "1px solid var(--fio)",
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "1.25rem 3rem",
-              }}
-            >
+            <dl className="pp-ficha" data-revela="" style={ordem(3)}>
               <div>
                 <dt className="pp-mono">Emitida em</dt>
-                <dd style={{ margin: "0.375rem 0 0", color: "var(--neve)" }}>
-                  {dataBR(p.criado_em.slice(0, 10))}
-                </dd>
+                <dd>{dataBR(p.criado_em.slice(0, 10))}</dd>
               </div>
               {p.validade ? (
                 <div>
                   <dt className="pp-mono">
                     {vencida ? "Venceu em" : "Válida até"}
                   </dt>
-                  <dd
-                    style={{
-                      margin: "0.375rem 0 0",
-                      color: vencida ? "var(--azul-claro)" : "var(--neve)",
-                    }}
-                  >
+                  <dd data-alerta={vencida ? "" : undefined}>
                     {dataBR(p.validade)}
                   </dd>
                 </div>
               ) : null}
               <div>
                 <dt className="pp-mono">Por</dt>
-                <dd style={{ margin: "0.375rem 0 0", color: "var(--neve)" }}>
-                  {nomeAgencia}
-                </dd>
+                <dd>{nomeAgencia}</dd>
               </div>
             </dl>
 
             {vencida ? (
-              <p
-                style={{
-                  marginTop: "2rem",
-                  maxWidth: "54ch",
-                  borderRadius: "1rem",
-                  border: "1px solid var(--fio-forte)",
-                  background: "rgba(22,104,245,0.1)",
-                  padding: "1rem",
-                  fontSize: "0.9rem",
-                  lineHeight: 1.6,
-                  color: "var(--azul-claro)",
-                }}
-              >
+              <p className="pp-vencida" data-revela="" style={ordem(4)}>
                 Esta proposta passou da validade. Fale com a {nomeAgencia} para
                 receber uma versão atualizada, com os valores conferidos.
               </p>
-            ) : null}
+            ) : (
+              <p
+                className="pp-mono pp-dica"
+                data-revela=""
+                style={ordem(4)}
+              >
+                <span>Deslize para começar</span>
+                <span aria-hidden className="pp-dica-seta">
+                  →
+                </span>
+              </p>
+            )}
           </div>
+
+          {/* A faixa de serviços correndo no pé da capa: antes de ler uma
+              linha, a pessoa já viu tudo o que está sendo oferecido. */}
+          {fichas.length > 0 ? (
+            <div aria-hidden className="pp-faixa">
+              <div className="pp-faixa-trilho">
+                {[0, 1].map((volta) => (
+                  <span key={volta} className="pp-faixa-grupo">
+                    {fichas.map(({ ficha }) => (
+                      <span key={ficha.id}>
+                        {ficha.nome}
+                        <i>✦</i>
+                      </span>
+                    ))}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </Slide>
 
         {/* ── Diagnóstico ─────────────────────────────────────────── */}
@@ -213,32 +255,30 @@ export default async function PaginaProposta({
             rotulo="Diagnóstico"
             titulo={eco("O que encontramos")}
             apoio="O ponto de partida desta proposta. Se algo aqui estiver errado, o escopo muda junto."
+            visual={
+              <Janela
+                src={FOTO("diagnostico")}
+                alt="Lupa sobre gráficos de desempenho"
+                legenda="Leitura da operação atual"
+                selo={
+                  <>
+                    <span className="pp-selo-pulso" />
+                    <span>
+                      <strong>{n.diagnostico.length}</strong> pontos de atenção
+                    </span>
+                  </>
+                }
+              />
+            }
           >
-            <ol
-              style={{
-                display: "grid",
-                gap: "0.75rem",
-                margin: 0,
-                padding: 0,
-                listStyle: "none",
-              }}
-            >
+            <ol className="pp-lista">
               {n.diagnostico.map((d, i) => (
                 <li key={d}>
-                  <Bloco className="pp-linha">
+                  <Bloco className="pp-linha" indice={3 + i}>
                     <span className="pp-marcador">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span
-                      style={{
-                        minWidth: 0,
-                        alignSelf: "center",
-                        lineHeight: 1.65,
-                        color: "var(--neve)",
-                      }}
-                    >
-                      {d}
-                    </span>
+                    <span className="pp-texto-linha">{d}</span>
                   </Bloco>
                 </li>
               ))}
@@ -248,30 +288,19 @@ export default async function PaginaProposta({
 
         {/* ── Escopo em frentes, ou o texto antigo ────────────────── */}
         {n.frentes.length > 0 ? (
-          <Slide rotulo="Escopo" titulo={eco("O que vamos fazer")}>
-            <div
-              style={{
-                display: "grid",
-                gap: "0.75rem",
-                gridTemplateColumns: "repeat(auto-fit, minmax(17rem, 1fr))",
-              }}
-            >
-              {n.frentes.map((b) => (
-                <Bloco key={b.frente}>
-                  <h3
-                    style={{
-                      margin: 0,
-                      fontFamily: "var(--fonte-display), system-ui, sans-serif",
-                      fontSize: "1.1rem",
-                      fontWeight: 700,
-                      letterSpacing: "-0.02em",
-                    }}
-                  >
-                    {b.frente}
-                  </h3>
+          <Slide
+            rotulo="Escopo"
+            titulo={eco("O que vamos fazer")}
+            fundo={FOTO("escopo")}
+            veu="total"
+          >
+            <div className="pp-frentes">
+              {n.frentes.map((b, i) => (
+                <Bloco key={b.frente} indice={3 + i}>
+                  <h3 className="pp-sub">{b.frente}</h3>
                   <ul className="pp-itens">
-                    {b.itens.map((i) => (
-                      <li key={i}>{i}</li>
+                    {b.itens.map((it) => (
+                      <li key={it}>{it}</li>
                     ))}
                   </ul>
                 </Bloco>
@@ -279,12 +308,19 @@ export default async function PaginaProposta({
             </div>
           </Slide>
         ) : escopoAntigo.length > 0 && fichas.length === 0 ? (
-          <Slide rotulo="Escopo" titulo={eco("O que vamos fazer")}>
-            <ul className="pp-itens" style={{ marginTop: 0 }}>
-              {escopoAntigo.map((i) => (
-                <li key={i}>{i}</li>
-              ))}
-            </ul>
+          <Slide
+            rotulo="Escopo"
+            titulo={eco("O que vamos fazer")}
+            fundo={FOTO("escopo")}
+            veu="total"
+          >
+            <Bloco>
+              <ul className="pp-itens" style={{ marginTop: 0 }}>
+                {escopoAntigo.map((i) => (
+                  <li key={i}>{i}</li>
+                ))}
+              </ul>
+            </Bloco>
           </Slide>
         ) : null}
 
@@ -292,9 +328,10 @@ export default async function PaginaProposta({
         {/* Array, e não fragmento: o Deck fatia pelos filhos diretos, e um
             fragmento com seis slides dentro vira UMA tela de três mil
             pixels. `Children.toArray` achata array aninhado. */}
-        {fichas.map(({ ficha: f, escolhido }) => (
+        {fichas.map(({ ficha: f, escolhido }, i) => (
           <Slide
             key={f.id}
+            numeral={String(i + 1).padStart(2, "0")}
             rotulo={
               f.papel === "complemento"
                 ? "Complemento"
@@ -303,48 +340,43 @@ export default async function PaginaProposta({
                   : "O serviço"
             }
             titulo={eco(f.nome)}
+            visual={
+              <Janela
+                src={fotoDoServico(f.id)}
+                alt={f.nome}
+                legenda={`${String(i + 1).padStart(2, "0")} / ${String(fichas.length).padStart(2, "0")}`}
+                selo={
+                  <>
+                    <span className="pp-selo-pulso" />
+                    <span>
+                      {f.cobranca === "mensal"
+                        ? "Recorrente, todo mês"
+                        : "Projeto, entrega única"}
+                    </span>
+                  </>
+                }
+              />
+            }
           >
-            <div className="pp-duas">
-              <div>
+            <div className="pp-servico">
+              <div data-revela="" style={ordem(3)}>
                 <p className="pp-mono" style={{ margin: 0 }}>
                   {f.paraQuem}
                 </p>
-                <p
-                  style={{
-                    margin: "0.875rem 0 0",
-                    maxWidth: "54ch",
-                    fontSize: "var(--guia)",
-                    lineHeight: 1.65,
-                    color: "var(--neve)",
-                  }}
-                >
-                  {f.promessa}
-                </p>
+                <p className="pp-promessa">{f.promessa}</p>
 
                 {detalhaPreco && escolhido.fee > 0 ? (
-                  <p
-                    className="pp-num"
-                    style={{ margin: "1.5rem 0 0", fontSize: "2rem" }}
-                  >
+                  <p className="pp-num pp-preco">
                     {emReais(escolhido.fee)}
-                    <span
-                      style={{
-                        marginLeft: "0.5rem",
-                        fontFamily: "var(--fonte-prosa), Georgia, serif",
-                        fontSize: "0.95rem",
-                        fontWeight: 400,
-                        letterSpacing: 0,
-                        color: "var(--cinza)",
-                      }}
-                    >
+                    <span>
                       {f.cobranca === "mensal" ? "por mês" : "valor do projeto"}
                     </span>
                   </p>
                 ) : null}
               </div>
 
-              <div style={{ display: "grid", gap: "0.75rem" }}>
-                <Bloco>
+              <div className="pp-entra-sai">
+                <Bloco indice={4}>
                   <p className="pp-mono" style={{ margin: 0 }}>
                     O que entra
                   </p>
@@ -358,7 +390,7 @@ export default async function PaginaProposta({
                 {/* O que NÃO entra tem tela igual à do que entra, e não uma
                     nota de rodapé. É a parte que evita a conversa
                     desconfortável do segundo mês. */}
-                <Bloco>
+                <Bloco indice={5}>
                   <p className="pp-mono" style={{ margin: 0 }}>
                     O que não entra
                   </p>
@@ -381,76 +413,53 @@ export default async function PaginaProposta({
         <Slide
           rotulo="Investimento"
           titulo={eco("Quanto custa")}
+          fundo={FOTO("investimento")}
+          veu="esquerda"
           apoio={
             p.valor_setup > 0
               ? "A implantação é cobrada uma vez, no começo. O mensal recomeça a cada ciclo."
-              : undefined
+              : principais > 0
+                ? `${principais} ${principais === 1 ? "frente" : "frentes"} de trabalho numa conta só, fechada.`
+                : undefined
           }
         >
           <div className="pp-conta">
-            <Bloco destaque>
+            <Bloco destaque indice={3}>
               <p className="pp-mono" style={{ margin: 0 }}>
                 Mensal
               </p>
-              <p
-                className="pp-num"
-                style={{ margin: "0.625rem 0 0", fontSize: "2.4rem" }}
-              >
-                {emReais(p.valor_mensal)}
+              <p className="pp-num pp-valor">
+                <Contador valor={p.valor_mensal} />
               </p>
-              <p
-                style={{
-                  margin: "0.75rem 0 0",
-                  fontSize: "0.85rem",
-                  color: "var(--cinza)",
-                }}
-              >
+              <p className="pp-nota">
                 Contrato de {p.meses_contrato} meses. Depois disso, renovação
                 mensal.
               </p>
             </Bloco>
 
             {p.valor_setup > 0 ? (
-              <Bloco>
+              <Bloco indice={4}>
                 <p className="pp-mono" style={{ margin: 0 }}>
                   Implantação, uma vez
                 </p>
-                <p
-                  className="pp-num"
-                  style={{ margin: "0.625rem 0 0", fontSize: "2.4rem" }}
-                >
-                  {emReais(p.valor_setup)}
+                <p className="pp-num pp-valor">
+                  <Contador valor={p.valor_setup} />
                 </p>
-                <p
-                  style={{
-                    margin: "0.75rem 0 0",
-                    fontSize: "0.85rem",
-                    color: "var(--cinza)",
-                  }}
-                >
+                <p className="pp-nota">
                   Auditoria, rastreamento e estrutura inicial, antes da primeira
                   campanha.
                 </p>
               </Bloco>
             ) : null}
 
-            <Bloco>
+            <Bloco indice={5}>
               <p className="pp-mono" style={{ margin: 0 }}>
                 Total do contrato
               </p>
-              <p
-                className="pp-num"
-                style={{ margin: "0.625rem 0 0", fontSize: "2.4rem" }}
-              >
-                {emReais(totalContrato)}
+              <p className="pp-num pp-valor">
+                <Contador valor={totalContrato} duracao={2000} />
               </p>
-              <p
-                style={{
-                  margin: "0.75rem 0 0",
-                  fontSize: "0.85rem",
-                  color: "var(--cinza)",
-                }}
-              >
+              <p className="pp-nota">
                 {p.meses_contrato} × {emReais(p.valor_mensal)}
                 {p.valor_setup > 0
                   ? ` + ${emReais(p.valor_setup)} de implantação`
@@ -467,15 +476,7 @@ export default async function PaginaProposta({
           {fichas.some(
             (f) => f.ficha.id === "meta" || f.ficha.id === "google",
           ) ? (
-            <p
-              style={{
-                marginTop: "1rem",
-                maxWidth: "62ch",
-                fontSize: "0.85rem",
-                lineHeight: 1.65,
-                color: "var(--cinza)",
-              }}
-            >
+            <p className="pp-nota pp-nota-midia" data-revela="" style={ordem(6)}>
               A verba de mídia não está aqui. Ela é paga por você direto ao Meta
               e ao Google, no valor que você definir — a {nomeAgencia} não
               intermedeia pagamento de plataforma, e este documento cobra só a
@@ -485,69 +486,31 @@ export default async function PaginaProposta({
         </Slide>
 
         {/* ── Condições ───────────────────────────────────────────── */}
-        <Slide rotulo="Condições" titulo={eco("Como funciona")}>
-          <ul
-            style={{
-              display: "grid",
-              gap: "0.75rem",
-              margin: 0,
-              padding: 0,
-              listStyle: "none",
-            }}
-          >
+        <Slide
+          rotulo="Condições"
+          titulo={eco("Como funciona")}
+          fundo={FOTO("condicoes")}
+          veu="total"
+        >
+          <ul className="pp-lista">
             {/* As negociadas primeiro, e destacadas: é o que a pessoa
                 abriu esta tela para conferir. As de sempre ela já leu em
                 qualquer proposta. */}
-            {n.condicoesExtras.map((c) => (
+            {[
+              ...n.condicoesExtras.map((c) => ({ c, destaque: true })),
+              ...(p.condicoes ?? "")
+                .split("\n")
+                .map((l) => l.trim())
+                .filter(Boolean)
+                .map((c) => ({ c, destaque: false })),
+              ...condicoesDeSempre.map((c) => ({ c, destaque: false })),
+            ].map(({ c, destaque }, i) => (
               <li key={c}>
-                <Bloco destaque className="pp-linha">
-                  <span
-                    aria-hidden
-                    style={{ flex: "none", color: "var(--azul-claro)" }}
-                  >
+                <Bloco destaque={destaque} className="pp-linha" indice={3 + i}>
+                  <span aria-hidden className="pp-seta">
                     →
                   </span>
-                  <span style={{ lineHeight: 1.65, color: "var(--neve)" }}>
-                    {c}
-                  </span>
-                </Bloco>
-              </li>
-            ))}
-            {p.condicoes
-              ? p.condicoes
-                  .split("\n")
-                  .map((l) => l.trim())
-                  .filter(Boolean)
-                  .map((c) => (
-                    <li key={c}>
-                      <Bloco className="pp-linha">
-                        <span
-                          aria-hidden
-                          style={{ flex: "none", color: "var(--azul-claro)" }}
-                        >
-                          →
-                        </span>
-                        <span
-                          style={{ lineHeight: 1.65, color: "var(--neve)" }}
-                        >
-                          {c}
-                        </span>
-                      </Bloco>
-                    </li>
-                  ))
-              : null}
-            {condicoesDeSempre.map((c) => (
-              <li key={c}>
-                <Bloco className="pp-linha">
-                  <span
-                    aria-hidden
-                    style={{ flex: "none", color: "var(--azul-claro)" }}
-                  >
-                    →
-                  </span>
-                  <span style={{ lineHeight: 1.65, color: "var(--neve)" }}>
-                    {c}
-                  </span>
+                  <span className="pp-texto-linha">{c}</span>
                 </Bloco>
               </li>
             ))}
@@ -556,33 +519,21 @@ export default async function PaginaProposta({
 
         {/* ── Próximos passos ─────────────────────────────────────── */}
         {n.proximosPassos.length > 0 ? (
-          <Slide rotulo="A partir do sim" titulo={eco("Próximos passos")}>
-            <ol
-              style={{
-                display: "grid",
-                gap: "0.75rem",
-                margin: 0,
-                padding: 0,
-                listStyle: "none",
-              }}
-            >
+          <Slide
+            rotulo="A partir do sim"
+            titulo={eco("Próximos passos")}
+            fundo={FOTO("passos")}
+            veu="esquerda"
+          >
+            {/* Linha do tempo: o fio azul se desenha de cima para baixo
+                quando a tela entra, ligando um passo ao outro. */}
+            <ol className="pp-passos">
               {n.proximosPassos.map((s, i) => (
-                <li key={s}>
-                  <Bloco className="pp-linha">
-                    <span className="pp-marcador">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span
-                      style={{
-                        minWidth: 0,
-                        alignSelf: "center",
-                        lineHeight: 1.65,
-                        color: "var(--neve)",
-                      }}
-                    >
-                      {s}
-                    </span>
-                  </Bloco>
+                <li key={s} data-revela="" style={ordem(3 + i)}>
+                  <span className="pp-passo-marca">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="pp-texto-linha">{s}</span>
                 </li>
               ))}
             </ol>
@@ -590,38 +541,38 @@ export default async function PaginaProposta({
         ) : null}
 
         {/* ── Aceite ──────────────────────────────────────────────── */}
-        <Slide centrado>
-          <div>
-            <p className="pp-rotulo">Aceite</p>
+        <Slide centrado fundo={FOTO("aceite")} veu="centro">
+          <div className="pp-aceite">
+            <p className="pp-rotulo" data-revela="" style={ordem(0)}>
+              Aceite
+            </p>
 
-            <h2 className="pp-mostro">{eco("Pronto para começar")}</h2>
+            <h2 className="pp-mostro">
+              <span className="pp-mascara">
+                <span>{eco("Pronto para começar")}</span>
+              </span>
+            </h2>
 
-            <p className="pp-apoio">
+            <p className="pp-apoio" data-revela="" style={ordem(2)}>
               Responda por aqui que a {nomeAgencia} começa o kick off e o
               primeiro calendário na mesma semana.
             </p>
 
-            <div style={{ marginTop: "2.25rem" }}>
+            <div data-revela="" style={{ ...ordem(3), marginTop: "2.25rem" }}>
               <a
                 href={linkZap}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="pp-cta"
               >
-                Aceitar e falar no WhatsApp
+                <span>Aceitar e falar no WhatsApp</span>
+                <span aria-hidden className="pp-cta-seta">
+                  →
+                </span>
               </a>
             </div>
 
-            <p
-              style={{
-                marginTop: "3rem",
-                paddingTop: "1.5rem",
-                borderTop: "1px solid var(--fio)",
-                fontSize: "0.78rem",
-                lineHeight: 1.7,
-                color: "var(--cinza)",
-              }}
-            >
+            <p className="pp-rodape" data-revela="" style={ordem(4)}>
               Documento confidencial, preparado para{" "}
               {p.cliente_nome ?? p.titulo}.
               {p.validade ? ` Os valores valem até ${dataBR(p.validade)}.` : ""}
