@@ -215,6 +215,13 @@
   animation-play-state: paused !important;
 }
 
+/* Acima do conteúdo, que está no z-index 2: é o que faz o texto sumir
+   atrás da peça em vez de passar por cima dela. */
+.pp-recorte {
+  z-index: 3;
+  pointer-events: none;
+}
+
 .pp-veu {
   position: absolute;
   inset: 0;
@@ -601,8 +608,18 @@
 
 /* ── 2. Seja visto ───────────────────────────────────────────────── */
 
+/* A frase corre a largura toda, de propósito: é ela que precisa chegar
+   até a dama para passar atrás dela. Presa em 9ch, quebrava em três
+   linhas curtas e morria no meio da tela, longe da peça. */
 .pp-t-visto .pp-gigante {
-  max-width: 9ch;
+  max-width: none;
+  font-size: clamp(2.6rem, 11vw, 11.5rem);
+  line-height: 0.86;
+}
+
+/* O conteúdo desta tela avança sob a peça. */
+.pp-t-visto .pp-conteudo {
+  width: min(1340px, calc(100% - 2 * var(--margem)));
 }
 
 /* "Esquecido" some e volta, como uma marca que o público esquece. */

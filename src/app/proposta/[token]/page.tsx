@@ -158,9 +158,8 @@ export default async function PaginaProposta({
           <div className="pp-veu pp-veu-esq" />
           <div className="pp-conteudo pp-meio">
             <h2 className="pp-gigante">
-              <Linha i={0}>Seja visto</Linha>
-              <Linha i={1}>ou seja</Linha>
-              <Linha i={2} className="pp-esquecido">
+              <Linha i={0}>Seja visto ou seja</Linha>
+              <Linha i={1} className="pp-esquecido">
                 esquecido
               </Linha>
             </h2>
@@ -170,6 +169,18 @@ export default async function PaginaProposta({
               aparece sem estratégia vira só mais um no feed.
             </p>
           </div>
+          {/* A mesma foto, recortada só na peça, por cima do texto: a
+              palavra passa atrás da dama. Vem do mesmo arquivo, no mesmo
+              tamanho e com a mesma profundidade e o mesmo zoom — então as
+              duas camadas andam juntas e não há posição a acertar à mão.
+              Como o véu fica embaixo, a peça mantém o brilho inteiro
+              enquanto o resto da cena escurece. */}
+          <Foto
+            src={FOTO("rainha-recorte.webp")}
+            posicao="70% center"
+            prof={-3}
+            className="pp-recorte"
+          />
         </Tela>
 
         {/* ── 3. Posicionamento (tela branca) ─────────────────────── */}
