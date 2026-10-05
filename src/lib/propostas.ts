@@ -34,6 +34,9 @@ export type Frente = { frente: string; itens: string[] };
  * antes destes campos existirem continua abrindo, só com menos telas.
  */
 export type Narrativa = {
+  /** Nível escolhido: `basic`, `pro`, `premium` — ou nada, quando a
+      proposta é de serviços soltos em vez de plano. */
+  plano: string | null;
   /** O que foi encontrado na conta do cliente. Abre a argumentação. */
   diagnostico: string[];
   /** Serviços do catálogo, com o fee de cada um. */
@@ -47,6 +50,7 @@ export type Narrativa = {
 };
 
 export const NARRATIVA_VAZIA: Narrativa = {
+  plano: null,
   diagnostico: [],
   servicos: [],
   frentes: [],
@@ -69,6 +73,9 @@ export type Proposta = {
   valor_setup: number;
   /** Duração do contrato em meses; é ela que multiplica o valor mensal. */
   meses_contrato: number;
+  /** Preço de tabela, quando há desconto. Zero significa sem oferta: o
+      mensal já é o preço. */
+  valor_cheio: number;
   total: number;
   validade: string | null;
   criado_em: string;
@@ -113,6 +120,7 @@ function lerNarrativa(j: Record<string, unknown>): Narrativa {
     : [];
 
   return {
+    plano: typeof j.plano === "string" && j.plano ? j.plano : null,
     diagnostico: listaDeTexto(j.diagnostico),
     servicos,
     frentes,
@@ -127,6 +135,7 @@ function lerValores(condicoes: string | null) {
     return {
       narrativa: lerNarrativa(j),
       mensal: Number(j.mensal ?? 0),
+      cheio: Number(j.cheio ?? 0),
       setup: Number(j.setup ?? 0),
       /* Proposta salva antes deste campo existir não tem `meses`, e cai no
          padrão — não em zero, que zeraria o total do contrato na tela. */
@@ -139,6 +148,7 @@ function lerValores(condicoes: string | null) {
     return {
       narrativa: NARRATIVA_VAZIA,
       mensal: 0,
+      cheio: 0,
       setup: 0,
       meses: PRAZO_PADRAO,
       condicoes: condicoes,
@@ -152,10 +162,12 @@ export function escreverCondicoes(
   texto: string,
   meses: number,
   narrativa: Narrativa = NARRATIVA_VAZIA,
+  cheio = 0,
 ) {
   return JSON.stringify({
     mensal,
     setup,
+    cheio,
     meses: prazoValido(meses),
     texto,
     ...narrativa,
@@ -186,6 +198,7 @@ function demo(): Lista {
       valor_mensal: p.mensal,
       valor_setup: p.setup,
       meses_contrato: PRAZO_PADRAO,
+      valor_cheio: Math.round(p.mensal / 0.8),
       organizacao_id: "demo",
       total: p.mensal + p.setup,
       validade: p.validade,
@@ -195,6 +208,7 @@ function demo(): Lista {
          mandar o primeiro de verdade. Uma demo pela metade faria a
          conferência passar por cima justamente das telas novas. */
       narrativa: {
+        plano: "pro",
         diagnostico: [
           "A conta investe todo mês, mas ninguém sabe dizer quanto voltou. Não há rastreamento de conversão instalado — o que existe é o número que a própria plataforma declara.",
           "O conteúdo da rede e o que vai para o anúncio são decididos em lugares diferentes, por pessoas diferentes. A marca fala uma coisa no feed e outra no criativo.",
@@ -271,6 +285,7 @@ function daLinha(p: Linha): Proposta {
     valor_mensal: mensal,
     valor_setup: v.setup,
     meses_contrato: v.meses,
+    valor_cheio: v.cheio,
     /* Primeiro ciclo do contrato: o recorrente mais o setup. É esse o número
        que o cliente vê no aceite e o que o financeiro precisa projetar. */
     total: mensal + v.setup,

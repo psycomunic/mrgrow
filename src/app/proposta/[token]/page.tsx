@@ -7,13 +7,20 @@ import {
 } from "next/font/google";
 import { Deck } from "./deck";
 import { Slide, Bloco, Janela, eco, ordem } from "./slide";
-import { Contador } from "./movimento";
+import { Contador, Numero } from "./movimento";
 import { carregarMarcaPublica, carregarPorToken } from "@/lib/propostas";
 import {
   condicoesDosServicos,
   emReais,
   fichaDoServico,
 } from "@/lib/servicos-proposta";
+import {
+  NUMEROS,
+  PLANOS,
+  PONTO_A,
+  PONTO_B,
+  plano as nivel,
+} from "@/lib/planos-proposta";
 import { MARCA } from "@/lib/marca";
 import "./deck.css";
 
@@ -139,6 +146,11 @@ export default async function PaginaProposta({
      do investimento. */
   const detalhaPreco = fichas.some((f) => f.escolhido.fee > 0);
 
+  /* O nível escolhido. Quando existe, ele substitui as telas de serviço:
+     o plano JÁ lista as entregas, e mostrar as duas coisas faria o cliente
+     ler a mesma entrega duas vezes com palavras diferentes. */
+  const escolhido = n.plano ? nivel(n.plano) : null;
+
   /* O escopo antigo era um campo de texto com uma linha por entrega.
      Proposta gravada antes do catálogo continua abrindo por aqui. */
   const escopoAntigo = (p.escopo ?? "")
@@ -247,6 +259,29 @@ export default async function PaginaProposta({
           ) : null}
         </Slide>
 
+        {/* ── Os números da agência ───────────────────────────────── */}
+        {/* Entra logo depois da capa, antes de qualquer argumento. Quem
+            abre uma proposta não sabe se fala com alguém que já fez isso
+            centenas de vezes ou com alguém no segundo mês: dez anos e nove
+            milhões de verba respondem em quatro segundos. */}
+        <Slide
+          rotulo="Nosso DNA em números"
+          titulo={eco("Transformar atenção em venda")}
+          fundo={FOTO("escopo")}
+          veu="total"
+        >
+          <dl className="pp-numeros">
+            {NUMEROS.map((n, i) => (
+              <div key={n.rotulo} data-revela="" style={ordem(3 + i)}>
+                <dt className="pp-num pp-numeros-valor">
+                  <Numero valor={n.valor} prefixo={n.prefixo} />
+                </dt>
+                <dd className="pp-numeros-rotulo">{n.rotulo}</dd>
+              </div>
+            ))}
+          </dl>
+        </Slide>
+
         {/* ── Diagnóstico ─────────────────────────────────────────── */}
         {/* Abre a argumentação de propósito. Sem ele a proposta começa
             falando de preço, e quem lê conclui que recebeu tabela. */}
@@ -286,6 +321,71 @@ export default async function PaginaProposta({
           </Slide>
         ) : null}
 
+        {/* ── Do ponto A ao ponto B ───────────────────────────────── */}
+        {/* A copy é a da proposta que a agência já manda: "pegamos do
+            ponto A e levamos para um ponto B". Vale duas telas e não uma
+            porque são dois movimentos — de onde vem o clique, e para onde
+            ele vai. Numa tela só, o trilho fica com dezoito itens e o
+            cliente lê nenhum. */}
+        <Slide
+          rotulo="Ponto A"
+          titulo={eco("De onde vêm seus clientes")}
+          apoio="Cada canal tem um jeito próprio de alcançar quem ainda não te conhece. A estrutura muda conforme a consciência de compra, não o criativo."
+          fundo={FOTO("meta")}
+          veu="esquerda"
+          numeral="A"
+        >
+          <div className="pp-canais">
+            {PONTO_A.map((c, i) => (
+              <Bloco key={c.canal} indice={3 + i} className="pp-canal">
+                <h3 className="pp-canal-nome">{c.canal}</h3>
+                <p className="pp-canal-texto">{c.texto}</p>
+              </Bloco>
+            ))}
+          </div>
+        </Slide>
+
+        <Slide
+          rotulo="Ponto B"
+          titulo={eco("E para onde eles vão")}
+          apoio="Anúncio bom que termina em lugar nenhum é verba queimada. O destino é parte da campanha."
+          fundo={FOTO("landing")}
+          veu="direita"
+          numeral="B"
+        >
+          <div className="pp-canais" data-dois="">
+            {PONTO_B.map((c, i) => (
+              <Bloco key={c.canal} indice={3 + i} className="pp-canal">
+                <h3 className="pp-canal-nome">{c.canal}</h3>
+                <p className="pp-canal-texto">{c.texto}</p>
+              </Bloco>
+            ))}
+          </div>
+        </Slide>
+
+        {/* ── Segmentação ─────────────────────────────────────────── */}
+        <Slide
+          rotulo="Segmentação"
+          titulo={eco("Na hora certa, para quem importa")}
+          fundo={FOTO("google")}
+          veu="esquerda"
+        >
+          <div className="pp-mira" data-revela="" style={ordem(3)}>
+            {/* O radar é desenho, não enfeite solto: ele diz em imagem o
+                que a frase diz em palavra — um público que vai sendo
+                varrido até sobrar quem interessa. */}
+            <span aria-hidden className="pp-mira-anel" />
+            <span aria-hidden className="pp-mira-anel" />
+            <span aria-hidden className="pp-mira-anel" />
+            <span aria-hidden className="pp-mira-varre" />
+            <p className="pp-mira-texto">
+              Já pensou seus anúncios aparecerem na hora certa, para as pessoas certas? É o que
+              separa alcance de faturamento: a mesma verba, entregue a quem tem motivo para
+              comprar.
+            </p>
+          </div>
+        </Slide>
+
         {/* ── Escopo em frentes, ou o texto antigo ────────────────── */}
         {n.frentes.length > 0 ? (
           <Slide
@@ -324,11 +424,103 @@ export default async function PaginaProposta({
           </Slide>
         ) : null}
 
+        {/* ── Escolha o nível ─────────────────────────────────────── */}
+        {escolhido ? (
+          <Slide
+            rotulo="Escolha o nível de crescimento"
+            titulo={eco(escolhido.nome)}
+            apoio={escolhido.tagline}
+            fundo={FOTO("estrategia")}
+            veu="esquerda"
+          >
+            <div className="pp-niveis">
+              {PLANOS.map((p, i) => (
+                <Bloco
+                  key={p.id}
+                  indice={3 + i}
+                  destaque={p.id === escolhido.id}
+                  className="pp-nivel"
+                >
+                  {/* O selo pulsa de leve só no plano desta proposta.
+                      Três preços sem dizer qual serve convidam o cliente
+                      a comprar para baixo. */}
+                  {p.id === escolhido.id ? (
+                    <span className="pp-nivel-selo">Seu plano</span>
+                  ) : p.recomendado ? (
+                    <span className="pp-nivel-selo" data-fraco="">
+                      Mais recomendado
+                    </span>
+                  ) : null}
+                  <h3 className="pp-nivel-nome">{p.nome}</h3>
+                  <p className="pp-nivel-tag">{p.tagline}</p>
+                </Bloco>
+              ))}
+            </div>
+          </Slide>
+        ) : null}
+
+        {/* ── As entregas do plano ────────────────────────────────── */}
+        {escolhido ? (
+          <Slide
+            rotulo="Entregas da assessoria"
+            titulo={eco("O que entra todo mês")}
+            apoio={escolhido.resumo}
+            visual={
+              <Janela
+                src={FOTO("social")}
+                alt="Produção de conteúdo da MR Grow"
+                legenda={escolhido.nome}
+              />
+            }
+          >
+            <ul className="pp-itens pp-itens-duas" style={{ marginTop: 0 }}>
+              {escolhido.entregas.map((e) => (
+                <li key={e}>{e}</li>
+              ))}
+            </ul>
+          </Slide>
+        ) : null}
+
+        {/* ── Vídeos e diferenciais ───────────────────────────────── */}
+        {escolhido ? (
+          <Slide
+            rotulo="Como funciona"
+            titulo={eco("Quem grava, quem edita")}
+            fundo={FOTO("video")}
+            veu="direita"
+          >
+            <div className="pp-duas">
+              <Bloco destaque indice={3}>
+                <p className="pp-mono" style={{ margin: 0 }}>
+                  Os vídeos
+                </p>
+                <p className="pp-canal-texto" style={{ marginTop: "0.75rem" }}>
+                  {escolhido.videos}
+                </p>
+              </Bloco>
+              {escolhido.diferenciais.length > 0 ? (
+                <Bloco indice={4}>
+                  <p className="pp-mono" style={{ margin: 0 }}>
+                    {escolhido.recomendado
+                      ? "Por que este é o mais recomendado"
+                      : "O que este nível tem a mais"}
+                  </p>
+                  <ul className="pp-itens">
+                    {escolhido.diferenciais.map((x) => (
+                      <li key={x}>{x}</li>
+                    ))}
+                  </ul>
+                </Bloco>
+              ) : null}
+            </div>
+          </Slide>
+        ) : null}
+
         {/* ── Um slide por serviço ────────────────────────────────── */}
         {/* Array, e não fragmento: o Deck fatia pelos filhos diretos, e um
             fragmento com seis slides dentro vira UMA tela de três mil
             pixels. `Children.toArray` achata array aninhado. */}
-        {fichas.map(({ ficha: f, escolhido }, i) => (
+        {(escolhido ? [] : fichas).map(({ ficha: f, escolhido: item }, i) => (
           <Slide
             key={f.id}
             numeral={String(i + 1).padStart(2, "0")}
@@ -365,9 +557,9 @@ export default async function PaginaProposta({
                 </p>
                 <p className="pp-promessa">{f.promessa}</p>
 
-                {detalhaPreco && escolhido.fee > 0 ? (
+                {detalhaPreco && item.fee > 0 ? (
                   <p className="pp-num pp-preco">
-                    {emReais(escolhido.fee)}
+                    {emReais(item.fee)}
                     <span>
                       {f.cobranca === "mensal" ? "por mês" : "valor do projeto"}
                     </span>
@@ -428,12 +620,27 @@ export default async function PaginaProposta({
               <p className="pp-mono" style={{ margin: 0 }}>
                 Mensal
               </p>
+              {/* A oferta, quando existe: o preço de tabela riscado em
+                  cima do que o cliente vai pagar. Só aparece se alguém
+                  cadastrou um valor cheio maior que o mensal — a validação
+                  da action não deixa "desconto" para cima passar. */}
+              {p.valor_cheio > p.valor_mensal ? (
+                <p className="pp-de">
+                  de <s>{emReais(p.valor_cheio)}</s>
+                  <span className="pp-off">
+                    {Math.round((1 - p.valor_mensal / p.valor_cheio) * 100)}% OFF
+                  </span>
+                </p>
+              ) : null}
               <p className="pp-num pp-valor">
                 <Contador valor={p.valor_mensal} />
               </p>
               <p className="pp-nota">
                 Contrato de {p.meses_contrato} meses. Depois disso, renovação
                 mensal.
+                {p.validade && p.valor_cheio > p.valor_mensal
+                  ? ` Esta condição vale até ${dataBR(p.validade)}.`
+                  : ""}
               </p>
             </Bloco>
 

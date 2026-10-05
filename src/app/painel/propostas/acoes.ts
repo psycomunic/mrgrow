@@ -11,6 +11,7 @@ import {
 } from "@/lib/propostas";
 import type { Narrativa } from "@/lib/propostas";
 import { fichaDoServico } from "@/lib/servicos-proposta";
+import { plano } from "@/lib/planos-proposta";
 import { hoje } from "@/lib/tempo";
 import { PRAZOS_CONTRATO } from "@/lib/rotulos";
 
@@ -32,6 +33,10 @@ export type DadosProposta = {
   valor_setup: number;
   meses_contrato: number;
   validade: string | null;
+  /** Preço de tabela. Zero = sem oferta. */
+  valor_cheio: number;
+  /** Nível escolhido, ou "" para proposta de serviços soltos. */
+  plano: string;
   /* As telas novas do deck. Uma linha por item nos textos; a action é que
      quebra, para o formulário não ter que carregar array. */
   diagnostico: string;
@@ -63,6 +68,13 @@ function validar(d: DadosProposta): string | null {
   /* Id de serviço que não existe no catálogo sumiria em silêncio na hora de
      desenhar o deck: a proposta abriria sem a tela daquele serviço, e
      ninguém descobriria antes do cliente. */
+  if (d.plano && !plano(d.plano)) return "Plano desconhecido.";
+  if (!Number.isFinite(d.valor_cheio) || d.valor_cheio < 0) return "Preço de tabela inválido.";
+  /* Oferta que "desconta" para cima viraria um aumento anunciado como
+     promoção na tela do cliente. */
+  if (d.valor_cheio > 0 && d.valor_cheio <= d.valor_mensal) {
+    return "O preço de tabela precisa ser maior que o mensal, ou zero.";
+  }
   const invalido = d.servicos.find((x) => !fichaDoServico(x.id));
   if (invalido) return `Serviço desconhecido: ${invalido.id}.`;
   if (d.servicos.some((x) => !Number.isFinite(x.fee) || x.fee < 0)) {
@@ -94,6 +106,7 @@ function linhas(texto: string): string[] {
 function narrativaDe(d: DadosProposta): Narrativa {
   return {
     ...NARRATIVA_VAZIA,
+    plano: d.plano || null,
     diagnostico: linhas(d.diagnostico),
     proximosPassos: linhas(d.proximos_passos),
     condicoesExtras: linhas(d.condicoes_extras),
@@ -114,6 +127,7 @@ function paraBanco(d: DadosProposta) {
       d.condicoes.trim(),
       d.meses_contrato,
       narrativaDe(d),
+      d.valor_cheio,
     ),
     /* Primeiro ciclo: recorrente + setup. Antes só o mensal ia para `total`,
        e todo relatório financeiro subestimava o contrato pelo valor do setup. */

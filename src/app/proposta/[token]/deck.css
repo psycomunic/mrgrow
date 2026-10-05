@@ -1669,6 +1669,279 @@
 
 /* ── Movimento reduzido: tudo parado, tudo visível ───────────────── */
 
+
+/* ═══════════════════════════════════════════════════════════════════
+   AS TELAS DA PROPOSTA ORIGINAL
+
+   Números da agência, o caminho do ponto A ao ponto B, a segmentação e
+   os três níveis. Todo o movimento daqui é `transform` e `opacity`, que
+   a placa de vídeo compõe sem refazer layout — e todo ele morre no
+   `prefers-reduced-motion` no fim do arquivo.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Números ─────────────────────────────────────────────────────── */
+
+.pp-numeros {
+  margin: 0;
+  display: grid;
+  gap: 1.75rem 2.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+}
+
+.pp-numeros dt {
+  margin: 0;
+}
+
+.pp-numeros-valor {
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  line-height: 1;
+  color: var(--branco);
+  /* Tabular para o número não dançar enquanto sobe: sem isto, a largura
+     de cada dígito muda e a linha inteira treme na contagem. */
+  font-variant-numeric: tabular-nums;
+}
+
+.pp-numeros-rotulo {
+  margin: 0.5rem 0 0;
+  max-width: 16ch;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--neve);
+}
+
+/* ── Canais do ponto A e do ponto B ──────────────────────────────── */
+
+.pp-canais {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.pp-canais[data-dois] {
+  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+}
+
+.pp-canal-nome {
+  margin: 0;
+  font-family: var(--fonte-display), system-ui, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--branco);
+}
+
+.pp-canal-texto {
+  margin: 0.75rem 0 0;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--neve);
+}
+
+/* O fio de luz que atravessa o cartão: diz, em imagem, que ali passa
+   gente — e corre uma vez cada, em tempos diferentes, para não virar
+   pisca-pisca sincronizado. */
+.pp-palco[data-mov] section[data-visto] .pp-canal::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, var(--azul-claro), transparent);
+  transform: translate3d(-100%, 0, 0);
+  animation: pp-passa 2.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: calc(var(--i, 0) * 260ms + 500ms);
+}
+
+@keyframes pp-passa {
+  to {
+    transform: translate3d(100%, 0, 0);
+  }
+}
+
+/* ── Segmentação: o radar ────────────────────────────────────────── */
+
+.pp-mira {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 22rem;
+  padding: 2.5rem 0;
+}
+
+.pp-mira-texto {
+  position: relative;
+  z-index: 2;
+  margin: 0;
+  max-width: 34ch;
+  text-align: center;
+  font-size: var(--guia);
+  line-height: 1.7;
+  color: var(--neve);
+}
+
+.pp-mira-anel,
+.pp-mira-varre {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+.pp-mira-anel {
+  /* Maior que o texto, para emoldurar em vez de cortar: o anel de 13rem
+     passava por dentro das linhas e parecia erro de alinhamento. */
+  height: 26rem;
+  width: 26rem;
+  margin: -13rem 0 0 -13rem;
+  border: 1px solid var(--fio-forte);
+  opacity: 0;
+}
+
+/* Três anéis saindo do centro, um atrás do outro: é o pulso do radar. */
+.pp-palco[data-mov] section[data-visto] .pp-mira-anel {
+  animation: pp-pulso 3.6s ease-out infinite;
+}
+.pp-palco[data-mov] section[data-visto] .pp-mira-anel:nth-of-type(2) {
+  animation-delay: 1.2s;
+}
+.pp-palco[data-mov] section[data-visto] .pp-mira-anel:nth-of-type(3) {
+  animation-delay: 2.4s;
+}
+
+@keyframes pp-pulso {
+  0% {
+    transform: scale(0.35);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* A varredura: um setor de luz girando devagar, como a agulha do radar. */
+.pp-mira-varre {
+  height: 34rem;
+  width: 34rem;
+  margin: -17rem 0 0 -17rem;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(87, 152, 255, 0.22) 28deg,
+    transparent 60deg
+  );
+  mask-image: radial-gradient(circle, #000 32%, transparent 72%);
+}
+
+.pp-palco[data-mov] section[data-visto] .pp-mira-varre {
+  animation: pp-gira 9s linear infinite;
+}
+
+@keyframes pp-gira {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Os três níveis ─────────────────────────────────────────────── */
+
+.pp-niveis {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+}
+
+.pp-nivel-nome {
+  margin: 0.75rem 0 0;
+  font-family: var(--fonte-display), system-ui, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--branco);
+}
+
+.pp-nivel-tag {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--cinza);
+}
+
+.pp-nivel-selo {
+  display: inline-block;
+  border-radius: 9999px;
+  background: var(--azul);
+  padding: 0.25rem 0.7rem;
+  font-family: var(--fonte-dado), ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--branco);
+}
+
+/* O selo do plano desta proposta respira. O "mais recomendado" dos
+   outros fica parado e em contorno: um chama, o outro só informa. */
+.pp-palco[data-mov] section[data-visto] .pp-nivel-selo:not([data-fraco]) {
+  animation: pp-respira 2.8s ease-in-out infinite;
+}
+
+.pp-nivel-selo[data-fraco] {
+  background: transparent;
+  border: 1px solid var(--fio-forte);
+  color: var(--azul-claro);
+}
+
+@keyframes pp-respira {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(22, 104, 245, 0.55);
+  }
+  60% {
+    box-shadow: 0 0 0 10px rgba(22, 104, 245, 0);
+  }
+}
+
+/* Entregas em duas colunas quando há espaço: doze itens numa coluna só
+   viram uma lista que não cabe na tela. */
+@media (min-width: 640px) {
+  .pp-itens-duas {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 2rem;
+  }
+}
+
+/* ── A oferta ────────────────────────────────────────────────────── */
+
+.pp-de {
+  margin: 0 0 0.25rem;
+  font-size: 0.9rem;
+  color: var(--cinza);
+}
+
+.pp-de s {
+  text-decoration-thickness: 1px;
+}
+
+.pp-off {
+  margin-left: 0.6rem;
+  display: inline-block;
+  border-radius: 9999px;
+  background: rgba(22, 104, 245, 0.18);
+  border: 1px solid var(--fio-forte);
+  padding: 0.1rem 0.55rem;
+  font-family: var(--fonte-dado), ui-monospace, monospace;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--azul-claro);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pp-palco[data-mov] [data-revela],
   .pp-palco[data-mov] .pp-mascara > span,
@@ -1686,6 +1959,17 @@
   .pp-palco[data-mov] .pp-passos::before {
     transform: none;
     transition: none;
+  }
+  /* As animações das telas novas também param: radar girando e selo
+     pulsando são exatamente o que incomoda quem pediu menos movimento. */
+  .pp-palco[data-mov] section[data-visto] .pp-canal::after,
+  .pp-palco[data-mov] section[data-visto] .pp-mira-anel,
+  .pp-palco[data-mov] section[data-visto] .pp-mira-varre,
+  .pp-palco[data-mov] section[data-visto] .pp-nivel-selo:not([data-fraco]) {
+    animation: none;
+  }
+  .pp-mira-anel {
+    opacity: 0.4;
   }
   .pp-kb,
   .pp-brilho,

@@ -7,6 +7,7 @@ import { Botao } from "@/components/ui/botao";
 import { Sobreposicao } from "@/components/ui/sobreposicao";
 import { Campo, Entrada, AreaTexto, Selecao } from "@/components/ui/campo";
 import { SERVICOS } from "@/lib/servicos-proposta";
+import { PLANOS } from "@/lib/planos-proposta";
 import { semTravar } from "@/lib/acao-cliente";
 import { brl } from "@/lib/utils";
 import { PRAZOS_CONTRATO, PRAZO_PADRAO, rotuloPrazo } from "@/lib/rotulos";
@@ -44,6 +45,8 @@ function vazia(): DadosProposta {
     valor_setup: 0,
     meses_contrato: PRAZO_PADRAO,
     validade: null,
+    valor_cheio: 0,
+    plano: "pro",
     diagnostico: "",
     proximos_passos: PASSOS_PADRAO,
     condicoes_extras: "",
@@ -71,6 +74,8 @@ function daProposta(p: Proposta): DadosProposta {
     valor_setup: p.valor_setup,
     meses_contrato: p.meses_contrato,
     validade: p.validade,
+    valor_cheio: p.valor_cheio,
+    plano: p.narrativa.plano ?? "",
     diagnostico: p.narrativa.diagnostico.join("\n"),
     proximos_passos: p.narrativa.proximosPassos.join("\n"),
     condicoes_extras: p.narrativa.condicoesExtras.join("\n"),
@@ -232,6 +237,24 @@ export function Construtor({
                 />
               </Campo>
               <Campo
+                rotulo="Plano"
+                dica="Define as telas de entregas e diferenciais. Sem plano, a proposta usa os serviços marcados abaixo."
+                className="mt-4"
+              >
+                <Selecao
+                  value={d.plano}
+                  onChange={(e) => setD((x) => ({ ...x, plano: e.target.value }))}
+                >
+                  <option value="">Sem plano — serviços soltos</option>
+                  {PLANOS.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.nome}
+                      {p.recomendado ? " (mais recomendado)" : ""}
+                    </option>
+                  ))}
+                </Selecao>
+              </Campo>
+              <Campo
                 rotulo="Diagnóstico"
                 dica="Um achado por linha. Abre a argumentação antes de qualquer preço."
                 className="mt-4"
@@ -340,6 +363,18 @@ export function Construtor({
                         valor_mensal:
                           Number(e.target.value.replace(",", ".")) || 0,
                       }))
+                    }
+                  />
+                </Campo>
+                <Campo
+                  rotulo="Preço de tabela (R$)"
+                  dica="Só quando houver oferta. Em branco, nenhum desconto aparece."
+                >
+                  <Entrada
+                    inputMode="decimal"
+                    value={d.valor_cheio || ""}
+                    onChange={(e) =>
+                      setD((x) => ({ ...x, valor_cheio: Number(e.target.value) || 0 }))
                     }
                   />
                 </Campo>
