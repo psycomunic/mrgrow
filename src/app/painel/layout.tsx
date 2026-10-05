@@ -3,6 +3,7 @@ import { exigirEquipe } from "@/lib/sessao";
 import { BarraLateral } from "./_componentes/barra-lateral";
 import { SessaoPainel } from "./_componentes/sessao-cliente";
 import { RegistrarServiceWorker } from "@/components/painel/instalar";
+import { RedeDeSeguranca } from "@/components/painel/rede-de-seguranca";
 
 export const metadata: Metadata = { title: { default: "Painel", template: "%s · Painel MR Grow" } };
 /**
@@ -32,6 +33,7 @@ export default async function LayoutPainel({ children }: { children: React.React
       {/* `tema-painel` é o escopo do tema claro: a landing divide o
           `body` com o painel e precisa continuar escura. */}
       <RegistrarServiceWorker />
+      <RedeDeSeguranca />
       <div className="tema-painel min-h-dvh bg-papel">
         <BarraLateral
           papel={sessao.papel}

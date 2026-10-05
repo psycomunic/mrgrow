@@ -7,6 +7,7 @@ import { Botao } from "@/components/ui/botao";
 import { Sobreposicao } from "@/components/ui/sobreposicao";
 import { Campo, Entrada, AreaTexto, Selecao } from "@/components/ui/campo";
 import { SERVICOS } from "@/lib/servicos-proposta";
+import { semTravar } from "@/lib/acao-cliente";
 import { brl } from "@/lib/utils";
 import { PRAZOS_CONTRATO, PRAZO_PADRAO, rotuloPrazo } from "@/lib/rotulos";
 import { criarProposta, atualizarProposta, type DadosProposta } from "./acoes";
@@ -112,9 +113,9 @@ export function Construtor({
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
     setEnviando(true);
-    const r = proposta
-      ? await atualizarProposta(proposta.id, d)
-      : await criarProposta(d);
+    const r = await semTravar(() =>
+      proposta ? atualizarProposta(proposta.id, d) : criarProposta(d),
+    );
     setEnviando(false);
 
     if (!r.ok) return setErro(r.erro ?? "Não foi possível salvar.");
