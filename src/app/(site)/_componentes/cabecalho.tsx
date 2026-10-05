@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { MARCA, linkWhatsApp } from "@/lib/marca";
 import { ProgressoRolagem } from "./progresso-rolagem";
+import { Lampada, Logotipo } from "@/components/marca";
 
 const LINKS = [
   { href: "#diagnostico-dores", rotulo: "Diagnóstico" },
@@ -94,31 +94,15 @@ export function Cabecalho() {
   );
 }
 
-/** Logotipo oficial. `altura` em rem; a largura acompanha. */
+/**
+ * Logotipo oficial. `altura` em rem; a largura acompanha.
+ *
+ * Reexportado daqui por compatibilidade: meia dúzia de telas já
+ * importavam `Logo` e `Lampada` deste arquivo. O desenho em si mora em
+ * `@/components/marca`, em vetor, e herda a cor de quem o usa.
+ */
 export function Logo({ altura = 2.15 }: { altura?: number }) {
-  return (
-    <Image
-      src="/marca/mr-grow-logo.webp"
-      alt={MARCA.nome}
-      width={1400}
-      height={728}
-      style={{ height: `${altura}rem`, width: "auto" }}
-      loading="eager"
-      fetchPriority="high"
-    />
-  );
+  return <Logotipo className="w-auto" style={{ height: `${altura}rem` }} />;
 }
 
-/** Só a lâmpada da marca, para blocos pequenos (usada no painel). */
-export function Lampada({ className }: { className?: string }) {
-  return (
-    <Image
-      src="/marca/lampada.webp"
-      alt=""
-      width={512}
-      height={512}
-      aria-hidden
-      className={className ?? "size-8"}
-    />
-  );
-}
+export { Lampada };

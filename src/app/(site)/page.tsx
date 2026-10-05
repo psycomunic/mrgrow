@@ -35,7 +35,7 @@ const JSON_LD = {
       description: MARCA.descricao,
       url: MARCA.site,
       email: MARCA.email,
-      logo: `${MARCA.site}/marca/mr-grow-logo.webp`,
+      logo: `${MARCA.site}/marca/mr-grow-logo.png`,
       image: `${MARCA.site}/marca/og.png`,
       areaServed: "BR",
       founder: { "@type": "Person", name: MARCA.fundador },

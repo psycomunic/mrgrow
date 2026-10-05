@@ -9,6 +9,8 @@ import {
   useState,
 } from "react";
 import type { ReactNode } from "react";
+import { Logotipo } from "@/components/marca";
+import { MARCA } from "@/lib/marca";
 
 /**
  * A proposta como apresentação que passa para o lado.
@@ -341,6 +343,11 @@ export function Deck({
         {logo && /^https?:\/\//i.test(logo) ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={logo} alt={marca} className="pp-topo-logo" />
+        ) : marca === MARCA.nome ? (
+          /* A marca própria, em vetor, só quando a organização é a MR Grow.
+             A plataforma serve outras agências, e carimbar esta logo na
+             proposta de outra pessoa seria assinar o documento dela. */
+          <Logotipo className="pp-topo-vetor" />
         ) : (
           <p className="pp-topo-marca">{marca}</p>
         )}

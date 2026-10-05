@@ -44,7 +44,7 @@ export function BarraLateral({
         className="flex h-16 shrink-0 items-center gap-2.5 px-5 foco-anel"
         aria-label="Ir para a visão geral"
       >
-        <Lampada className="size-8 shrink-0" />
+        <Lampada className="size-8 shrink-0 text-acento" />
         <span className="min-w-0">
           <span className="block truncate font-display text-sm font-bold text-tinta">
             {organizacao}

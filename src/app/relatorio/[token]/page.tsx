@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { MessageCircle } from "lucide-react";
 import { Kpi } from "@/components/painel/kpi";
 import { GraficoArea, LegendaGrafico } from "@/components/painel/grafico-area";
@@ -17,6 +16,7 @@ import {
 import { STATUS_TAREFA } from "@/lib/rotulos";
 import { MARCA, linkWhatsApp } from "@/lib/marca";
 import { brl, dataCompleta, divisao, multiplo, numero, percentual } from "@/lib/utils";
+import { Logotipo } from "@/components/marca";
 
 export const metadata: Metadata = {
   title: "Relatório de performance",
@@ -83,14 +83,7 @@ export default async function PaginaRelatorio({
       <header className="border-b border-borda bg-carta">
         <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-10">
           <div className="flex items-center justify-between gap-4">
-            <Image
-              src="/marca/mr-grow-logo.webp"
-              alt={MARCA.nome}
-              width={1400}
-              height={728}
-              priority
-              style={{ height: "1.75rem", width: "auto" }}
-            />
+            <Logotipo className="w-auto text-tinta" style={{ height: "1.75rem" }} />
             <Etiqueta tom="azul">{cadencia}</Etiqueta>
           </div>
 

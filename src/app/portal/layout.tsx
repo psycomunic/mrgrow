@@ -29,7 +29,7 @@ export default async function LayoutPortal({ children }: { children: React.React
               sobre este cabeçalho branco ela simplesmente desaparecia. Aqui vale
               a lâmpada com o nome, igual à barra lateral do painel. */}
           <Link href="/portal" className="flex items-center gap-2.5 foco-anel">
-            <Lampada className="size-8 shrink-0" />
+            <Lampada className="size-8 shrink-0 text-acento" />
             <span className="font-display text-sm font-bold text-tinta">MR Grow</span>
             <span className="border-l border-borda pl-2.5 text-xs font-medium text-cinza">
               Portal do cliente

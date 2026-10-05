@@ -1642,6 +1642,16 @@
   object-fit: contain;
 }
 
+/* O vetor herda a cor do palco, que é branca — a mesma do texto que ele
+   substitui. A altura é menor que a do logo enviado porque o lockup é
+   muito mais largo: 9 para 1 contra 2 para 1. */
+.pp-topo-vetor {
+  display: block;
+  height: 15px;
+  width: auto;
+  color: var(--branco);
+}
+
 .pp-topo-marca {
   margin: 0;
   font-family: var(--fonte-display), system-ui, sans-serif;
