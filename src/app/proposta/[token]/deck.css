@@ -2057,6 +2057,21 @@
   inset: 0 -14%;
 }
 
+/* A foto ancorada pelo topo, e não centrada.
+
+   Centrada, o recorte vertical muda com a altura da janela e a linha do
+   teto do carro passeia: em 840px ela cai aos 59% da tela, em 574px aos
+   80%. Nenhuma porcentagem fixa de título acerta as duas — foi por isso
+   que a palavra ora encostava, ora ficava longe, ora sumia atrás.
+
+   Presa no topo, a escala passa a depender só da LARGURA, e o teto fica
+   sempre na mesma altura em pixels. Aí o título pode ser posicionado em
+   `vw` e acompanhar o carro em qualquer janela. */
+.pp-escolhido-foto .pp-foto .pp-kb > img,
+.pp-escolhido-foto .pp-foto .pp-kb-parado > img {
+  object-position: center top;
+}
+
 .pp-escolhido-foto::after {
   content: "";
   position: absolute;
@@ -3220,7 +3235,10 @@
      31% deixava a segunda linha bem na altura do teto do carro, e a
      palavra sumia pela metade. Subindo para 22%, só o pé dela fica
      atrás. */
-  inset: 26% 0 auto;
+  /* Em `vw`, não em `%` da altura: com a foto presa no topo, o teto do
+     carro fica sempre no mesmo pixel para uma dada largura, e só uma
+     medida que também dependa da largura consegue acompanhá-lo. */
+  inset: 15.6vw 0 auto;
   justify-content: flex-start;
   align-items: center;
   text-align: center;
@@ -3233,7 +3251,7 @@
    tamanho, e as duas linhas cabem acima do teto. */
 @media (max-height: 780px) {
   .pp-escolhido-titulo {
-    inset: 24% 0 auto;
+    inset: 20.8vw 0 auto;
     font-size: clamp(1.9rem, 5vw, 3.8rem);
   }
   .pp-completa {
