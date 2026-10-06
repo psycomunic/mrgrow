@@ -3250,9 +3250,12 @@
      larguras diferentes, e o que eu acertava numa altura quebrava na
      outra. Com a foto presa no topo, o teto do carro fica no mesmo
      pixel para uma dada largura, então uma medida em `vw` basta. */
-  /* Preso embaixo também, pelo mesmo motivo: assim título e carro
-     andam juntos em qualquer altura de janela. */
-  inset: auto 0 25.4vw;
+  /* Preso pelo teto do carro. A foto do carro entra centrada (o
+     `object-position` inline do <Foto> vence o "center bottom" do CSS),
+     então o teto cai a 50% da altura menos 17px da foto, que em escala
+     dão 0,9vw. O pé do bloco fica ali, e o `em` final é quanto do pé
+     de "assessoria" entra atrás do capô. */
+  inset: auto 0 calc(50% + 0.9vw - 0.3em);
   justify-content: flex-start;
   align-items: center;
   text-align: center;
@@ -3291,8 +3294,10 @@
   .pp-veu-visto {
     background: linear-gradient(rgba(5, 6, 8, 0.35), rgba(5, 6, 8, 0.85) 55%);
   }
+  /* No telefone a foto ocupa a largura toda: o teto fica a 1,8vw
+     acima do meio. */
   .pp-escolhido-titulo {
-    inset: 14% 0 auto;
+    inset: auto 0 calc(50% + 1.8vw - 0.3em);
   }
 }
 
