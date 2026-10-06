@@ -2069,7 +2069,12 @@
    `vw` e acompanhar o carro em qualquer janela. */
 .pp-escolhido-foto .pp-foto .pp-kb > img,
 .pp-escolhido-foto .pp-foto .pp-kb-parado > img {
-  object-position: center top;
+  /* Pelo PÉ, e não pelo topo. O carro está no rodapé do quadro: preso
+     embaixo, o teto dele fica a uma distância fixa da base do painel, e
+     essa distância só depende da largura. Preso no topo, ele ainda
+     passeava com a altura — medi 469px numa janela de 574 e 507px numa
+     de 840. */
+  object-position: center bottom;
 }
 
 .pp-escolhido-foto::after {
@@ -3245,7 +3250,9 @@
      larguras diferentes, e o que eu acertava numa altura quebrava na
      outra. Com a foto presa no topo, o teto do carro fica no mesmo
      pixel para uma dada largura, então uma medida em `vw` basta. */
-  inset: 17.2vw 0 auto;
+  /* Preso embaixo também, pelo mesmo motivo: assim título e carro
+     andam juntos em qualquer altura de janela. */
+  inset: auto 0 26.5vw;
   justify-content: flex-start;
   align-items: center;
   text-align: center;
