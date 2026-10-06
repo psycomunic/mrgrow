@@ -1,4 +1,4 @@
-import { Outfit, Manrope } from "next/font/google";
+import localFont from "next/font/local";
 import { Cabecalho } from "./_componentes/cabecalho";
 import { Rodape } from "./_componentes/rodape";
 import { AcoesFlutuantes } from "./_componentes/acoes-flutuantes";
@@ -7,17 +7,17 @@ import "./sitio.css";
 import "./secoes.css";
 
 // Outfit: geométrica, confiante em caixa alta e corpo grande.
-const display = Outfit({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+const display = localFont({
+  src: "../../fontes/outfit.woff2",
+  weight: "400 700",
   display: "swap",
   variable: "--fonte-display",
 });
 
 // Manrope: humanista, boa leitura sobre fundo escuro.
-const texto = Manrope({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+const texto = localFont({
+  src: "../../fontes/manrope.woff2",
+  weight: "400 700",
   display: "swap",
   variable: "--fonte-texto",
 });

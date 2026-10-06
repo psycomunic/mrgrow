@@ -1,21 +1,32 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Plus_Jakarta_Sans, Sora, Space_Grotesk } from "next/font/google";
+/* Fontes servidas do próprio projeto, e não do `next/font/google`.
+
+   O build na Hostinger caiu buscando fonte na rede — o carregador do
+   Google pede o CSS em tempo de compilação e quebrou com um `null`
+   quando a resposta não veio como esperado. Eram seis famílias em dois
+   layouts: seis chances de o deploy falhar por motivo que não tem nada
+   a ver com o código.
+
+   São as versões variáveis: um arquivo por família cobre toda a faixa
+   de peso, e o visitante também deixa de fazer uma ida ao
+   `fonts.gstatic.com` para ver a página. */
+import localFont from "next/font/local";
 import { Toaster } from "sonner";
 import { MARCA } from "@/lib/marca";
 import "./globals.css";
 import { SCRIPT_TEMA } from "@/components/painel/tema";
 
 // Fontes auto-hospedadas: sem requisição bloqueante ao Google e sem salto de layout.
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+const inter = localFont({
+  src: "../fontes/inter.woff2",
+  weight: "400 700",
   display: "swap",
   variable: "--fonte-sans",
 });
 
-const sora = Sora({
-  subsets: ["latin"],
-  weight: ["600", "700", "800"],
+const sora = localFont({
+  src: "../fontes/sora.woff2",
+  weight: "400 800",
   display: "swap",
   variable: "--fonte-display",
 });
@@ -26,16 +37,16 @@ const sora = Sora({
 /* A fonte do painel. Uma família só, variando o peso, como nas
    referências de dashboard: a Inter é neutra demais para dar caráter e
    a Sora é de display, pesada para tabela e formulário. */
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+const jakarta = localFont({
+  src: "../fontes/jakarta.woff2",
+  weight: "400 800",
   display: "swap",
   variable: "--fonte-painel",
 });
 
-const grotesk = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["500", "700"],
+const grotesk = localFont({
+  src: "../fontes/grotesk.woff2",
+  weight: "400 700",
   display: "swap",
   variable: "--fonte-cartaz",
 });
