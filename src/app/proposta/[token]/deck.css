@@ -2694,7 +2694,11 @@
      "seja" sumia quase inteiro atrás dela; o pedido é encostar, não
      cobrir. Agora a frase termina na borda da peça e só as últimas
      letras ficam atrás. */
-  font-size: clamp(2.8rem, 8.2vw, 9rem);
+  /* Calibrado medindo, não no olho: a linha cresce ~108px por vw nesta
+     tela, e a peça começa em x≈1005. A 8,5vw o texto termina uns 15px
+     depois disso — o bastante para cortar um pedaço do A e ainda se
+     reconhecer a letra. */
+  font-size: clamp(2.8rem, 8.5vw, 9.2rem);
   line-height: 0.88;
   text-shadow: 0 0.06em 0.25em rgba(0, 0, 0, 0.45);
 }
@@ -3216,7 +3220,7 @@
      31% deixava a segunda linha bem na altura do teto do carro, e a
      palavra sumia pela metade. Subindo para 22%, só o pé dela fica
      atrás. */
-  inset: 22% 0 auto;
+  inset: 26% 0 auto;
   justify-content: flex-start;
   align-items: center;
   text-align: center;
@@ -3229,7 +3233,7 @@
    tamanho, e as duas linhas cabem acima do teto. */
 @media (max-height: 780px) {
   .pp-escolhido-titulo {
-    inset: 20% 0 auto;
+    inset: 24% 0 auto;
     font-size: clamp(1.9rem, 5vw, 3.8rem);
   }
   .pp-completa {
