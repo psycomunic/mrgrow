@@ -2690,7 +2690,11 @@
 
 .pp-t-visto .pp-gigante {
   max-width: none;
-  font-size: clamp(3.4rem, 10.6vw, 11.8rem);
+  /* Menor que antes de propósito. A 10,6vw a linha mergulhava na dama e
+     "seja" sumia quase inteiro atrás dela; o pedido é encostar, não
+     cobrir. Agora a frase termina na borda da peça e só as últimas
+     letras ficam atrás. */
+  font-size: clamp(2.8rem, 8.2vw, 9rem);
   line-height: 0.88;
   text-shadow: 0 0.06em 0.25em rgba(0, 0, 0, 0.45);
 }
