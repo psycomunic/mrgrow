@@ -3252,7 +3252,7 @@
      pixel para uma dada largura, então uma medida em `vw` basta. */
   /* Preso embaixo também, pelo mesmo motivo: assim título e carro
      andam juntos em qualquer altura de janela. */
-  inset: auto 0 26.5vw;
+  inset: auto 0 25.4vw;
   justify-content: flex-start;
   align-items: center;
   text-align: center;
