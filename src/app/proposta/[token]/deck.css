@@ -3166,6 +3166,27 @@
   font-size: clamp(0.85rem, 1.1vw, 1rem);
 }
 
+.pp-plano-valor {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+  font-family: var(--f-titulo), Impact, sans-serif;
+  text-transform: uppercase;
+}
+
+.pp-plano-valor b {
+  font-weight: 400;
+  font-size: clamp(2rem, 3vw, 2.7rem);
+  line-height: 1;
+  color: #fff;
+}
+
+.pp-plano-valor span {
+  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+  color: #7d9bff;
+}
+
 .pp-plano-desc {
   margin-top: 0.8rem;
   display: grid;

@@ -388,10 +388,10 @@ export default async function PaginaProposta({
           </span>
           <div className="pp-conteudo pp-meio">
             <h2 className="pp-titulo-tela">
-              <Linha i={0}>Pegamos seus futuros clientes</Linha>
-              <Linha i={1}>
-                no <span className="pp-azul">ponto A.</span>
+              <Linha i={0}>
+                Pegamos do <span className="pp-azul">ponto A,</span>
               </Linha>
+              <Linha i={1}>seus futuros clientes!</Linha>
             </h2>
             <ul className="pp-canais">
               <li data-revela="" style={ordem(2)}>
@@ -400,8 +400,10 @@ export default async function PaginaProposta({
                 </span>
                 <span>
                   <b>Facebook</b>
-                  Campanhas pensadas para cada nível de consciência de compra.
-                  Despertamos o desejo em quem ainda nem sabe que precisa de você.
+                  Estruturamos todas as campanhas para cada mídia social,
+                  sabendo quem e como atingir em cada plataforma, utilizando
+                  estratégias e consciências de compra, despertando assim o
+                  desejo ou criando a necessidade de compra.
                 </span>
               </li>
               <li data-revela="" style={ordem(3)}>
@@ -410,9 +412,11 @@ export default async function PaginaProposta({
                 </span>
                 <span>
                   <b>Instagram</b>
-                  Feed, Stories e Reels, com criativos próprios para cada
-                  posicionamento. Os números dizem onde escalar: numa
-                  plataforma ou nas duas.
+                  Replicamos essa mesma estrutura no Instagram, podendo usar
+                  criativos diferentes ou outros posicionamentos, como Reels.
+                  Analisamos os números e resultados para escalar nas melhores
+                  plataformas, podendo subir campanhas em só uma delas ou em
+                  ambas!
                 </span>
               </li>
               <li data-revela="" style={ordem(4)}>
@@ -421,8 +425,10 @@ export default async function PaginaProposta({
                 </span>
                 <span>
                   <b>Google Ads</b>
-                  Quem pesquisa já quer comprar. Colocamos sua marca nas
-                  primeiras posições, na hora exata da decisão.
+                  O Google Ads é a maior plataforma de vendas online, onde
+                  encontramos um público qualificado e com consciência e
+                  decisão de compra mais elevadas. Já pensou estar nas
+                  primeiras posições do Google?
                 </span>
               </li>
             </ul>
@@ -453,9 +459,9 @@ export default async function PaginaProposta({
                   <p>
                     Uma das melhores fontes de conversão é levar o lead para o
                     WhatsApp, criando conexão e uma oportunidade de venda
-                    enorme. Junto de um atendimento diferenciado, gera
-                    resultados incríveis e leads qualificados para continuar
-                    trabalhando numa lista de remarketing.
+                    enorme. Aqui, junto de um atendimento diferenciado, pode
+                    gerar resultados incríveis e criar leads qualificados para
+                    continuar trabalhando numa lista de remarketing.
                   </p>
                 </div>
               </div>
@@ -464,11 +470,12 @@ export default async function PaginaProposta({
                 <div>
                   <b>Página de vendas</b>
                   <p>
-                    Seja um e-commerce ou uma página de captura, ter um site
-                    com domínio próprio, estruturado e captando os dados dos
-                    visitantes traz muito mais inteligência e faturamento para
-                    o seu negócio. Com mais tráfego, a audiência cresce, e com
-                    ela as vendas.
+                    Seja um e-commerce ou sua página de captura, ter um site
+                    com domínio, estruturado e obtendo os dados dos
+                    visitantes e leads traz muito mais inteligência e aumento
+                    de faturamento para o seu negócio. Conseguimos gerar um
+                    tráfego muito maior e, naturalmente, aumentando a
+                    audiência, as vendas tendem a aumentar!
                   </p>
                 </div>
               </div>
@@ -483,8 +490,8 @@ export default async function PaginaProposta({
               <Linha i={0}>Segmentação</Linha>
             </h2>
             <p className="pp-apoio" data-revela="" style={ordem(1)}>
-              Seu anúncio na hora certa, no lugar certo, para a pessoa certa.
-              Sem desperdiçar verba com quem nunca vai comprar.
+              Já pensou seus anúncios aparecerem na hora certa para as pessoas
+              certas? Sem desperdiçar verba com quem nunca vai comprar.
             </p>
             <div className="pp-seg-grade">
               <figure data-revela="" style={ordem(2)}>
@@ -513,14 +520,14 @@ export default async function PaginaProposta({
               <Linha i={0}>Criação do conteúdo geral</Linha>
             </h2>
             <p className="pp-apoio pp-apoio-largo" data-revela="" style={ordem(1)}>
-              Nossa equipe cria conteúdo relevante e de qualidade para as suas
-              redes sociais: postagens do seu setor, notícias, tendências e
-              dicas.
+              Nossa equipe de profissionais criará conteúdo relevante e de
+              qualidade para as suas páginas de redes sociais, incluindo
+              postagens relacionadas ao setor, notícias, tendências e dicas.
             </p>
             <p className="pp-apoio pp-apoio-largo" data-revela="" style={ordem(2)}>
-              Para garantir que o conteúdo seja a cara da sua marca e chegue no
-              público certo, trabalhamos junto com você para entender a marca,
-              a mensagem e os objetivos.
+              Para garantir que o conteúdo que criamos seja adequado para a sua
+              marca e atinja o seu público-alvo, trabalharemos com você para
+              entender a sua marca, a sua mensagem e os seus objetivos.
             </p>
           </div>
           {/* A colagem do portfólio, como na proposta impressa: duas fileiras
@@ -546,8 +553,10 @@ export default async function PaginaProposta({
         {/* ── 12. Planos ──────────────────────────────────────────── */}
         {/* Os cartões trazem o texto inteiro da proposta impressa. É longo de
             propósito: é aqui que o cliente compara um plano com o outro,
-            linha por linha. A tela rola por dentro quando não cabe. */}
-        {escolhido ? (
+            linha por linha. A tela rola por dentro quando não cabe.
+            Aparece sempre, com ou sem plano escolhido: os três níveis e os
+            preços são a parte que o cliente mais procura na proposta. */}
+        {PLANOS.length > 0 ? (
           <Tela rotulo="Planos" className="pp-t-planos">
             <div className="pp-planos-topo pp-centro">
               <h2 className="pp-planos-titulo">
@@ -564,7 +573,7 @@ export default async function PaginaProposta({
                   key={pl.id}
                   className="pp-plano"
                   data-recomendado={pl.recomendado ? "" : undefined}
-                  data-escolhido={pl.id === escolhido.id ? "" : undefined}
+                  data-escolhido={pl.id === escolhido?.id ? "" : undefined}
                   data-revela=""
                   style={ordem(2 + i)}
                 >
@@ -573,6 +582,12 @@ export default async function PaginaProposta({
                   ) : null}
                   <h3>Plano {pl.nome}</h3>
                   <p className="pp-plano-formula">{pl.tagline}</p>
+                  {/* O preço logo no topo: no pé do cartão ele só aparecia
+                      depois de rolar o texto inteiro. */}
+                  <p className="pp-plano-valor">
+                    <b>{emReais(pl.preco)}</b>
+                    <span>/ mês</span>
+                  </p>
                   <div className="pp-plano-desc">
                     {pl.cartao.descricao.map((d) => (
                       <p key={d}>{d}</p>
@@ -589,7 +604,7 @@ export default async function PaginaProposta({
                     </div>
                   ))}
                   <div className="pp-plano-pe">
-                    {pl.id === escolhido.id ? (
+                    {pl.id === escolhido?.id ? (
                       <p className="pp-plano-seu">✓ O plano desta proposta</p>
                     ) : null}
                     <div className="pp-plano-preco">
