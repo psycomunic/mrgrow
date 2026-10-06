@@ -2072,7 +2072,11 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 clamp(1.5rem, 4vw, 4rem);
+  /* O bloco sobe: centrado, ele caía bem na altura do capô e o carro
+     engolia "assessoria" quase inteira. Empurrado para cima, só o pé da
+     palavra fica atrás — o suficiente para ver os três planos sem perder
+     a leitura, que é o que a palavra está ali para fazer. */
+  padding: 0 clamp(1.5rem, 4vw, 4rem) clamp(5rem, 24vh, 15rem);
   font-family: var(--f-titulo), Impact, sans-serif;
   font-size: clamp(3rem, 7.2vw, 7rem);
   line-height: 0.9;
@@ -2697,6 +2701,44 @@
   }
   .pp-t-visto .pp-gigante .pp-linha {
     white-space: normal;
+  }
+}
+
+
+/* ── Seja visto: a dama inteira, e sem engolir a frase ───────────── */
+/*
+   Três coisas somadas faziam a peça aparecer gigante e cortada: a foto
+   é 16:9 e a tela é mais larga que isso, então `cover` estica pela
+   largura e perde o topo e a base; a camada ainda avança 12% para cada
+   lado; e o zoom lento cresce até 1,14.
+
+   `contain` mostra o quadro inteiro. As bordas que sobram são pretas
+   como a própria cena, então não aparece tarja. As duas camadas — fundo
+   e recorte — recebem exatamente as mesmas regras, que é o que as mantém
+   coladas uma na outra.
+*/
+.pp-t-visto .pp-foto {
+  inset: 0;
+}
+
+.pp-t-visto .pp-foto .pp-kb > img,
+.pp-t-visto .pp-foto .pp-kb-parado > img {
+  object-fit: contain;
+}
+
+/* O zoom ampliava a peça de volta até cortá-la de novo. Vira um
+   movimento quase imperceptível; as duas camadas continuam juntas
+   porque dividem a mesma animação e o mesmo início. */
+.pp-t-visto .pp-foto .pp-kb {
+  animation-name: pp-kb-visto;
+}
+
+@keyframes pp-kb-visto {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.035) translate3d(-0.4%, 0, 0);
   }
 }
 
