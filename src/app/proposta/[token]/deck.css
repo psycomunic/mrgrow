@@ -3238,7 +3238,14 @@
   /* Em `vw`, não em `%` da altura: com a foto presa no topo, o teto do
      carro fica sempre no mesmo pixel para uma dada largura, e só uma
      medida que também dependa da largura consegue acompanhá-lo. */
-  inset: 15.6vw 0 auto;
+  /* Uma calibração só, em `vw`, para qualquer altura de janela.
+
+     Antes havia uma segunda regra por `max-height` que encolhia o
+     título e deixava "completa" no tamanho cheio: as linhas saíam com
+     larguras diferentes, e o que eu acertava numa altura quebrava na
+     outra. Com a foto presa no topo, o teto do carro fica no mesmo
+     pixel para uma dada largura, então uma medida em `vw` basta. */
+  inset: 17.2vw 0 auto;
   justify-content: flex-start;
   align-items: center;
   text-align: center;
@@ -3246,19 +3253,6 @@
   transform: translate3d(calc(var(--d, 0) * 6vw), 0, 0);
 }
 
-/* Em janela baixa o carro ocupa quase dois terços da altura: não há para
-   onde subir sem jogar a primeira linha fora pelo topo. Aí o título cede
-   tamanho, e as duas linhas cabem acima do teto. */
-@media (max-height: 780px) {
-  .pp-escolhido-titulo {
-    inset: 20.8vw 0 auto;
-    font-size: clamp(1.9rem, 5vw, 3.8rem);
-  }
-  .pp-completa {
-    inset: auto 0 7%;
-    font-size: clamp(2.2rem, 6vw, 4.4rem);
-  }
-}
 
 .pp-completa {
   position: absolute;
