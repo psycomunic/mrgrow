@@ -6,12 +6,11 @@ import { Deck } from "./deck";
 import { Tela, Camada, Foto, Linha, ordem } from "./slide";
 import {
   Outdoor,
-  Gema,
   IconeFacebook,
   IconeInstagram,
   IconeGoogle,
-  IconeWhatsApp,
-  ConversaWhats,
+  WhatsAppVivo,
+  Notificacoes,
   PaginaVendas,
   GradeHorario,
   MapaRaio,
@@ -126,7 +125,7 @@ export default async function PaginaProposta({
      de planos sai, e a de investimento lista os serviços marcados. */
   const escolhido = n.plano ? nivel(n.plano) : null;
   const itensDaConta = escolhido
-    ? escolhido.entregas
+    ? escolhido.cartao.blocos[0].itens
     : n.servicos
         .map((x) => fichaDoServico(x.id)?.nome)
         .filter((x): x is string => Boolean(x));
@@ -153,32 +152,30 @@ export default async function PaginaProposta({
         </Tela>
 
         {/* ── 2. Seja visto ou seja esquecido ─────────────────────── */}
+        {/* O título passa POR TRÁS da rainha: a foto inteira embaixo, o
+            texto no meio e, por cima, só a peça recortada da mesma foto.
+            As duas camadas da foto andam juntas no parallax, então o
+            recorte nunca se descola da peça. */}
         <Tela rotulo="Seja visto ou seja esquecido" className="pp-t-visto">
-          <Foto src={FOTO("rainha.webp")} posicao="70% center" prof={-3} />
-          <div className="pp-veu pp-veu-esq" />
-          <div className="pp-conteudo pp-meio">
+          <Foto src={FOTO("rainha-fundo.webp")} posicao="75% center" prof={-1.5} />
+          <div className="pp-veu pp-veu-visto" />
+          <div className="pp-conteudo pp-meio pp-visto-texto">
             <h2 className="pp-gigante">
               <Linha i={0}>Seja visto ou seja</Linha>
               <Linha i={1} className="pp-esquecido">
                 esquecido
               </Linha>
             </h2>
-            <span className="pp-traco" data-revela="" style={ordem(4)} />
-            <p className="pp-apoio" data-revela="" style={ordem(5)}>
+            <span className="pp-traco" data-revela="" style={ordem(3)} />
+            <p className="pp-apoio" data-revela="" style={ordem(4)}>
               No digital, quem não aparece não existe para o cliente. E quem
               aparece sem estratégia vira só mais um no feed.
             </p>
           </div>
-          {/* A mesma foto, recortada só na peça, por cima do texto: a
-              palavra passa atrás da dama. Vem do mesmo arquivo, no mesmo
-              tamanho e com a mesma profundidade e o mesmo zoom — então as
-              duas camadas andam juntas e não há posição a acertar à mão.
-              Como o véu fica embaixo, a peça mantém o brilho inteiro
-              enquanto o resto da cena escurece. */}
           <Foto
             src={FOTO("rainha-recorte.webp")}
-            posicao="70% center"
-            prof={-3}
+            posicao="75% center"
+            prof={-1.5}
             className="pp-recorte"
           />
         </Tela>
@@ -282,14 +279,21 @@ export default async function PaginaProposta({
                 <span>empresas posicionadas</span>
               </div>
               <Camada prof={1.5} className="pp-dna-gema">
-                <Gema />
+                <div className="pp-diamante" aria-hidden>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={FOTO("diamante.webp")} alt="" decoding="async" />
+                  <span className="pp-diamante-brilho" />
+                  <span className="pp-gema-faisca" style={{ left: "24%", top: "30%" }} />
+                  <span className="pp-gema-faisca" style={{ left: "70%", top: "26%", animationDelay: "-1.2s" }} />
+                  <span className="pp-gema-faisca" style={{ left: "58%", top: "74%", animationDelay: "-2.3s" }} />
+                </div>
               </Camada>
-              <div className="pp-dna-num" data-revela="" style={ordem(3)}>
+              <div className="pp-dna-num pp-dna-mi" data-revela="" style={ordem(3)}>
                 <b>
                   <i>+</i>
-                  <Contador valor={9} duracao={1200} /> mi
+                  <Contador valor={9} duracao={1200} /> milhões
                 </b>
-                <span>em verba administrada em anúncios</span>
+                <span>de verba administrada em anúncios</span>
               </div>
             </div>
             <div className="pp-dna-num pp-dna-largo" data-revela="" style={ordem(4)}>
@@ -301,7 +305,7 @@ export default async function PaginaProposta({
             <div className="pp-dna-num pp-dna-anos" data-revela="" style={ordem(5)}>
               <b>
                 <i>+</i>
-                <Contador valor={10} duracao={1000} /> anos de mercado
+                <Contador valor={10} duracao={1000} /> anos no mercado
               </b>
               <span>Especialistas em transformar atenção em venda.</span>
             </div>
@@ -310,25 +314,31 @@ export default async function PaginaProposta({
 
         {/* ── 7. Método G.R.O.W. ──────────────────────────────────── */}
         <Tela rotulo="Método G.R.O.W." className="pp-t-grow">
-          <Foto src={FOTO("carro.webp")} posicao="center" prof={-2.5} className="pp-grow-foto" />
-          <div className="pp-veu pp-veu-esq" />
+          <Camada prof={1} className="pp-grow-cena">
+            <div className="pp-grow-pc">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={FOTO("notebook-rocha.webp")} alt="" decoding="async" />
+              {/* Notificações que pipocam em volta do notebook: o método
+                  rodando, em resultado que o cliente reconhece. */}
+              <Notificacoes />
+            </div>
+          </Camada>
+          <div className="pp-veu pp-veu-esq pp-veu-grow" />
           <div className="pp-conteudo pp-meio">
-            <p className="pp-sobretitulo" data-revela="" style={ordem(0)}>
-              Nosso diferencial
-            </p>
             <h2 className="pp-titulo-tela">
+              <Linha i={0}>Nosso diferencial:</Linha>
               <Linha i={1}>Método G.R.O.W.</Linha>
             </h2>
             <p className="pp-apoio" data-revela="" style={ordem(2)}>
-              Toda estratégia da {nomeAgencia} passa pelas mesmas quatro
-              etapas. É o que faz o resultado ser repetível, e não sorte.
+              Na {nomeAgencia}, toda estratégia segue o nosso método próprio:
+              o Método G.R.O.W.
             </p>
             <ol className="pp-grow">
               {[
-                ["G", "Goals", "Metas", "Metas reais de faturamento e autoridade. Nada de número de vaidade."],
-                ["R", "Results", "Resultados", "Medimos o que paga as contas: leads, vendas e mercado conquistado. Curtida não paga boleto."],
-                ["O", "Optimization", "Otimização", "Todo mês a estratégia é revisada para escalar o que funciona e cortar o que não funciona."],
-                ["W", "Winner Mind", "Mente campeã", "Lado a lado com você: constância, estratégia e visão de futuro."],
+                ["G", "Goals", "Metas", "Definimos metas reais e alcançáveis que impulsionam o seu crescimento, com foco em faturamento e autoridade."],
+                ["R", "Results", "Resultados", "Mensuramos o que importa: leads, vendas, expansão de mercado. Curtida não paga boleto."],
+                ["O", "Optimization", "Otimização", "Cada estratégia é otimizada mensalmente para melhorar resultados e escalar sua presença digital."],
+                ["W", "Winner Mind", "Mente campeã", "Trabalhamos lado a lado para fortalecer a mentalidade empresarial: constância, estratégia e visão de futuro."],
               ].map(([letra, en, pt, txt], i) => (
                 <li
                   key={letra}
@@ -432,32 +442,33 @@ export default async function PaginaProposta({
           <div className="pp-conteudo pp-pontob">
             <h2 className="pp-titulo-tela">
               <Linha i={0}>
-                E levamos até o <span className="pp-azul">ponto B:</span>
+                E levamos para um <span className="pp-azul">ponto B.</span>
               </Linha>
-              <Linha i={1}>a venda.</Linha>
             </h2>
-            <div className="pp-pontob-grade">
-              <div className="pp-pontob-item" data-revela="" style={ordem(2)}>
-                <ConversaWhats marca={cliente} />
+            <div className="pp-pontob-lista">
+              <div className="pp-pontob-linha" data-revela="" style={ordem(2)}>
+                <WhatsAppVivo />
                 <div>
-                  <b>
-                    <IconeWhatsApp /> WhatsApp
-                  </b>
+                  <b>WhatsApp</b>
                   <p>
-                    O lead chega pronto para conversar. Com um atendimento
-                    afiado, a conversa vira venda, e quem não comprou entra
-                    na lista de remarketing.
+                    Uma das melhores fontes de conversão é levar o lead para o
+                    WhatsApp, criando conexão e uma oportunidade de venda
+                    enorme. Junto de um atendimento diferenciado, gera
+                    resultados incríveis e leads qualificados para continuar
+                    trabalhando numa lista de remarketing.
                   </p>
                 </div>
               </div>
-              <div className="pp-pontob-item" data-revela="" style={ordem(3)}>
+              <div className="pp-pontob-linha" data-revela="" style={ordem(3)}>
                 <PaginaVendas />
                 <div>
                   <b>Página de vendas</b>
                   <p>
-                    Site ou página de captura com domínio próprio, rápida e
-                    medida. Cada visita vira dado, e cada dado vira
-                    faturamento.
+                    Seja um e-commerce ou uma página de captura, ter um site
+                    com domínio próprio, estruturado e captando os dados dos
+                    visitantes traz muito mais inteligência e faturamento para
+                    o seu negócio. Com mais tráfego, a audiência cresce, e com
+                    ela as vendas.
                   </p>
                 </div>
               </div>
@@ -499,89 +510,122 @@ export default async function PaginaProposta({
         <Tela rotulo="Criação de conteúdo" className="pp-t-conteudo">
           <div className="pp-conteudo pp-conteudo-topo">
             <h2 className="pp-titulo-tela">
-              <Linha i={0}>Criação de conteúdo</Linha>
+              <Linha i={0}>Criação do conteúdo geral</Linha>
             </h2>
             <p className="pp-apoio pp-apoio-largo" data-revela="" style={ordem(1)}>
-              Conteúdo com intenção comercial: posts, reels e stories que
-              constroem autoridade e trazem cliente. Antes de criar, a gente
-              mergulha na sua marca, na sua mensagem e nos seus objetivos.
+              Nossa equipe cria conteúdo relevante e de qualidade para as suas
+              redes sociais: postagens do seu setor, notícias, tendências e
+              dicas.
+            </p>
+            <p className="pp-apoio pp-apoio-largo" data-revela="" style={ordem(2)}>
+              Para garantir que o conteúdo seja a cara da sua marca e chegue no
+              público certo, trabalhamos junto com você para entender a marca,
+              a mensagem e os objetivos.
             </p>
           </div>
-          <div className="pp-portfolio" data-revela="" style={ordem(2)}>
-            <Esteira segundos={46}>
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={i} src={FOTO(`post-${i}.webp`)} alt="" loading="lazy" />
-              ))}
-            </Esteira>
-            <Esteira segundos={52} sentido="direita">
-              {[4, 6, 1, 5, 3, 2].map((i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={i} src={FOTO(`post-${i}.webp`)} alt="" loading="lazy" />
-              ))}
-            </Esteira>
+          {/* A colagem do portfólio, como na proposta impressa: duas fileiras
+              desencontradas, cada post entrando no seu tempo e flutuando. */}
+          <div className="pp-colagem" aria-hidden>
+            <span className="pp-colagem-fio pp-colagem-fio-1" />
+            <span className="pp-colagem-fio pp-colagem-fio-2" />
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={i}
+                src={FOTO(`post-${i}.webp`)}
+                alt=""
+                loading="lazy"
+                className={`pp-post pp-post-${i}`}
+                data-revela=""
+                style={{ ...ordem(2 + i), "--k": i } as CSSProperties}
+              />
+            ))}
           </div>
         </Tela>
 
         {/* ── 12. Planos ──────────────────────────────────────────── */}
+        {/* Os cartões trazem o texto inteiro da proposta impressa. É longo de
+            propósito: é aqui que o cliente compara um plano com o outro,
+            linha por linha. A tela rola por dentro quando não cabe. */}
         {escolhido ? (
-        <Tela rotulo="Planos" className="pp-t-planos">
-          <div className="pp-conteudo pp-planos-topo pp-centro">
-            <h2 className="pp-titulo-tela">
-              <Linha i={0}>Escolha o nível de crescimento</Linha>
-            </h2>
-            <p className="pp-apoio" data-revela="" style={ordem(1)}>
-              Estratégia, conteúdo e tráfego para sua marca sair do improviso e
-              crescer com direção.
-            </p>
-          </div>
-          <div className="pp-planos">
-            {PLANOS.map((pl, i) => (
-              <article
-                key={pl.id}
-                className="pp-plano"
-                data-recomendado={pl.recomendado ? "" : undefined}
-                data-escolhido={pl.id === escolhido.id ? "" : undefined}
-                data-revela=""
-                style={ordem(2 + i)}
-              >
-                {pl.recomendado ? (
-                  <span className="pp-plano-selo">★ Mais recomendado</span>
-                ) : null}
-                <h3>Plano {pl.nome}</h3>
-                <p className="pp-plano-formula">{pl.tagline}</p>
-                <ul>
-                  {pl.entregas.map((e) => (
-                    <li key={e}>{e}</li>
+          <Tela rotulo="Planos" className="pp-t-planos">
+            <div className="pp-planos-topo pp-centro">
+              <h2 className="pp-planos-titulo">
+                <Linha i={0}>Escolha o nível de crescimento</Linha>
+              </h2>
+              <p data-revela="" style={ordem(1)}>
+                Estratégia, conteúdo e tráfego para sua marca sair do improviso
+                e crescer com direção.
+              </p>
+            </div>
+            <div className="pp-planos">
+              {PLANOS.map((pl, i) => (
+                <article
+                  key={pl.id}
+                  className="pp-plano"
+                  data-recomendado={pl.recomendado ? "" : undefined}
+                  data-escolhido={pl.id === escolhido.id ? "" : undefined}
+                  data-revela=""
+                  style={ordem(2 + i)}
+                >
+                  {pl.recomendado ? (
+                    <span className="pp-plano-selo">★ Mais recomendado</span>
+                  ) : null}
+                  <h3>Plano {pl.nome}</h3>
+                  <p className="pp-plano-formula">{pl.tagline}</p>
+                  <div className="pp-plano-desc">
+                    {pl.cartao.descricao.map((d) => (
+                      <p key={d}>{d}</p>
+                    ))}
+                  </div>
+                  {pl.cartao.blocos.map((b) => (
+                    <div key={b.titulo} className="pp-plano-bloco">
+                      <span className="pp-plano-pilula">{b.titulo}</span>
+                      <ul>
+                        {b.itens.map((e) => (
+                          <li key={e}>{e}</li>
+                        ))}
+                      </ul>
+                    </div>
                   ))}
-                </ul>
-                {pl.id === escolhido.id ? (
-                  <p className="pp-plano-seu">✓ O plano desta proposta</p>
-                ) : null}
-                <div className="pp-plano-preco">
-                  <span>Investimento mensal</span>
-                  <b>{emReais(pl.preco)}</b>
-                </div>
-              </article>
-            ))}
-          </div>
-        </Tela>
+                  <div className="pp-plano-pe">
+                    {pl.id === escolhido.id ? (
+                      <p className="pp-plano-seu">✓ O plano desta proposta</p>
+                    ) : null}
+                    <div className="pp-plano-preco">
+                      <span>Investimento mensal</span>
+                      <b>{emReais(pl.preco)}</b>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </Tela>
         ) : null}
 
         {/* ── 13. Plano selecionado ───────────────────────────────── */}
         <Tela rotulo="Plano selecionado" className="pp-t-escolhido">
+          {/* O carro passa na frente de "assessoria" e "completa" passa na
+              frente do carro: três planos, com o recorte do carro tirado da
+              mesma foto e andando junto com ela. */}
           <div className="pp-escolhido-foto">
-            <Foto src={FOTO("notebook.webp")} posicao="center 70%" prof={-2} />
+            <Foto src={FOTO("carro-fundo.webp")} posicao="center" prof={-1} />
             <div className="pp-escolhido-titulo">
               <Linha i={0}>Entrega da</Linha>
               <Linha i={1}>assessoria</Linha>
-              <Linha i={2} className="pp-completa">
-                completa
-              </Linha>
             </div>
+            <Foto
+              src={FOTO("carro-recorte.webp")}
+              posicao="center"
+              prof={-1}
+              className="pp-recorte"
+            />
+            <p className="pp-completa">
+              <Linha i={2}>completa</Linha>
+            </p>
           </div>
           <div className="pp-escolhido-texto">
-            <p className="pp-sobretitulo pp-escuro" data-revela="" style={ordem(0)}>
+            <p className="pp-escolhido-sobre" data-revela="" style={ordem(0)}>
               {escolhido ? "Plano selecionado" : "Sua assessoria"}
             </p>
             <h2 className="pp-escolhido-nome" data-revela="" style={ordem(1)}>

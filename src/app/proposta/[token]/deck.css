@@ -215,13 +215,6 @@
   animation-play-state: paused !important;
 }
 
-/* Acima do conteúdo, que está no z-index 2: é o que faz o texto sumir
-   atrás da peça em vez de passar por cima dela. */
-.pp-recorte {
-  z-index: 3;
-  pointer-events: none;
-}
-
 .pp-veu {
   position: absolute;
   inset: 0;
@@ -608,18 +601,8 @@
 
 /* ── 2. Seja visto ───────────────────────────────────────────────── */
 
-/* A frase corre a largura toda, de propósito: é ela que precisa chegar
-   até a dama para passar atrás dela. Presa em 9ch, quebrava em três
-   linhas curtas e morria no meio da tela, longe da peça. */
 .pp-t-visto .pp-gigante {
-  max-width: none;
-  font-size: clamp(2.6rem, 11vw, 11.5rem);
-  line-height: 0.86;
-}
-
-/* O conteúdo desta tela avança sob a peça. */
-.pp-t-visto .pp-conteudo {
-  width: min(1340px, calc(100% - 2 * var(--margem)));
+  max-width: 9ch;
 }
 
 /* "Esquecido" some e volta, como uma marca que o público esquece. */
@@ -2110,25 +2093,16 @@
   justify-content: center;
   background: var(--branco);
   color: #050505;
-  /* Topo e rodapé iguais: com 5rem em cima e 7rem embaixo, o
-     `justify-content: center` empurrava tudo para cima e sobrava um
-     vazio grande no pé da coluna. */
-  padding: 4.5rem clamp(1.5rem, 4vw, 4.5rem);
-  gap: 0.25rem;
+  padding: 5rem clamp(1.5rem, 4vw, 4.5rem) 7rem;
 }
 
 .pp-escolhido-nome {
   font-family: var(--f-titulo), Impact, sans-serif;
   font-weight: 400;
-  /* Menor e mais justo que antes. O 0.22em foi desenhado para "GROW
-     PRO", de oito letras; num nome de cliente comprido ele abria a
-     palavra até ela atravessar a coluna e encostar na borda. O
-     `min()` com a contagem de letras segura os dois casos. */
-  font-size: clamp(2rem, min(4.2vw, 3.4rem), 3.4rem);
-  line-height: 1;
+  font-size: clamp(2.6rem, 5vw, 4.8rem);
+  line-height: 0.95;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  overflow-wrap: anywhere;
+  letter-spacing: 0.22em;
   color: var(--azul-real);
 }
 
@@ -2439,14 +2413,6 @@
   width: auto;
 }
 
-/* A marca inteira é 9 para 1: na altura da lâmpada ela ficaria com
-   180px de largura e dominaria o cabeçalho, então entra mais baixa. */
-.pp-topo-vetor {
-  display: block;
-  height: 0.95rem;
-  width: auto;
-}
-
 .pp-topo-logo {
   display: block;
   height: 30px;
@@ -2635,112 +2601,6 @@
 
 /* ── Movimento reduzido: tudo parado, tudo visível ───────────────── */
 
-
-/* ── Correções do ponto B ────────────────────────────────────────── */
-
-/* O chat tinha altura livre e seis mensagens empilhadas: no notebook ele
-   passava da borda de baixo da tela e a última bolha era cortada. Agora
-   tem altura fixa e as mensagens encostam embaixo, como num aparelho de
-   verdade — as antigas saem por cima conforme as novas chegam. */
-.pp-chat-corpo {
-  min-height: 0;
-  height: clamp(13rem, 30vh, 16.5rem);
-  justify-content: flex-end;
-  overflow: hidden;
-}
-
-/* A hora dentro da bolha, como no aplicativo. Não é enfeite: é o que
-   faz a peça parecer uma conversa real em vez de um desenho de
-   conversa. */
-.pp-msg {
-  position: relative;
-  padding-right: 2.9rem;
-}
-
-.pp-msg::after {
-  content: attr(data-hora);
-  position: absolute;
-  right: 0.55rem;
-  bottom: 0.35rem;
-  font-size: 0.58rem;
-  letter-spacing: 0.02em;
-  color: rgba(233, 237, 239, 0.45);
-}
-
-/* Os dois tiques de entregue, só no que a loja mandou. */
-.pp-msg[data-lado="loja"]::before {
-  content: "✓✓";
-  position: absolute;
-  right: 0.5rem;
-  bottom: 0.3rem;
-  font-size: 0.5rem;
-  letter-spacing: -0.12em;
-  color: #53bdeb;
-  transform: translateX(0.1rem);
-}
-
-.pp-msg[data-lado="loja"]::after {
-  right: 1.35rem;
-}
-
-/* O aviso de novo lead saía 1,2rem para fora do navegador, pela direita
-   — bem onde mora o título "Página de vendas". Ele passava por cima do
-   texto em tela cheia. Dentro da janela ele continua chamando atenção e
-   fica mais realista: o aviso nasce no site, não ao lado dele. */
-.pp-site-toast {
-  right: 0.6rem;
-  top: 2.6rem;
-}
-
-/* Os dois blocos param de se encostar: a peça nunca passa da metade da
-   coluna, e o texto fica com o resto. */
-.pp-pontob-item {
-  align-items: center;
-  gap: clamp(1rem, 2vw, 1.75rem);
-}
-
-@media (min-width: 1024px) {
-  .pp-pontob-grade {
-    gap: clamp(2rem, 5vw, 5rem);
-  }
-}
-
-
-/* ── Telas baixas: notebook de 13 a 14 polegadas ─────────────────── */
-/*
-   Quase tudo no deck é dimensionado em `vw`, que não encolhe quando o
-   que falta é ALTURA. Num notebook de 768px de altura o título continuava
-   do tamanho de um monitor grande e encostava na lista logo abaixo — foi
-   a sobreposição relatada. Aqui a tipografia cede o que precisa, e só
-   nessas alturas.
-*/
-@media (max-height: 820px) {
-  .pp-titulo-tela {
-    font-size: clamp(1.9rem, 3.9vw, 3.4rem);
-  }
-  .pp-t-dna .pp-titulo-tela {
-    font-size: clamp(2.1rem, 5vw, 4.4rem);
-  }
-  .pp-canais {
-    margin-top: 2rem;
-    gap: 1.25rem;
-  }
-  .pp-canais b {
-    font-size: clamp(1.2rem, 2vw, 1.6rem);
-  }
-  .pp-canais > li {
-    grid-template-columns: clamp(3rem, 4.6vw, 3.8rem) 1fr;
-    font-size: clamp(0.86rem, 1.1vw, 0.98rem);
-    line-height: 1.45;
-  }
-  .pp-pontob-grade {
-    margin-top: 1.25rem;
-  }
-  .pp-escolhido-texto {
-    padding-block: 2.5rem;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .pp-palco[data-mov] [data-revela],
   .pp-palco[data-mov] .pp-linha > span {
@@ -2798,5 +2658,607 @@
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Rodada 3: recortes, notificações, colagem e cartões completos
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* O recorte da foto, por cima do texto. Mesma caixa e mesma velocidade
+   da foto de baixo, então ele fica colado no lugar exato. */
+.pp-foto.pp-recorte {
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* ── Seja visto: o título passa por trás da rainha ───────────────── */
+
+.pp-veu-visto {
+  background:
+    linear-gradient(90deg, rgba(5, 6, 8, 0.82) 0%, rgba(5, 6, 8, 0.45) 45%, transparent 70%),
+    linear-gradient(to top, rgba(5, 6, 8, 0.7), transparent 35%);
+}
+
+.pp-t-visto .pp-gigante {
+  max-width: none;
+  font-size: clamp(3.4rem, 10.6vw, 11.8rem);
+  line-height: 0.88;
+  text-shadow: 0 0.06em 0.25em rgba(0, 0, 0, 0.45);
+}
+
+.pp-t-visto .pp-gigante .pp-linha {
+  white-space: nowrap;
+}
+
+@media (max-width: 899px) {
+  .pp-t-visto .pp-gigante {
+    font-size: clamp(2.8rem, 13vw, 5rem);
+  }
+  .pp-t-visto .pp-gigante .pp-linha {
+    white-space: normal;
+  }
+}
+
+/* ── DNA: o diamante de verdade ──────────────────────────────────── */
+
+.pp-t-dna .pp-dna-grade {
+  margin-top: clamp(-3rem, -2.4vw, -1rem);
+}
+
+.pp-dna-mi b {
+  white-space: nowrap;
+  font-size: clamp(2.4rem, 5.2vw, 5rem);
+}
+
+.pp-diamante {
+  position: relative;
+  width: clamp(220px, 30vw, 430px);
+  aspect-ratio: 1;
+  animation: pp-flutua 5s ease-in-out infinite;
+}
+
+.pp-diamante > img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+  animation: pp-diamante-gira 9s ease-in-out infinite;
+}
+
+@keyframes pp-diamante-gira {
+  0%, 100% { transform: rotate(-3deg) scale(1); filter: brightness(1) saturate(1.05); }
+  50% { transform: rotate(3deg) scale(1.04); filter: brightness(1.18) saturate(1.2); }
+}
+
+.pp-diamante-brilho {
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(40, 170, 255, 0.55), transparent);
+  filter: blur(30px);
+  animation: pp-cintila 3.2s ease-in-out infinite;
+}
+
+.pp-diamante .pp-gema-faisca {
+  z-index: 2;
+}
+
+/* ── Método G.R.O.W.: notebook e notificações ────────────────────── */
+
+.pp-grow-cena {
+  pointer-events: none;
+}
+
+.pp-grow-pc {
+  position: absolute;
+  right: -9%;
+  top: 52%;
+  width: min(84vw, 1500px);
+  translate: 0 -50%;
+}
+
+.pp-grow-pc > img {
+  display: block;
+  height: auto;
+  width: 100%;
+  mask-image: radial-gradient(ellipse 70% 70% at 55% 50%, #000 60%, transparent 85%);
+}
+
+.pp-veu-grow {
+  background:
+    linear-gradient(90deg, var(--preto) 0%, rgba(5, 6, 8, 0.92) 30%, rgba(5, 6, 8, 0.3) 55%, transparent 70%);
+}
+
+.pp-notifs {
+  position: absolute;
+  inset: 0;
+}
+
+.pp-notif {
+  position: absolute;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.65rem;
+  width: clamp(200px, 17vw, 250px);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.94);
+  padding: 0.65rem 0.8rem;
+  color: #12151c;
+  box-shadow: 0 20px 40px -14px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  animation: pp-notif 12.5s var(--sai) infinite;
+  animation-delay: calc(var(--i) * 2.5s + 0.8s);
+}
+
+.pp-notif-icone {
+  position: relative;
+  height: 2rem;
+  width: 2rem;
+  border-radius: 0.6rem;
+  background: var(--cor);
+}
+
+.pp-notif-icone::after {
+  content: "";
+  position: absolute;
+  inset: 32%;
+  border-radius: 9999px;
+  background: #fff;
+}
+
+.pp-notif b {
+  display: block;
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+
+.pp-notif i {
+  display: block;
+  font-style: normal;
+  font-size: 0.7rem;
+  color: #5b6270;
+}
+
+.pp-notif small {
+  align-self: start;
+  font-size: 0.6rem;
+  color: #8a8f99;
+}
+
+@keyframes pp-notif {
+  0% { opacity: 0; transform: translateY(14px) scale(0.9); }
+  4%, 30% { opacity: 1; transform: none; }
+  36%, 100% { opacity: 0; transform: translateY(-8px) scale(0.98); }
+}
+
+@media (max-width: 899px) {
+  .pp-grow-pc {
+    width: 120vw;
+    right: -30vw;
+    top: 22%;
+    opacity: 0.45;
+  }
+  .pp-notif {
+    display: none;
+  }
+}
+
+/* ── Ponto B ─────────────────────────────────────────────────────── */
+
+.pp-pontob-lista {
+  margin-top: clamp(1.75rem, 5vh, 3.25rem);
+  display: grid;
+  gap: clamp(1.75rem, 5vh, 3.25rem);
+}
+
+.pp-pontob-linha {
+  display: grid;
+  grid-template-columns: clamp(17rem, 24vw, 22rem) 1fr;
+  align-items: center;
+  gap: clamp(1.5rem, 3vw, 3rem);
+}
+
+.pp-pontob-linha b {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.7rem, 2.6vw, 2.5rem);
+  text-transform: uppercase;
+}
+
+.pp-pontob-linha p {
+  max-width: 70ch;
+  font-size: clamp(0.95rem, 1.3vw, 1.12rem);
+  line-height: 1.6;
+  color: #c3c9d4;
+}
+
+@media (max-width: 899px) {
+  .pp-pontob-linha {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pp-wa {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pp-wa-icone {
+  position: relative;
+  width: clamp(6.5rem, 9vw, 8.5rem);
+  flex: none;
+  animation: pp-flutua 4.5s ease-in-out infinite;
+}
+
+@property --m {
+  syntax: "<integer>";
+  initial-value: 1;
+  inherits: false;
+}
+
+.pp-wa-contador {
+  position: absolute;
+  right: 2%;
+  top: 2%;
+  display: grid;
+  height: 2.1rem;
+  min-width: 2.1rem;
+  place-items: center;
+  border-radius: 9999px;
+  border: 3px solid var(--preto);
+  background: #ff3b30;
+  font-family: var(--f-texto), sans-serif;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #fff;
+  counter-reset: m var(--m);
+  animation:
+    pp-msgs 9s steps(8, end) infinite,
+    pp-pula 1.125s ease-out infinite;
+}
+
+.pp-wa-contador::after {
+  content: counter(m);
+}
+
+@keyframes pp-msgs {
+  from { --m: 1; }
+  to { --m: 9; }
+}
+
+@keyframes pp-pula {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.25); }
+}
+
+.pp-wa-baloes {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.pp-wa-baloes > span {
+  justify-self: start;
+  border-radius: 0.8rem 0.8rem 0.8rem 0.2rem;
+  background: #1f2c33;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.74rem;
+  line-height: 1.3;
+  color: #e9edef;
+  box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  animation: pp-chip 9s var(--sai) infinite;
+  animation-delay: calc(var(--i) * 1.2s + 0.6s);
+}
+
+.pp-wa-baloes > span:last-child {
+  background: #005c4b;
+}
+
+/* ── Conteúdo: a colagem do portfólio ────────────────────────────── */
+
+.pp-colagem {
+  position: relative;
+  z-index: 2;
+  width: min(1240px, calc(100% - 2 * var(--margem)));
+  margin: 0.5rem auto 0;
+  padding-bottom: 7rem;
+  container-type: inline-size;
+}
+
+.pp-colagem::before {
+  content: "";
+  display: block;
+  height: 31cqw;
+}
+
+.pp-post {
+  position: absolute;
+  width: 16.5cqw;
+  aspect-ratio: 1;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 0.4rem;
+  box-shadow: 0 24px 40px -18px rgba(0, 0, 0, 0.9);
+  animation: pp-post-flutua 6s ease-in-out infinite;
+  animation-delay: calc(var(--k) * -1s);
+}
+
+.pp-post-1 { left: 4cqw; top: 0; }
+.pp-post-2 { left: 21.5cqw; top: 0; }
+.pp-post-3 { left: 39cqw; top: 0; }
+.pp-post-4 { left: 32.5cqw; top: 14cqw; z-index: 1; }
+.pp-post-5 { left: 50cqw; top: 14cqw; z-index: 1; }
+.pp-post-6 { left: 67.5cqw; top: 14cqw; z-index: 1; }
+
+@keyframes pp-post-flutua {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -0.6cqw; }
+}
+
+.pp-colagem-fio {
+  position: absolute;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.85));
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 1.4s var(--sai) 1.2s;
+}
+
+.pp-colagem-fio-1 { left: 56cqw; width: 33cqw; top: 6cqw; }
+.pp-colagem-fio-2 { left: 0; width: 32cqw; top: 25cqw; background: linear-gradient(90deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.2)); }
+
+.pp-palco section[data-visto] .pp-colagem-fio {
+  transform: scaleX(1);
+}
+
+@media (max-width: 899px) {
+  .pp-colagem::before { height: 62cqw; }
+  .pp-post { width: 32cqw; }
+  .pp-post-1 { left: 0; top: 0; }
+  .pp-post-2 { left: 34cqw; top: 0; }
+  .pp-post-3 { left: 68cqw; top: 0; }
+  .pp-post-4 { left: 0; top: 32cqw; }
+  .pp-post-5 { left: 34cqw; top: 32cqw; }
+  .pp-post-6 { left: 68cqw; top: 32cqw; }
+  .pp-colagem-fio { display: none; }
+}
+
+/* ── Planos: os cartões completos da proposta impressa ───────────── */
+
+.pp-trilho > section:has(.pp-t-planos) {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+.pp-t-planos {
+  background-color: #10141e;
+  background-image: none;
+}
+
+.pp-planos-topo {
+  display: flex;
+  flex-direction: column;
+  padding: 4.5rem var(--margem) 2.25rem;
+}
+
+.pp-planos-titulo {
+  font-family: var(--f-texto), sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.9rem, 3.6vw, 3.2rem);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.pp-planos-topo > p {
+  margin-top: 0.4rem;
+  font-size: clamp(0.95rem, 1.5vw, 1.25rem);
+  color: #a9b0bd;
+}
+
+.pp-planos {
+  padding-bottom: 8rem;
+  align-items: stretch;
+}
+
+.pp-plano {
+  border-radius: 1.6rem;
+  border-color: rgba(255, 255, 255, 0.55);
+  background: #10141e;
+  padding: clamp(1.4rem, 2.2vw, 2.2rem) clamp(1.2rem, 2vw, 2rem) 0;
+}
+
+.pp-plano h3 {
+  font-family: var(--f-texto), sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.3rem, 1.9vw, 1.75rem);
+  letter-spacing: -0.01em;
+  border-bottom-color: #2d55c8;
+}
+
+.pp-plano-formula {
+  margin-top: 0.8rem;
+  font-weight: 500;
+  font-size: clamp(0.85rem, 1.1vw, 1rem);
+}
+
+.pp-plano-desc {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.7rem;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: #e3e6ec;
+}
+
+.pp-plano-bloco {
+  margin-top: 1.2rem;
+}
+
+.pp-plano-pilula {
+  display: inline-block;
+  border-radius: 0.55rem;
+  background: #1d4fd8;
+  padding: 0.45rem 0.8rem;
+  font-weight: 700;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.pp-plano-bloco ul {
+  margin: 0.7rem 0 0;
+  gap: 0.1rem;
+  font-size: 0.72rem;
+  color: #e3e6ec;
+}
+
+.pp-plano-bloco li::before {
+  margin-top: 0.5em;
+  height: 0.28rem;
+  width: 0.28rem;
+  background: #fff;
+}
+
+.pp-plano-pe {
+  margin-top: auto;
+  padding-top: 1.4rem;
+}
+
+.pp-plano-preco {
+  justify-items: center;
+  width: max-content;
+  min-width: 13rem;
+  margin-bottom: -1.4rem;
+  border-radius: 0.9rem;
+  padding: 0.5rem 1.4rem 0.4rem;
+  box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.8);
+}
+
+.pp-plano-preco span {
+  color: #1d4fd8;
+}
+
+.pp-plano-preco b {
+  font-size: clamp(2rem, 3vw, 2.6rem);
+}
+
+/* ── Plano selecionado: o carro entre os textos ──────────────────── */
+
+.pp-escolhido-foto::after {
+  background: linear-gradient(rgba(5, 6, 8, 0.25), transparent 35%, transparent 70%, rgba(5, 6, 8, 0.35));
+}
+
+.pp-escolhido-titulo {
+  inset: 31% 0 auto;
+  justify-content: flex-start;
+  align-items: center;
+  text-align: center;
+  font-size: clamp(3rem, 7.4vw, 7.6rem);
+  transform: translate3d(calc(var(--d, 0) * 6vw), 0, 0);
+}
+
+.pp-completa {
+  position: absolute;
+  inset: auto 0 11%;
+  z-index: 4;
+  text-align: center;
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-size: clamp(3.4rem, 8.4vw, 8.6rem);
+  font-style: italic;
+  line-height: 0.9;
+  text-transform: uppercase;
+  text-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
+  transform: translate3d(calc(var(--d, 0) * 14vw), 0, 0);
+}
+
+.pp-escolhido-sobre {
+  font-family: var(--f-titulo), Impact, sans-serif;
+  font-size: clamp(2.2rem, 4.4vw, 4.4rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+/* No telefone em pé a rainha ocupa a tela toda: o texto passa por cima
+   dela, com véu mais forte, em vez de por trás. */
+@media (max-width: 899px) {
+  .pp-t-visto .pp-recorte {
+    display: none;
+  }
+  .pp-veu-visto {
+    background: linear-gradient(rgba(5, 6, 8, 0.35), rgba(5, 6, 8, 0.85) 55%);
+  }
+  .pp-escolhido-titulo {
+    inset: 14% 0 auto;
+  }
+}
+
+/* ── Trazido da sessão paralela: cabeçalho e telas baixas ────────── */
+
+/* A marca inteira é 9 para 1: na altura da lâmpada ela dominaria o
+   cabeçalho, então entra mais baixa. */
+.pp-topo-vetor {
+  display: block;
+  height: 0.95rem;
+  width: auto;
+}
+
+.pp-escolhido-texto {
+  padding: 4.5rem clamp(1.5rem, 4vw, 4.5rem);
+  gap: 0.25rem;
+}
+
+.pp-escolhido-nome {
+  font-size: clamp(2rem, min(4.2vw, 3.4rem), 3.4rem);
+  line-height: 1;
+  letter-spacing: 0.08em;
+  overflow-wrap: anywhere;
+}
+
+.pp-site-toast {
+  right: 0.6rem;
+  top: 2.6rem;
+}
+
+/* Notebook de 13 a 14 polegadas: o que falta é altura, e `vw` não
+   encolhe com ela. A tipografia cede só nessas alturas. */
+@media (max-height: 820px) {
+  .pp-titulo-tela {
+    font-size: clamp(1.9rem, 3.9vw, 3.4rem);
+  }
+  .pp-t-dna .pp-titulo-tela {
+    font-size: clamp(2.1rem, 5vw, 4.4rem);
+  }
+  .pp-canais {
+    margin-top: 2rem;
+    gap: 1.25rem;
+  }
+  .pp-canais b {
+    font-size: clamp(1.2rem, 2vw, 1.6rem);
+  }
+  .pp-canais > li {
+    grid-template-columns: clamp(3rem, 4.6vw, 3.8rem) 1fr;
+    font-size: clamp(0.86rem, 1.1vw, 0.98rem);
+    line-height: 1.45;
+  }
+  .pp-pontob-lista {
+    margin-top: 1.25rem;
+    gap: 1.5rem;
+  }
+  .pp-escolhido-texto {
+    padding-block: 2.5rem;
+  }
+  .pp-diamante {
+    width: clamp(180px, 22vw, 320px);
   }
 }

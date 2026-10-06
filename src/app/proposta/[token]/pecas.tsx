@@ -223,44 +223,65 @@ export function IconeWhatsApp() {
   );
 }
 
-/* ── Ponto B: a conversa no WhatsApp ────────────────────────────── */
+/* ── Ponto B: o WhatsApp vivo ───────────────────────────────── */
 
 /**
- * Um atendimento que vira venda, em loop. As mensagens entram em
- * sequência pela própria animação CSS, com o "digitando…" entre elas.
+ * O ícone do WhatsApp grande, como na proposta impressa, mas vivo: o
+ * contador de mensagens sobe e os balões das conversas pipocam ao lado.
  */
-export function ConversaWhats({ marca }: { marca: string }) {
+export function WhatsAppVivo() {
+  const baloes = [
+    "Oi! Vi o anúncio de vocês",
+    "Quero um orçamento",
+    "Pode fechar, vou querer!",
+  ];
   return (
-    <div className="pp-chat" aria-hidden>
-      <div className="pp-chat-topo">
-        <span className="pp-chat-avatar">{marca.slice(0, 1)}</span>
-        <span>
-          <b>{marca}</b>
-          <i>online</i>
-        </span>
+    <div className="pp-wa" aria-hidden>
+      <span className="pp-wa-icone">
+        <IconeWhatsApp />
+        <b className="pp-wa-contador" />
+      </span>
+      <div className="pp-wa-baloes">
+        {baloes.map((t, i) => (
+          <span key={t} style={ordem(i)}>
+            {t}
+          </span>
+        ))}
       </div>
-      <div className="pp-chat-corpo">
-        <p className="pp-msg" data-lado="cliente" data-hora="14:31" style={ordem(0)}>
-          Oi! Vi o anúncio de vocês. Ainda tem horário essa semana?
-        </p>
-        <p className="pp-digitando" style={ordem(1)}>
-          <span />
-          <span />
-          <span />
-        </p>
-        <p className="pp-msg" data-lado="loja" data-hora="14:32" style={ordem(2)}>
-          Tem sim! Quinta às 15h ou sexta às 10h. Qual fica melhor?
-        </p>
-        <p className="pp-msg" data-lado="cliente" data-hora="14:33" style={ordem(3)}>
-          Quinta às 15h, pode confirmar.
-        </p>
-        <p className="pp-msg" data-lado="loja" data-hora="14:33" style={ordem(4)}>
-          Confirmado! Te mando o endereço por aqui.
-        </p>
-        <p className="pp-chat-selo" style={ordem(5)}>
-          Venda fechada
-        </p>
-      </div>
+    </div>
+  );
+}
+
+/* ── Método G.R.O.W.: notificações em volta do notebook ─────────── */
+
+/**
+ * Resultados pipocando em volta do notebook, um por vez, em loop. São
+ * exemplos genéricos de operação, sem nome de cliente nem número real.
+ */
+export function Notificacoes() {
+  const itens = [
+    { cor: "#25d366", titulo: "Nova venda", texto: "Pedido aprovado pelo site", x: "50%", y: "16%" },
+    { cor: "#1f5cff", titulo: "Novo lead", texto: "Chegou pelo WhatsApp agora", x: "72%", y: "8%" },
+    { cor: "#e1306c", titulo: "+127 seguidores", texto: "Crescimento desta semana", x: "76%", y: "60%" },
+    { cor: "#fbbc05", titulo: "Campanha otimizada", texto: "Custo por lead caiu 32%", x: "50%", y: "68%" },
+    { cor: "#6b97ff", titulo: "Reunião confirmada", texto: "Planejamento do mês", x: "62%", y: "82%" },
+  ];
+  return (
+    <div className="pp-notifs" aria-hidden>
+      {itens.map((n, i) => (
+        <div
+          key={n.titulo}
+          className="pp-notif"
+          style={{ left: n.x, top: n.y, "--i": i, "--cor": n.cor } as CSSProperties}
+        >
+          <span className="pp-notif-icone" />
+          <span>
+            <b>{n.titulo}</b>
+            <i>{n.texto}</i>
+          </span>
+          <small>agora</small>
+        </div>
+      ))}
     </div>
   );
 }

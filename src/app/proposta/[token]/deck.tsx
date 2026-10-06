@@ -274,11 +274,9 @@ export function Deck({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={logo} alt={marca} className="pp-topo-logo" />
         ) : (
-          /* A marca inteira, e não só a lâmpada. A lâmpada sozinha não
-             identifica ninguém: num documento que o cliente encaminha
-             para o sócio, o cabeçalho é a única assinatura que viaja
-             junto. A lâmpada fica para quem não é a MR Grow, onde a
-             única coisa certa é o nome escrito. */
+          /* A marca inteira, e não só a lâmpada: num documento que o
+             cliente encaminha para o sócio, o cabeçalho é a única
+             assinatura que viaja junto. */
           <span className="pp-topo-marca" aria-label={marca}>
             {marca === MARCA.nome ? (
               <Logotipo className="pp-topo-vetor" />
